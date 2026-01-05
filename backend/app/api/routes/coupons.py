@@ -53,26 +53,52 @@ def create_coupon_endpoint(
     return create_coupon(session=session, coupon_in=coupon_in)
 
 
-@router.get("/", response_model=CouponsPublic)
+# @router.get("/", response_model=CouponsPublic, dependencies=[require_role(["admin", "manager"])])
+# def read_coupons(
+#     response: Response,
+#     session: SessionDep, 
+#     current_user: CurrentUser, 
+#     skip: int = 0, 
+#     limit: int = 100
+# ) -> CouponsPublic:
+#     """
+#     Retrieve coupons.
+#     Requires admin or manager role.
+#     """
+#     # Add CORS headers explicitly
+#     response.headers["Access-Control-Allow-Origin"] = "*"
+#     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+#     response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
+    
+#     coupons = get_coupons(session=session, skip=skip, limit=limit)
+#     count = len(coupons)
+#     return CouponsPublic(data=coupons, count=count)
+
+@router.get("/", response_model=CouponsPublic, dependencies=[require_role(["admin", "manager"])])
 def read_coupons(
-    response: Response,
-    session: SessionDep, 
-    current_user: CurrentUser, 
-    skip: int = 0, 
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    skip: int = 0,
     limit: int = 100
 ) -> CouponsPublic:
     """
-    Retrieve coupons.
-    Requires admin or manager role.
+    Retrieve coupons. Requires admin or manager role.
     """
-    # Add CORS headers explicitly
-    response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
-    
-    coupons = get_coupons(session=session, skip=skip, limit=limit)
-    count = len(coupons)
-    return CouponsPublic(data=coupons, count=count)
+    try:
+        # Fetch coupons
+        coupons_list = get_coupons(session=session, skip=skip, limit=limit)
+
+        # Count total number of coupons in DB
+        total_count = session.exec(select(func.count()).select_from(Coupon)).one()
+
+        return CouponsPublic(data=coupons_list, count=total_count)
+    except Exception as e:
+        # Catch unexpected errors to avoid 500 without trace
+        return JSONResponse(status_code=500, content={"detail": str(e)})
+
+
+        # -------------------------------------------------------------------------------
 
 
 @router.options("/my")

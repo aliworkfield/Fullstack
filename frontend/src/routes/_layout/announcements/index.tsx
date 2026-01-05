@@ -15,6 +15,8 @@ import useRoles from "@/hooks/useRoles";
 
 export function AnnouncementsRoute() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { hasRole } = useRoles();
+  const canCreate = hasRole("admin") || hasRole("manager");
 
   const { data: announcements = [], isLoading } = useQuery({
     queryKey: ["announcements"],
@@ -36,9 +38,11 @@ export function AnnouncementsRoute() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Announcements</h1>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          Create Announcement
-        </Button>
+        {canCreate && (
+          <Button onClick={() => setIsCreateModalOpen(true)}>
+            Create Announcement
+          </Button>
+        )}
       </div>
 
       <div className="relative">

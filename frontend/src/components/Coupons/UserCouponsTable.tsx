@@ -16,9 +16,8 @@ export function UserCouponsTable() {
   const { data: coupons = [], isLoading } = useQuery({
     queryKey: ["userCoupons"],
     queryFn: async () => {
-      // In a real implementation, you would call the user coupons endpoint
-      // For now, we'll return an empty array
-      return [];
+      const response = await import('@/client').then(client => client.CouponsService.readUserCoupons());
+      return response.data || [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });

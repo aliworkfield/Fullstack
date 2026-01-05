@@ -2,6 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { app__models__announcement__AnnouncementPublic } from "@/client";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 
 export const columns: ColumnDef<app__models__announcement__AnnouncementPublic>[] = [
   {
@@ -43,6 +44,26 @@ export const columns: ColumnDef<app__models__announcement__AnnouncementPublic>[]
         }`}>
           {isPublished ? "Published" : "Draft"}
         </span>
+      );
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const announcement = row.original;
+      const navigate = useNavigate();
+      
+      return (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate({ 
+            to: '/announcements/$id', 
+            params: { id: announcement.id } 
+          })}
+        >
+          View
+        </Button>
       );
     },
   },

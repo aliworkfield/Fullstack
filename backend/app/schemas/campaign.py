@@ -9,7 +9,7 @@ class CampaignBase(SQLModel):
     description: str | None = Field(default=None, max_length=1000)
     start_date: datetime
     end_date: datetime
-    is_active: bool = True
+    active: bool = True
 
 
 class CampaignCreate(CampaignBase):
@@ -21,7 +21,7 @@ class CampaignUpdate(CampaignBase):
     description: str | None = Field(default=None, max_length=1000)
     start_date: datetime | None = None
     end_date: datetime | None = None
-    is_active: bool | None = None
+    active: bool | None = None
 
 
 class CampaignPublic(CampaignBase):

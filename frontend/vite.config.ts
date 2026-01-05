@@ -17,10 +17,6 @@ export default defineConfig({
         target: process.env.VITE_API_URL || 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
-        headers: {
-          // Ensure authorization header is forwarded
-          'Authorization': undefined,
-        },
       },
     },
   },

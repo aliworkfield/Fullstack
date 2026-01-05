@@ -46,7 +46,7 @@ def get_all_coupons(
             from app.models import Campaign
             category_filter = f"%{category}%"
             statement = statement.join(Campaign, Coupon.campaign_id == Campaign.id, isouter=True).where(
-                (Campaign.name.ilike(category_filter)) | 
+                (Campaign.title.ilike(category_filter)) | 
                 (Campaign.description.ilike(category_filter))
             )
         
@@ -72,7 +72,7 @@ def get_all_coupons(
             from app.models import Campaign
             category_filter = f"%{category}%"
             count_statement = count_statement.join(Campaign, Coupon.campaign_id == Campaign.id, isouter=True).where(
-                (Campaign.name.ilike(category_filter)) | 
+                (Campaign.title.ilike(category_filter)) | 
                 (Campaign.description.ilike(category_filter))
             )
         if campaign_id:

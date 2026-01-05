@@ -33,11 +33,11 @@ class CampaignService:
         
         return {
             "id": campaign.id,
-            "name": campaign.name,
+            "title": campaign.title,
             "description": campaign.description,
             "start_date": campaign.start_date,
             "end_date": campaign.end_date,
-            "is_active": campaign.is_active,
+            "active": campaign.active,
             "created_at": campaign.created_at,
             "stats": {
                 "total": total,
@@ -72,7 +72,7 @@ class CampaignService:
                 "description": campaign.description,
                 "start_date": campaign.start_date,
                 "end_date": campaign.end_date,
-                "is_active": campaign.is_active,
+                "active": campaign.active,
                 "created_at": campaign.created_at,
                 "stats": {
                     "total": total,
