@@ -3,7 +3,6 @@ from sqlmodel import Session, select
 from app.dependencies import get_db, get_current_user
 from app.services.coupon_service import CouponService
 from app.models import Coupon, User
-from app.schemas import CouponRedeem
 import uuid
 
 router = APIRouter(prefix="/user/coupons", tags=["user/coupons"])
@@ -19,6 +18,30 @@ def get_my_coupons(
         statement = select(Coupon).where(Coupon.assigned_user_id == current_user.id)
         coupons = db.exec(statement).all()
         return {"coupons": coupons, "count": len(coupons)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/campaign/{campaign_id}", response_model=dict)
+def get_my_coupon_for_campaign(
+    campaign_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get the coupon assigned to current user for a specific campaign"""
+    try:
+        statement = select(Coupon).where(
+            Coupon.assigned_to_user_id == current_user.id,
+            Coupon.campaign_id == campaign_id
+        )
+        coupon = db.exec(statement).first()
+        
+        if not coupon:
+            raise HTTPException(status_code=404, detail="No coupon assigned to you for this campaign")
+        
+        return {"coupon": coupon}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -53,7 +76,7 @@ def get_coupon(
             raise HTTPException(status_code=404, detail="Coupon not found")
         
         # Check if user is authorized to view this coupon
-        if coupon.assigned_user_id != current_user.id:
+        if coupon.assigned_to_user_id != current_user.id:
             raise HTTPException(status_code=403, detail="Not authorized to view this coupon")
             
         return {"coupon": coupon}

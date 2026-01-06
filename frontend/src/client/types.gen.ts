@@ -96,19 +96,19 @@ export type app__schemas__user__UserPublic = {
 };
 
 export type CampaignCreate = {
-    name: string;
+    title: string;
     description?: (string | null);
     start_date: string;
     end_date: string;
-    is_active?: boolean;
+    active?: boolean;
 };
 
 export type CampaignPublic = {
-    name: string;
+    title: string;
     description?: (string | null);
     start_date: string;
     end_date: string;
-    is_active?: boolean;
+    active?: boolean;
     id: string;
     created_at: string;
 };
@@ -119,11 +119,11 @@ export type CampaignsPublic = {
 };
 
 export type CampaignUpdate = {
-    name?: (string | null);
+    title?: (string | null);
     description?: (string | null);
     start_date?: (string | null);
     end_date?: (string | null);
-    is_active?: (boolean | null);
+    active?: (boolean | null);
 };
 
 export type CouponCreate = {
@@ -323,6 +323,15 @@ export type AdminCampaignsDeleteCampaignResponse = ({
     [key: string]: unknown;
 });
 
+export type AdminCouponsGetUserCouponForCampaignData = {
+    campaignId: string;
+    userId: string;
+};
+
+export type AdminCouponsGetUserCouponForCampaignResponse = ({
+    [key: string]: unknown;
+});
+
 export type AdminCouponsGetAllCouponsData = {
     assignedUserId?: (string | null);
     campaignId?: (string | null);
@@ -496,62 +505,6 @@ export type CampaignsDeleteCampaignEndpointData = {
 
 export type CampaignsDeleteCampaignEndpointResponse = (Message);
 
-export type CouponsCouponsOptionsResponse = (unknown);
-
-export type CouponsCreateCouponEndpointData = {
-    requestBody: CouponCreate;
-};
-
-export type CouponsCreateCouponEndpointResponse = (CouponPublic);
-
-export type CouponsReadCouponsData = {
-    limit?: number;
-    skip?: number;
-};
-
-export type CouponsReadCouponsResponse = (CouponsPublic);
-
-export type CouponsReadUserCouponsResponse = (CouponsPublic);
-
-export type CouponsUserCouponsOptionsResponse = (unknown);
-
-export type CouponsCouponOptionsData = {
-    id: string;
-};
-
-export type CouponsCouponOptionsResponse = (unknown);
-
-export type CouponsReadCouponData = {
-    id: string;
-};
-
-export type CouponsReadCouponResponse = (CouponPublic);
-
-export type CouponsUpdateCouponEndpointData = {
-    id: string;
-    requestBody: CouponCreate;
-};
-
-export type CouponsUpdateCouponEndpointResponse = (CouponPublic);
-
-export type CouponsDeleteCouponEndpointData = {
-    id: string;
-};
-
-export type CouponsDeleteCouponEndpointResponse = (Message);
-
-export type CouponsRedeemCouponOptionsData = {
-    id: string;
-};
-
-export type CouponsRedeemCouponOptionsResponse = (unknown);
-
-export type CouponsRedeemCouponEndpointData = {
-    id: string;
-};
-
-export type CouponsRedeemCouponEndpointResponse = (CouponPublic);
-
 export type ItemsReadItemsData = {
     limit?: number;
     skip?: number;
@@ -594,6 +547,14 @@ export type UserCouponsGetMyCouponsResponse = ({
     [key: string]: unknown;
 });
 
+export type UserCouponsGetCouponData = {
+    couponId: string;
+};
+
+export type UserCouponsGetCouponResponse = ({
+    [key: string]: unknown;
+});
+
 export type UserCouponsRedeemCouponData = {
     couponId: string;
 };
@@ -602,11 +563,11 @@ export type UserCouponsRedeemCouponResponse = ({
     [key: string]: unknown;
 });
 
-export type UserCouponsGetCouponData = {
-    couponId: string;
+export type UserCouponsGetMyCouponForCampaignData = {
+    campaignId: string;
 };
 
-export type UserCouponsGetCouponResponse = ({
+export type UserCouponsGetMyCouponForCampaignResponse = ({
     [key: string]: unknown;
 });
 

@@ -21,10 +21,10 @@ export const AnnouncementsPublicSchema = {
 
 export const CampaignCreateSchema = {
     properties: {
-        name: {
+        title: {
             type: 'string',
             maxLength: 255,
-            title: 'Name'
+            title: 'Title'
         },
         description: {
             anyOf: [
@@ -48,23 +48,23 @@ export const CampaignCreateSchema = {
             format: 'date-time',
             title: 'End Date'
         },
-        is_active: {
+        active: {
             type: 'boolean',
-            title: 'Is Active',
+            title: 'Active',
             default: true
         }
     },
     type: 'object',
-    required: ['name', 'start_date', 'end_date'],
+    required: ['title', 'start_date', 'end_date'],
     title: 'CampaignCreate'
 } as const;
 
 export const CampaignPublicSchema = {
     properties: {
-        name: {
+        title: {
             type: 'string',
             maxLength: 255,
-            title: 'Name'
+            title: 'Title'
         },
         description: {
             anyOf: [
@@ -88,9 +88,9 @@ export const CampaignPublicSchema = {
             format: 'date-time',
             title: 'End Date'
         },
-        is_active: {
+        active: {
             type: 'boolean',
-            title: 'Is Active',
+            title: 'Active',
             default: true
         },
         id: {
@@ -105,13 +105,13 @@ export const CampaignPublicSchema = {
         }
     },
     type: 'object',
-    required: ['name', 'start_date', 'end_date', 'id', 'created_at'],
+    required: ['title', 'start_date', 'end_date', 'id', 'created_at'],
     title: 'CampaignPublic'
 } as const;
 
 export const CampaignUpdateSchema = {
     properties: {
-        name: {
+        title: {
             anyOf: [
                 {
                     type: 'string',
@@ -121,7 +121,7 @@ export const CampaignUpdateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Name'
+            title: 'Title'
         },
         description: {
             anyOf: [
@@ -159,7 +159,7 @@ export const CampaignUpdateSchema = {
             ],
             title: 'End Date'
         },
-        is_active: {
+        active: {
             anyOf: [
                 {
                     type: 'boolean'
@@ -168,7 +168,7 @@ export const CampaignUpdateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Is Active'
+            title: 'Active'
         }
     },
     type: 'object',

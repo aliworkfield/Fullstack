@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AnnouncementsService, app__schemas__announcement__AnnouncementUpdate, app__models__announcement__AnnouncementPublic } from "@/client";
+import { AnnouncementsService, UserCouponsService, app__schemas__announcement__AnnouncementUpdate, app__models__announcement__AnnouncementPublic } from "@/client";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/Sidebar/AppSidebar";
 import useRoles from "@/hooks/useRoles";
@@ -26,6 +26,27 @@ export function AnnouncementDetailRoute() {
       });
       return response;
     },
+  });
+
+  // Query to get user's coupon for the campaign if announcement requires one
+  const { data: userCoupon, isLoading: isCouponLoading } = useQuery({
+    queryKey: ["user-coupon", announcement?.campaign_id],
+    queryFn: async () => {
+      if (announcement?.requires_coupon && announcement?.campaign_id) {
+        try {
+          const response: any = await UserCouponsService.getMyCouponForCampaign({
+            campaignId: announcement.campaign_id
+          });
+          // The API returns { coupon: coupon_data }, so we extract the coupon
+          return response.coupon;
+        } catch (error) {
+          // If coupon is not found, return null to show "No coupon assigned" message
+          return null;
+        }
+      }
+      return null;
+    },
+    enabled: !!announcement && announcement.requires_coupon && !!announcement.campaign_id
   });
 
   // Mutation for deleting announcement
@@ -99,9 +120,16 @@ export function AnnouncementDetailRoute() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>{announcement.title}</CardTitle>
-                    <Badge variant={announcement.is_published ? "default" : "secondary"}>
-                      {announcement.is_published ? "Published" : "Draft"}
-                    </Badge>
+                    <div className="flex gap-2">
+                      {announcement.is_published ? (
+                        <Badge variant="default">Published</Badge>
+                      ) : (
+                        <Badge variant="secondary">Draft</Badge>
+                      )}
+                      {announcement.expiry_date && new Date(announcement.expiry_date) < new Date() && announcement.is_published && (
+                        <Badge variant="destructive">Expired</Badge>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -120,6 +148,30 @@ export function AnnouncementDetailRoute() {
                         {announcement.created_date ? new Date(announcement.created_date).toLocaleDateString() : 'N/A'}
                       </p>
                     </div>
+                    {announcement.requires_coupon && (
+                      <div className="mt-6">
+                        <h3 className="font-medium mb-2">Your Discount Code</h3>
+                        {isCouponLoading ? (
+                          <p className="text-muted-foreground">Loading your coupon...</p>
+                        ) : userCoupon ? (
+                          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <p className="text-lg font-bold text-center text-blue-800">{userCoupon.code}</p>
+                            <p className="text-sm text-center text-blue-600 mt-1">
+                              {userCoupon.discount_type === 'percentage' 
+                                ? `${userCoupon.discount_value}% discount` 
+                                : `Fixed discount of ${userCoupon.discount_value}`}
+                            </p>
+                            {userCoupon.redeemed && (
+                              <p className="text-sm text-center text-red-600 mt-2">Coupon already redeemed</p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <p className="text-center text-gray-600">No coupon assigned to you for this campaign</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

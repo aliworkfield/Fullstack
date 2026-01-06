@@ -40,37 +40,13 @@ export type OpenAPIConfig = {
 	};
 };
 
-// Import keycloak here to get the token
-import keycloak from '@/keycloak';
-
 export const OpenAPI: OpenAPIConfig = {
 	BASE: '',
 	CREDENTIALS: 'include',
 	ENCODE_PATH: undefined,
 	HEADERS: undefined,
 	PASSWORD: undefined,
-	TOKEN: async () => {
-		// Ensure the token is valid and refresh if needed
-		if (!keycloak.token) {
-			return ''; // Return empty string instead of undefined
-		}
-		
-		// Check if token needs refresh
-		try {
-			const isTokenExpired = keycloak.isTokenExpired();
-			if (isTokenExpired) {
-				const refreshed = await keycloak.updateToken(5); // Refresh if expiring in 5 seconds
-				if (!refreshed) {
-					console.warn('Failed to refresh Keycloak token');
-					return ''; // Return empty string instead of undefined
-				}
-			}
-			return keycloak.token;
-		} catch (error) {
-			console.error('Error getting Keycloak token:', error);
-			return ''; // Return empty string instead of undefined
-		}
-	},
+	TOKEN: undefined,
 	USERNAME: undefined,
 	VERSION: '0.1.0',
 	WITH_CREDENTIALS: false,

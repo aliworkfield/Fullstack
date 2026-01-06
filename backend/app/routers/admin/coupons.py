@@ -8,7 +8,33 @@ from app.schemas import CouponCreate, CouponUpdate, CouponPublic, CouponsPublic
 import uuid
 from datetime import datetime
 
+
 router = APIRouter(prefix="/admin/coupons", tags=["admin/coupons"])
+
+
+@router.get("/user/{user_id}/campaign/{campaign_id}", response_model=dict)
+def get_user_coupon_for_campaign(
+    user_id: uuid.UUID,
+    campaign_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = require_role(["admin", "manager"])
+):
+    """Get the coupon assigned to a specific user for a specific campaign"""
+    try:
+        statement = select(Coupon).where(
+            Coupon.assigned_to_user_id == user_id,
+            Coupon.campaign_id == campaign_id
+        )
+        coupon = db.exec(statement).first()
+        
+        if not coupon:
+            raise HTTPException(status_code=404, detail="No coupon assigned to user for this campaign")
+        
+        return {"coupon": coupon}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/", response_model=dict)
