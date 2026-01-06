@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Search, Plus, Users, Tag } from "lucide-react";
-import { CampaignsService, CouponsService, CampaignPublic, CouponPublic } from "@/client";
+import { CampaignsService, UserCouponsService, CampaignPublic, CouponPublic } from "@/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -29,28 +29,25 @@ export function CouponManagement() {
   const { data: coupons = [], isLoading: couponsLoading, refetch } = useQuery({
     queryKey: ["coupons", selectedCampaign],
     queryFn: async () => {
-      const response = await CouponsService.readCoupons({
-        skip: 0,
-        limit: 100,
-      });
-      return response.data || [];
+      const response = await UserCouponsService.getMyCoupons();
+      return response?.coupons || [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const filteredCoupons = coupons.filter(coupon => {
+  const filteredCoupons = Array.isArray(coupons) ? coupons.filter((coupon: CouponPublic) => {
     const matchesSearch = coupon.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          coupon.discount_type.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesCampaign = !selectedCampaign || coupon.campaign_id === selectedCampaign;
     
     return matchesSearch && matchesCampaign;
-  });
+  }) : [];
 
   const getCampaignName = (campaignId: string | null | undefined): string => {
     if (!campaignId) return "No Campaign";
     const campaign = campaigns.find((c: CampaignPublic) => c.id === campaignId);
-    return campaign ? campaign.name : "Unknown Campaign";
+    return campaign ? campaign.title : "Unknown Campaign";
   };
 
   const handleGenerateCoupons = async () => {
@@ -92,7 +89,7 @@ export function CouponManagement() {
               <option value="">All Campaigns</option>
               {campaigns.map((campaign: CampaignPublic) => (
                 <option key={campaign.id} value={campaign.id}>
-                  {campaign.name}
+                  {campaign.title}
                 </option>
               ))}
             </select>
@@ -111,7 +108,7 @@ export function CouponManagement() {
             <Tag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{coupons.length}</div>
+            <div className="text-2xl font-bold">{Array.isArray(coupons) ? coupons.length : 0}</div>
             <p className="text-xs text-muted-foreground">All generated coupons</p>
           </CardContent>
         </Card>
@@ -134,7 +131,7 @@ export function CouponManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {coupons.filter(coupon => coupon.assigned_user_id).length}
+              {Array.isArray(coupons) ? coupons.filter((coupon: CouponPublic) => coupon.assigned_user_id).length : 0}
             </div>
             <p className="text-xs text-muted-foreground">Coupons assigned to users</p>
           </CardContent>

@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AnnouncementsService, UserCouponsService, app__schemas__announcement__AnnouncementUpdate, app__models__announcement__AnnouncementPublic } from "@/client";
+import { AnnouncementsService, UserCouponsService } from "@/client";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/Sidebar/AppSidebar";
 import useRoles from "@/hooks/useRoles";

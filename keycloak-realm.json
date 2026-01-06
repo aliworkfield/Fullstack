@@ -1315,7 +1315,7 @@
       "alias": "UPDATE_EMAIL",
       "name": "Update Email",
       "providerId": "UPDATE_EMAIL",
-      "enabled": true,
+      "enabled": false,
       "defaultAction": false,
       "priority": 70,
       "config": {}

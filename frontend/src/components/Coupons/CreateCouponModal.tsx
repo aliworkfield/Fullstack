@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { LoadingButton } from "@/components/ui/loading-button";
-import { CampaignsService, CouponsService, CouponCreate, CampaignPublic } from "@/client";
+import { CampaignsService, AdminCouponsService, CouponCreate, CampaignPublic } from "@/client";
 import { useQuery } from "@tanstack/react-query";
 import useCustomToast from "@/hooks/useCustomToast";
 import { handleError } from "@/utils";
@@ -72,7 +72,7 @@ export function CreateCouponModal({
 
   const mutation = useMutation({
     mutationFn: (data: CouponCreate) =>
-      CouponsService.createCouponEndpoint({ requestBody: data }),
+      AdminCouponsService.createCoupon({ requestBody: data }),
     onSuccess: () => {
       showSuccessToast("Coupon created successfully");
       form.reset();
@@ -175,7 +175,7 @@ export function CreateCouponModal({
                         <option value="">No Campaign</option>
                         {campaigns.map((campaign: CampaignPublic) => (
                           <option key={campaign.id} value={campaign.id}>
-                            {campaign.name}
+                            {campaign.title}
                           </option>
                         ))}
                       </select>

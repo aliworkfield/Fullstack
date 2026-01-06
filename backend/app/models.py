@@ -19,7 +19,7 @@ class TokenPayload(SQLModel):
 
 # Campaign Models
 class CampaignBase(SQLModel):
-    title: str = Field(min_length=1, max_length=255)
+    name: str = Field(min_length=1, max_length=255)
     description: str | None = Field(default=None, max_length=1000)
     start_date: datetime.datetime
     end_date: datetime.datetime
@@ -31,7 +31,7 @@ class CampaignCreate(CampaignBase):
 
 
 class CampaignUpdate(CampaignBase):
-    title: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+    name: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
 
 
 class Campaign(CampaignBase, table=True):

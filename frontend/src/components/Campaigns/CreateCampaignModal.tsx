@@ -14,11 +14,11 @@ import { toast } from "sonner";
 import { CampaignsService } from "@/client";
 
 interface CreateCampaignInput {
-  name: string;
+  title: string;
   description?: string | null;
   start_date: string;
   end_date: string;
-  is_active?: boolean;
+  active?: boolean;
 }
 
 interface CreateCampaignModalProps {
@@ -30,33 +30,33 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
   const queryClient = useQueryClient();
   
   const [formData, setFormData] = useState({
-    name: "",
+    title: "",
     description: "",
     start_date: "",
     end_date: "",
-    is_active: true,
+    active: true,
   });
 
   const mutation = useMutation({
     mutationFn: (data: CreateCampaignInput) => 
       CampaignsService.createCampaignEndpoint({ 
         requestBody: {
-          name: data.name,  // Use the API field name 'name' since that's what the API expects
+          title: data.title,  // Use the API field name 'title' as expected by CampaignCreate
           description: data.description,
           start_date: data.start_date,
           end_date: data.end_date,
-          is_active: data.is_active,
+          active: data.active,
         }
       }).then((response) => response),  // Type assertion since return type may vary
     onSuccess: () => {
       toast.success("Campaign created successfully");
       onClose();
       setFormData({
-        name: "",
+        title: "",
         description: "",
         start_date: "",
         end_date: "",
-        is_active: true,
+        active: true,
       });
       queryClient.invalidateQueries({ queryKey: ["campaigns"] });
     },
@@ -79,7 +79,7 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name === 'name' ? 'title' : name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -91,12 +91,12 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="title">Title</Label>
             <Input
-              id="name"
-              name="name"
+              id="title"
+              name="title"
               type="text"
-              value={formData.name}
+              value={formData.title}
               onChange={handleChange}
               required
             />
@@ -135,14 +135,14 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
           </div>
           <div className="flex items-center space-x-2">
             <input
-              id="is_active"
-              name="is_active"
+              id="active"
+              name="active"
               type="checkbox"
-              checked={formData.is_active}
+              checked={formData.active}
               onChange={handleChange}
               className="h-4 w-4"
             />
-            <Label htmlFor="is_active">Active</Label>
+            <Label htmlFor="active">Active</Label>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={mutation.isPending}>

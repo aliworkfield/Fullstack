@@ -63,7 +63,7 @@ function CampaignsTable() {
 
   // Filter campaigns based on search term
   const filteredCampaigns = campaigns.data.filter((campaign: CampaignPublic) =>
-    (campaign.name && campaign.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (campaign.title && campaign.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (campaign.description && campaign.description.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 

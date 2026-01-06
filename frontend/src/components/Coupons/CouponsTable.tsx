@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, Plus } from "lucide-react";
-import { CouponsService } from "@/client";
+import { UserCouponsService } from "@/client";
 import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "@/components/Common/DataTable";
 import { columns } from "./columns";
@@ -15,22 +15,19 @@ export function CouponsTable() {
   const { data: coupons = [], isLoading } = useQuery({
     queryKey: ["coupons"],
     queryFn: async () => {
-      const response = await CouponsService.readCoupons({
-        skip: 0,
-        limit: 100,
-      });
-      return response.data || [];
+      const response = await UserCouponsService.getMyCoupons();
+      return response?.coupons || [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
 
-  const filteredCoupons = coupons.filter(coupon => {
+  const filteredCoupons = Array.isArray(coupons) ? coupons.filter((coupon: import('@/client').CouponPublic) => {
     const matchesSearch = coupon.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          coupon.discount_type.toLowerCase().includes(searchTerm.toLowerCase());
     
     return matchesSearch;
-  });
+  }) : [];
 
   if (isLoading) {
     return <div>Loading coupons...</div>;

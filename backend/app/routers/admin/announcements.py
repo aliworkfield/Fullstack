@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlmodel import Session, select
-from app.dependencies import get_db
-from app.api.deps import require_role
+from app.api.deps import SessionDep, require_role, CurrentUser
 from app.models import Announcement, User
 from app.schemas import AnnouncementCreate, AnnouncementUpdate, AnnouncementPublic
 from app.crud import get_announcements, get_announcement
@@ -29,19 +28,19 @@ def announcement_item_options(response: Response):
     return {}
 
 
-@router.get("/", response_model=dict)
+@router.get("/", response_model=dict, dependencies=[require_role(["admin", "manager"])])
 def get_all_announcements(
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    session: SessionDep,
     category: str | None = None,
     search: str | None = None,
-    new_category: bool = False,
-    current_user: User = require_role(["admin", "manager"])
+    new_category: bool = False
 ):
     """Get all announcements that are not soft deleted and not expired"""
     try:
         # Get announcements that are not soft deleted and not expired
         announcements = get_announcements(
-            session=db,
+            session=session,
             skip=0,
             limit=1000,  # High limit for admin view
             include_deleted=False,
@@ -54,15 +53,15 @@ def get_all_announcements(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/{announcement_id}", response_model=AnnouncementPublic)
+@router.get("/{announcement_id}", response_model=AnnouncementPublic, dependencies=[require_role(["admin", "manager"])])
 def get_announcement_by_id(
     announcement_id: uuid.UUID,
-    db: Session = Depends(get_db),
-    current_user: User = require_role(["admin", "manager"])
+    current_user: CurrentUser,
+    session: SessionDep
 ):
     """Get a specific announcement that is not soft deleted"""
     try:
-        announcement = get_announcement(session=db, announcement_id=announcement_id)
+        announcement = get_announcement(session=session, announcement_id=announcement_id)
         if not announcement:
             raise HTTPException(status_code=404, detail="Announcement not found")
         
@@ -81,33 +80,33 @@ def get_announcement_by_id(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/", response_model=AnnouncementPublic)
+@router.post("/", response_model=AnnouncementPublic, dependencies=[require_role(["admin", "manager"])])
 def create_announcement(
     announcement_in: AnnouncementCreate,
-    db: Session = Depends(get_db),
-    current_user: User = require_role(["admin", "manager"])
+    current_user: CurrentUser,
+    session: SessionDep
 ):
     """Create a new announcement"""
     try:
         announcement = Announcement.model_validate(announcement_in)
-        db.add(announcement)
-        db.commit()
-        db.refresh(announcement)
+        session.add(announcement)
+        session.commit()
+        session.refresh(announcement)
         return announcement
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/{announcement_id}", response_model=AnnouncementPublic)
+@router.put("/{announcement_id}", response_model=AnnouncementPublic, dependencies=[require_role(["admin", "manager"])])
 def update_announcement(
     announcement_id: uuid.UUID,
     announcement_update: AnnouncementUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = require_role(["admin", "manager"])
+    current_user: CurrentUser,
+    session: SessionDep
 ):
     """Update an announcement that is not soft deleted"""
     try:
-        announcement = db.get(Announcement, announcement_id)
+        announcement = session.get(Announcement, announcement_id)
         if not announcement:
             raise HTTPException(status_code=404, detail="Announcement not found")
         
@@ -119,9 +118,9 @@ def update_announcement(
         for key, value in announcement_update.dict(exclude_unset=True).items():
             setattr(announcement, key, value)
         
-        db.add(announcement)
-        db.commit()
-        db.refresh(announcement)
+        session.add(announcement)
+        session.commit()
+        session.refresh(announcement)
         return announcement
     except HTTPException:
         raise
@@ -129,15 +128,15 @@ def update_announcement(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/{announcement_id}", response_model=dict)
+@router.delete("/{announcement_id}", response_model=dict, dependencies=[require_role(["admin"])])
 def delete_announcement(
     announcement_id: uuid.UUID,
-    db: Session = Depends(get_db),
-    current_user: User = require_role(["admin"])
+    current_user: CurrentUser,
+    session: SessionDep
 ):
     """Delete an announcement (soft delete)"""
     try:
-        announcement = db.get(Announcement, announcement_id)
+        announcement = session.get(Announcement, announcement_id)
         if not announcement:
             raise HTTPException(status_code=404, detail="Announcement not found")
         
@@ -147,8 +146,8 @@ def delete_announcement(
         
         # Perform soft delete
         announcement.deleted_at = datetime.utcnow()
-        db.add(announcement)
-        db.commit()
+        session.add(announcement)
+        session.commit()
         return {"message": "Announcement deleted successfully"}
     except HTTPException:
         raise

@@ -16,15 +16,15 @@ export function UserCouponsTable() {
   const { data: coupons = [], isLoading } = useQuery({
     queryKey: ["userCoupons"],
     queryFn: async () => {
-      const response = await import('@/client').then(client => client.CouponsService.readUserCoupons());
-      return response.data || [];
+      const response = await import('@/client').then(client => client.UserCouponsService.getMyCoupons());
+      return Array.isArray(response) ? response : [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const filteredCoupons = coupons.filter((coupon: CouponPublic) => {
     const matchesSearch = coupon.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         coupon.discount_type.toLowerCase().includes(searchTerm.toLowerCase());
+                         coupon.discount_type?.toLowerCase().includes(searchTerm.toLowerCase());
     
     return matchesSearch;
   });
