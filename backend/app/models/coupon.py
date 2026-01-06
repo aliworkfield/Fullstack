@@ -6,7 +6,7 @@ from sqlalchemy import Column, DateTime, func
 
 if TYPE_CHECKING:
     from app.models.user import User
-    from app.models.campaign import Campaign
+    from app.models import Campaign
 
 
 # Coupon Models

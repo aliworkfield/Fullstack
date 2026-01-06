@@ -1,12 +1,14 @@
 from fastapi import Depends, HTTPException, status
 from sqlmodel import Session
-from app.core.database import get_session
+from app.core.db import engine
 from app.models import User
+from typing import Generator
 
 
-def get_db():
+def get_db() -> Generator[Session, None, None]:
     """Dependency to get database session"""
-    return Depends(get_session)
+    with Session(engine) as session:
+        yield session
 
 
 def get_current_user():

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
-from app.dependencies import get_db, get_current_user
+from app.api.deps import SessionDep, CurrentUser
 from app.services.coupon_service import CouponService
 from app.models import Coupon, User
 import uuid
@@ -10,13 +10,13 @@ router = APIRouter(prefix="/user/coupons", tags=["user/coupons"])
 
 @router.get("/my", response_model=dict)
 def get_my_coupons(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    session: SessionDep,
+    current_user: CurrentUser = Depends(CurrentUser)
 ):
     """Get current user's coupons"""
     try:
-        statement = select(Coupon).where(Coupon.assigned_user_id == current_user.id)
-        coupons = db.exec(statement).all()
+        statement = select(Coupon).where(Coupon.assigned_to_user_id == current_user.id)
+        coupons = session.exec(statement).all()
         return {"coupons": coupons, "count": len(coupons)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -25,8 +25,8 @@ def get_my_coupons(
 @router.get("/campaign/{campaign_id}", response_model=dict)
 def get_my_coupon_for_campaign(
     campaign_id: uuid.UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    session: SessionDep,
+    current_user: CurrentUser = Depends(CurrentUser)
 ):
     """Get the coupon assigned to current user for a specific campaign"""
     try:
@@ -34,7 +34,7 @@ def get_my_coupon_for_campaign(
             Coupon.assigned_to_user_id == current_user.id,
             Coupon.campaign_id == campaign_id
         )
-        coupon = db.exec(statement).first()
+        coupon = session.exec(statement).first()
         
         if not coupon:
             raise HTTPException(status_code=404, detail="No coupon assigned to you for this campaign")
@@ -49,12 +49,12 @@ def get_my_coupon_for_campaign(
 @router.post("/redeem/{coupon_id}", response_model=dict)
 def redeem_coupon(
     coupon_id: uuid.UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    session: SessionDep,
+    current_user: CurrentUser = Depends(CurrentUser)
 ):
     """Redeem a coupon"""
     try:
-        service = CouponService(db)
+        service = CouponService(session)
         coupon = service.redeem_coupon(coupon_id, current_user)
         return {"coupon": coupon, "message": "Coupon redeemed successfully"}
     except ValueError as e:
@@ -66,12 +66,12 @@ def redeem_coupon(
 @router.get("/{coupon_id}", response_model=dict)
 def get_coupon(
     coupon_id: uuid.UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    session: SessionDep,
+    current_user: CurrentUser = Depends(CurrentUser)
 ):
     """Get a specific coupon"""
     try:
-        coupon = db.get(Coupon, coupon_id)
+        coupon = session.get(Coupon, coupon_id)
         if not coupon:
             raise HTTPException(status_code=404, detail="Coupon not found")
         

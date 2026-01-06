@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.core import security
 from app.core.config import settings
@@ -48,12 +48,14 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
         
         # First, try to find by Keycloak user ID if available
         if keycloak_user_id:
-            user = session.query(User).filter(User.keycloak_user_id == keycloak_user_id).first()
+            statement = select(User).where(User.keycloak_user_id == keycloak_user_id)
+            user = session.exec(statement).first()
         
         # If not found by Keycloak ID, try to find by email
         email = user_info.get("email")
         if not user and email:
-            user = session.query(User).filter(User.email == email).first()
+            statement = select(User).where(User.email == email)
+            user = session.exec(statement).first()
         
         if not user:
             print(f"DEBUG: Creating new user for email: {email}")

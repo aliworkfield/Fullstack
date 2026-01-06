@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional
 from sqlalchemy import Column, DateTime, func
 
 if TYPE_CHECKING:
-    from app.models.campaign import Campaign
+    from app.models import Campaign
 
 
 # Announcement Models
