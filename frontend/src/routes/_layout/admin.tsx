@@ -10,35 +10,48 @@ import { AnnouncementsService } from "@/client";
 import { createFileRoute } from '@tanstack/react-router'
 import { SidebarProvider } from "@/components/ui/sidebar"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
+import useRoles from "@/hooks/useRoles";
 
 export const Route = createFileRoute('/_layout/admin')({
   component: AdminRoute,
 })
 
 export function AdminRoute() {
-  // Fetch users
-  const { data: users = [], isLoading: usersLoading } = useQuery({
+  const { hasRole, isLoading: rolesLoading } = useRoles();
+  const isAdmin = hasRole("admin");
+  const isManager = hasRole("manager");
+
+  // Fetch users only if user is admin
+  const { data: users = [] } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
+      if (!isAdmin) {
+        throw new Error("Insufficient permissions");
+      }
       const response = await UsersService.readUsers({
         skip: 0,
         limit: 100,
       });
       return response.data || [];
     },
+    enabled: isAdmin, // Only run query if user is admin
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Fetch announcements
+  // Fetch announcements for both admin and manager
   const { data: announcements = [] } = useQuery({
     queryKey: ["announcements"],
     queryFn: async () => {
+      if (!isAdmin && !isManager) {
+        throw new Error("Insufficient permissions");
+      }
       const response = await AnnouncementsService.readAnnouncements({
         skip: 0,
         limit: 100,
       });
       return response.data || [];
     },
+    enabled: isAdmin || isManager, // Run query if user is admin or manager
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -57,8 +70,12 @@ export function AdminRoute() {
     id: user.id.toString()
   }));
 
-  if (usersLoading) {
-    return <div>Loading users...</div>;
+  if (rolesLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAdmin && !isManager) {
+    return <div>Access denied. Admin or Manager privileges required.</div>;
   }
 
   return (
@@ -69,14 +86,14 @@ export function AdminRoute() {
           <div className="space-y-6 p-4">
             <div className="flex items-center justify-between">
               <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-              <Button disabled={true}>
+              <Button disabled={!isAdmin}>
                 Add User
               </Button>
             </div>
 
             <Tabs defaultValue="users" className="space-y-4">
               <TabsList>
-                <TabsTrigger value="users">Users</TabsTrigger>
+                <TabsTrigger value="users" disabled={!isAdmin}>Users</TabsTrigger>
                 <TabsTrigger value="announcements">Announcements</TabsTrigger>
               </TabsList>
               <TabsContent value="users" className="space-y-4">
@@ -85,10 +102,16 @@ export function AdminRoute() {
                     <CardTitle>Manage Users</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <DataTable
-                      columns={columns}
-                      data={mappedUsers}
-                    />
+                    {isAdmin ? (
+                      <DataTable
+                        columns={columns}
+                        data={mappedUsers}
+                      />
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        User management is only available to administrators.
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>

@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTable } from "@/components/Common/DataTable"
 import { columns } from "./columns"
-import { CampaignsService } from "@/client"
-import { CampaignPublic, CampaignsPublic } from "@/client"
+import { AdminCampaignsService } from "@/client"
 import useRoles from "@/hooks/useRoles"
 import { CreateCampaignModal } from "./CreateCampaignModal"
 
@@ -20,13 +19,7 @@ function CampaignsTable() {
 
   const { data: campaignsData, isLoading, isError, error } = useQuery({
     queryKey: ["campaigns"],
-    queryFn: () => CampaignsService.readCampaigns({ skip: 0, limit: 100 }).then(response => {
-      // Transform the response to match expected format
-      return {
-        data: response.data,
-        count: response.data?.length || 0
-      } as CampaignsPublic;
-    }),
+    queryFn: () => AdminCampaignsService.getAllCampaigns({ search: searchTerm }),
     enabled: canAccessCampaigns, // Only fetch if user has proper role
   })
 
@@ -58,11 +51,11 @@ function CampaignsTable() {
     return <div>Error loading campaigns: {(error as Error).message}</div>
   }
 
-  // Ensure campaignsData is not undefined
-  const campaigns: CampaignsPublic = campaignsData || { data: [], count: 0 }
+  // Extract campaigns from the response
+  const campaigns = (campaignsData as any)?.campaigns || []
 
   // Filter campaigns based on search term
-  const filteredCampaigns = campaigns.data.filter((campaign: CampaignPublic) =>
+  const filteredCampaigns = campaigns.filter((campaign: any) =>
     (campaign.title && campaign.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (campaign.description && campaign.description.toLowerCase().includes(searchTerm.toLowerCase()))
   )

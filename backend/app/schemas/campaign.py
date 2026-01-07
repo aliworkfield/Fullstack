@@ -5,7 +5,7 @@ from typing import Optional
 
 
 class CampaignBase(SQLModel):
-    name: str = Field(max_length=255)
+    title: str = Field(max_length=255)
     description: str | None = Field(default=None, max_length=1000)
     start_date: datetime
     end_date: datetime
@@ -17,7 +17,7 @@ class CampaignCreate(CampaignBase):
 
 
 class CampaignUpdate(CampaignBase):
-    name: str | None = Field(default=None, max_length=255)
+    title: str | None = Field(default=None, max_length=255)
 
 
 class CampaignPublic(CampaignBase):

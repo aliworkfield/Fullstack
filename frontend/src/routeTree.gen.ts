@@ -19,6 +19,7 @@ import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutCouponsIndexRouteImport } from './routes/_layout/coupons/index'
 import { Route as LayoutCampaignsIndexRouteImport } from './routes/_layout/campaigns/index'
 import { Route as LayoutAnnouncementsIndexRouteImport } from './routes/_layout/announcements/index'
+import { Route as LayoutCampaignsIdRouteImport } from './routes/_layout/campaigns/$id'
 import { Route as LayoutAnnouncementsIdRouteImport } from './routes/_layout/announcements/$id'
 
 const SignupRoute = SignupRouteImport.update({
@@ -72,6 +73,11 @@ const LayoutAnnouncementsIndexRoute =
     path: '/announcements/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LayoutCampaignsIdRoute = LayoutCampaignsIdRouteImport.update({
+  id: '/_layout/campaigns/$id',
+  path: '/campaigns/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LayoutAnnouncementsIdRoute = LayoutAnnouncementsIdRouteImport.update({
   id: '/_layout/announcements/$id',
   path: '/announcements/$id',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
   '/announcements/$id': typeof LayoutAnnouncementsIdRoute
+  '/campaigns/$id': typeof LayoutCampaignsIdRoute
   '/announcements': typeof LayoutAnnouncementsIndexRoute
   '/campaigns': typeof LayoutCampaignsIndexRoute
   '/coupons': typeof LayoutCouponsIndexRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
   '/announcements/$id': typeof LayoutAnnouncementsIdRoute
+  '/campaigns/$id': typeof LayoutCampaignsIdRoute
   '/announcements': typeof LayoutAnnouncementsIndexRoute
   '/campaigns': typeof LayoutCampaignsIndexRoute
   '/coupons': typeof LayoutCouponsIndexRoute
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/announcements/$id': typeof LayoutAnnouncementsIdRoute
+  '/_layout/campaigns/$id': typeof LayoutCampaignsIdRoute
   '/_layout/announcements/': typeof LayoutAnnouncementsIndexRoute
   '/_layout/campaigns/': typeof LayoutCampaignsIndexRoute
   '/_layout/coupons/': typeof LayoutCouponsIndexRoute
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/'
     | '/announcements/$id'
+    | '/campaigns/$id'
     | '/announcements'
     | '/campaigns'
     | '/coupons'
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/'
     | '/announcements/$id'
+    | '/campaigns/$id'
     | '/announcements'
     | '/campaigns'
     | '/coupons'
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/_layout/settings'
     | '/_layout/'
     | '/_layout/announcements/$id'
+    | '/_layout/campaigns/$id'
     | '/_layout/announcements/'
     | '/_layout/campaigns/'
     | '/_layout/coupons/'
@@ -169,6 +181,7 @@ export interface RootRouteChildren {
   LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutAnnouncementsIdRoute: typeof LayoutAnnouncementsIdRoute
+  LayoutCampaignsIdRoute: typeof LayoutCampaignsIdRoute
   LayoutAnnouncementsIndexRoute: typeof LayoutAnnouncementsIndexRoute
   LayoutCampaignsIndexRoute: typeof LayoutCampaignsIndexRoute
   LayoutCouponsIndexRoute: typeof LayoutCouponsIndexRoute
@@ -246,6 +259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAnnouncementsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_layout/campaigns/$id': {
+      id: '/_layout/campaigns/$id'
+      path: '/campaigns/$id'
+      fullPath: '/campaigns/$id'
+      preLoaderRoute: typeof LayoutCampaignsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_layout/announcements/$id': {
       id: '/_layout/announcements/$id'
       path: '/announcements/$id'
@@ -265,6 +285,7 @@ const rootRouteChildren: RootRouteChildren = {
   LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutAnnouncementsIdRoute: LayoutAnnouncementsIdRoute,
+  LayoutCampaignsIdRoute: LayoutCampaignsIdRoute,
   LayoutAnnouncementsIndexRoute: LayoutAnnouncementsIndexRoute,
   LayoutCampaignsIndexRoute: LayoutCampaignsIndexRoute,
   LayoutCouponsIndexRoute: LayoutCouponsIndexRoute,

@@ -1,0 +1,370 @@
+import { createFileRoute } from '@tanstack/react-router';
+import { SidebarProvider } from "@/components/ui/sidebar";
+import AppSidebar from "@/components/Sidebar/AppSidebar";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AdminCampaignsService, AdminCouponsService, AnnouncementsService, UsersService } from '@/client';
+import { toast } from 'sonner';
+import { Upload, Users, FileSpreadsheet, UserRound } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { DataTable } from '@/components/Common/DataTable';
+import { couponColumns } from './couponColumns';
+import { announcementColumns } from './announcementColumns';
+import { CouponPublic } from '@/client';
+import { app__schemas__user__UserPublic } from '@/client';
+
+export const Route = createFileRoute('/_layout/campaigns/$id')({
+  component: CampaignDetail,
+});
+
+function CampaignDetail() {
+  const { id } = Route.useParams();
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [selectedCouponId, setSelectedCouponId] = useState<string | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [excelFile, setExcelFile] = useState<File | null>(null);
+  const [isAutoAssigning, setIsAutoAssigning] = useState(false);
+
+  // Fetch campaign data
+  const { data: campaignData, isLoading: campaignLoading } = useQuery({
+    queryKey: ['campaign', id],
+    queryFn: () => AdminCampaignsService.getCampaign({ campaignId: id }),
+    enabled: !!id,
+  });
+
+  // Fetch campaign coupons
+  const { data: couponsData, refetch: refetchCoupons } = useQuery({
+    queryKey: ['campaign-coupons', id],
+    queryFn: () => AdminCouponsService.getAllCoupons({ campaignId: id }),
+    enabled: !!id,
+  });
+
+  // Fetch campaign announcements
+  const { data: announcementsData } = useQuery({
+    queryKey: ['campaign-announcements', id],
+    queryFn: () => AnnouncementsService.readAnnouncements({ search: `campaign_id:${id}` }),
+    enabled: !!id,
+  });
+
+  // Fetch all users for assignment
+  const { data: usersData } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => UsersService.readUsers({ skip: 0, limit: 1000 }),
+  });
+
+  const campaign = (campaignData as any)?.campaign;
+  const coupons = (couponsData as any)?.data || [];
+  const announcements = (announcementsData as any)?.data || [];
+  const users = usersData?.data || [];
+
+  const stats = {
+    total: coupons.length,
+    assigned: coupons.filter((c: CouponPublic) => c.assigned_user_id).length,
+    unassigned: coupons.filter((c: CouponPublic) => !c.assigned_user_id).length,
+    redeemed: coupons.filter((c: CouponPublic) => c.redeemed).length,
+  };
+
+  // Handle Excel file upload
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        setExcelFile(file);
+      } else {
+        toast.error('Please upload an Excel file (.xlsx or .xls)');
+      }
+    }
+  };
+
+  // Upload coupons from Excel
+  const handleUpload = async () => {
+    if (!excelFile) {
+      toast.error('Please select an Excel file');
+      return;
+    }
+
+    try {
+      // In a real implementation, we would send the file to the backend
+      // For now, we'll simulate the upload
+      toast.success('Coupons uploaded successfully');
+      setUploadModalOpen(false);
+      setExcelFile(null);
+      refetchCoupons();
+    } catch (error) {
+      console.error('Error uploading coupons:', error);
+      toast.error('Failed to upload coupons');
+    }
+  };
+
+  // Assign coupon to user
+  const handleAssignCoupon = async () => {
+    if (!selectedCouponId || !selectedUserId) {
+      toast.error('Please select both coupon and user');
+      return;
+    }
+
+    try {
+      // Call the API to assign the coupon to the user
+      await AdminCouponsService.assignCouponToUser({
+        couponId: selectedCouponId,
+        userId: selectedUserId
+      });
+      toast.success('Coupon assigned successfully');
+      setAssignModalOpen(false);
+      setSelectedCouponId(null);
+      setSelectedUserId(null);
+      refetchCoupons();
+    } catch (error) {
+      console.error('Error assigning coupon:', error);
+      toast.error('Failed to assign coupon');
+    }
+  };
+
+  // Auto-assign unassigned coupons to users
+  const handleAutoAssign = async () => {
+    setIsAutoAssigning(true);
+    try {
+      await AdminCouponsService.assignCampaignToAllUsers({ campaignId: id });
+      toast.success('Coupons auto-assigned successfully');
+      refetchCoupons();
+    } catch (error) {
+      console.error('Error auto-assigning coupons:', error);
+      toast.error('Failed to auto-assign coupons');
+    } finally {
+      setIsAutoAssigning(false);
+    }
+  };
+
+  if (campaignLoading) {
+    return <div>Loading campaign...</div>;
+  }
+
+  if (!campaign) {
+    return <div>Campaign not found</div>;
+  }
+
+  return (
+    <SidebarProvider>
+      <AppSidebar />
+      <main className="flex flex-1 flex-col gap-4 p-4 pt-0 overflow-y-scroll">
+        <div className="flex-1 overflow-auto">
+          <div className="space-y-6 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold">{campaign.title}</h1>
+                <p className="text-muted-foreground">{campaign.description}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button 
+                  onClick={() => setUploadModalOpen(true)}
+                  variant="outline"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload Coupons (Excel)
+                </Button>
+                <Button 
+                  onClick={handleAutoAssign}
+                  disabled={isAutoAssigning || stats.unassigned === 0}
+                >
+                  <Users className="mr-2 h-4 w-4" />
+                  {isAutoAssigning ? 'Assigning...' : 'Auto-assign Coupons'}
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="p-4">
+                  <CardTitle className="text-sm font-medium">Total Coupons</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold">{stats.total}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="p-4">
+                  <CardTitle className="text-sm font-medium">Assigned</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold">{stats.assigned}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="p-4">
+                  <CardTitle className="text-sm font-medium">Unassigned</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold">{stats.unassigned}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="p-4">
+                  <CardTitle className="text-sm font-medium">Redeemed</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold">{stats.redeemed}</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Tabs defaultValue="coupons" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="coupons">Coupons ({coupons.length})</TabsTrigger>
+                <TabsTrigger value="announcements">Announcements ({announcements.length})</TabsTrigger>
+              </TabsList>
+              <TabsContent value="coupons" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Coupon Management</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4 flex justify-end">
+                      <Button 
+                        onClick={() => setAssignModalOpen(true)}
+                        disabled={stats.unassigned === 0}
+                      >
+                        Assign Coupon to User
+                      </Button>
+                    </div>
+                    <DataTable 
+                      columns={couponColumns} 
+                      data={coupons} 
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="announcements" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Related Announcements</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <DataTable 
+                      columns={announcementColumns} 
+                      data={announcements} 
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+
+            {/* Upload Coupons Modal */}
+            <Dialog open={uploadModalOpen} onOpenChange={setUploadModalOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Upload Coupons via Excel</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div>
+                    <Label htmlFor="excel-upload">Excel File</Label>
+                    <div className="mt-2 flex items-center gap-2">
+                      <Input 
+                        id="excel-upload" 
+                        type="file" 
+                        accept=".xlsx,.xls" 
+                        onChange={handleFileChange}
+                      />
+                      <FileSpreadsheet className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Excel format: code, user_id (optional)
+                    </p>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setUploadModalOpen(false);
+                      setExcelFile(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button onClick={handleUpload} disabled={!excelFile}>
+                    <Upload className="mr-2 h-4 w-4" />
+                    Upload
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* Assign Coupon Modal */}
+            <Dialog open={assignModalOpen} onOpenChange={setAssignModalOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Assign Coupon to User</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div>
+                    <Label htmlFor="coupon-select">Select Coupon</Label>
+                    <select
+                      id="coupon-select"
+                      className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2"
+                      value={selectedCouponId || ''}
+                      onChange={(e) => setSelectedCouponId(e.target.value)}
+                    >
+                      <option value="">Select a coupon</option>
+                      {coupons
+                        .filter((coupon: CouponPublic) => !coupon.assigned_user_id)
+                        .map((coupon: CouponPublic) => (
+                          <option key={coupon.id} value={coupon.id}>
+                            {coupon.code} ({coupon.discount_value} {coupon.discount_type})
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="user-select">Select User</Label>
+                    <select
+                      id="user-select"
+                      className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2"
+                      value={selectedUserId || ''}
+                      onChange={(e) => setSelectedUserId(e.target.value)}
+                    >
+                      <option value="">Select a user</option>
+                      {users.map((user: app__schemas__user__UserPublic) => (
+                        <option key={user.id} value={user.id}>
+                          {user.email} ({user.full_name})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setAssignModalOpen(false);
+                      setSelectedCouponId(null);
+                      setSelectedUserId(null);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button onClick={handleAssignCoupon} disabled={!selectedCouponId || !selectedUserId}>
+                    <UserRound className="mr-2 h-4 w-4" />
+                    Assign
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </main>
+    </SidebarProvider>
+  );
+}

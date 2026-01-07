@@ -1,9 +1,22 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { CampaignPublic } from "@/client/types.gen"
 
-export const columns: ColumnDef<CampaignPublic>[] = [
+// Define a type that includes coupon statistics
+interface CampaignWithStats {
+  id: string;
+  title: string;
+  description?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  active: boolean;
+  created_at: string;
+  total_coupons?: number;
+  assigned_coupons?: number;
+  unassigned_coupons?: number;
+}
+
+export const columns: ColumnDef<CampaignWithStats>[] = [
   {
     accessorKey: "title",
     header: ({ column }) => {
@@ -23,12 +36,25 @@ export const columns: ColumnDef<CampaignPublic>[] = [
     header: "Description",
   },
   {
-    accessorKey: "start_date",
-    header: "Start Date",
+    accessorKey: "total_coupons",
+    header: "Total Coupons",
+    cell: ({ row }) => {
+      return row.original.total_coupons || 0;
+    }
   },
   {
-    accessorKey: "end_date",
-    header: "End Date",
+    accessorKey: "assigned_coupons",
+    header: "Assigned Coupons",
+    cell: ({ row }) => {
+      return row.original.assigned_coupons || 0;
+    }
+  },
+  {
+    accessorKey: "unassigned_coupons",
+    header: "Unassigned Coupons",
+    cell: ({ row }) => {
+      return row.original.unassigned_coupons || 0;
+    }
   },
   {
     accessorKey: "active",
@@ -46,4 +72,4 @@ export const columns: ColumnDef<CampaignPublic>[] = [
       )
     },
   },
-];
+]

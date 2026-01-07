@@ -25,23 +25,23 @@ def get_all_campaigns(
         # Build query with filters
         statement = select(Campaign)
         
-        # Apply search filter if provided (search in name and description)
+        # Apply search filter if provided (search in title and description)
         if search:
             search_filter = f"%{search}%"
             statement = statement.where(
-                (Campaign.name.ilike(search_filter)) | 
+                (Campaign.title.ilike(search_filter)) | 
                 (Campaign.description.ilike(search_filter))
             )
         
         # Apply category filter if provided
-        # Note: campaigns don't have a direct category field, but we can search in name/description
+        # Note: campaigns don't have a direct category field, but we can search in title/description
         # If campaigns had a category field, we would add it here
         if category:
             # For campaigns, we might want to implement a different category approach
-            # For now, just using search in name/description
+            # For now, just using search in title/description
             category_filter = f"%{category}%"
             statement = statement.where(
-                (Campaign.name.ilike(category_filter)) | 
+                (Campaign.title.ilike(category_filter)) | 
                 (Campaign.description.ilike(category_filter))
             )
         
