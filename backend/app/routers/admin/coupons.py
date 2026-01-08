@@ -45,7 +45,7 @@ def get_all_coupons(
     search: str | None = None,
     category: str | None = None,  # Adding category filter
     campaign_id: uuid.UUID | None = None,
-    assigned_user_id: uuid.UUID | None = None
+    assigned_to_user_id: uuid.UUID | None = None
 ):
     """Get all coupons with optional filtering"""
     try:
@@ -75,8 +75,8 @@ def get_all_coupons(
         
         if campaign_id:
             statement = statement.where(Coupon.campaign_id == campaign_id)
-        if assigned_user_id:
-            statement = statement.where(Coupon.assigned_to_user_id == assigned_user_id)
+        if assigned_to_user_id:
+            statement = statement.where(Coupon.assigned_to_user_id == assigned_to_user_id)
         
         coupons = session.exec(statement.offset(skip).limit(limit)).all()
         
@@ -91,8 +91,8 @@ def get_all_coupons(
             )
         if campaign_id:
             count_statement = count_statement.where(Coupon.campaign_id == campaign_id)
-        if assigned_user_id:
-            count_statement = count_statement.where(Coupon.assigned_to_user_id == assigned_user_id)
+        if assigned_to_user_id:
+            count_statement = count_statement.where(Coupon.assigned_to_user_id == assigned_to_user_id)
         
         total_count = session.exec(count_statement).count()
         

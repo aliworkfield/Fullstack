@@ -50,6 +50,7 @@ class CouponPublic(CouponBase):
     class Config:
         from_attributes = True
 
+
 class CouponsPublic(SQLModel):
     data: list[CouponPublic]
     count: int

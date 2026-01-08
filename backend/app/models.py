@@ -59,33 +59,46 @@ class CouponBase(SQLModel):
     code: str = Field(unique=True, index=True, max_length=50)
     discount_type: str = Field(max_length=20)  # percentage or fixed
     discount_value: float
-    expires_at: datetime.datetime | None = None
+    campaign_id: uuid.UUID | None = None
+    assigned_to_user_id: uuid.UUID | None = None
     redeemed: bool = False
+    redeemed_at: datetime.datetime | None = None
+    expires_at: datetime.datetime | None = None
 
 
 class CouponCreate(CouponBase):
-    campaign_id: uuid.UUID | None = None
-    assigned_to_user_id: uuid.UUID | None = None
+    pass
 
 
 class CouponUpdate(CouponBase):
     code: str | None = Field(default=None, max_length=50)  # type: ignore
     discount_type: str | None = Field(default=None, max_length=20)  # type: ignore
     discount_value: float | None = None  # type: ignore
+    campaign_id: uuid.UUID | None = None  # type: ignore
+    assigned_to_user_id: uuid.UUID | None = None  # type: ignore
+    redeemed: bool | None = None  # type: ignore
+    redeemed_at: datetime.datetime | None = None  # type: ignore
+    expires_at: datetime.datetime | None = None  # type: ignore
 
 
 class Coupon(CouponBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    campaign_id: uuid.UUID | None = Field(default=None, foreign_key="campaign.id")
-    assigned_to_user_id: uuid.UUID | None = Field(default=None, foreign_key="user.id")
+    created_at: datetime.datetime = Field(
+        default_factory=datetime.datetime.utcnow,
+        sa_column=Column(DateTime(timezone=True), server_default=func.now())
+    )
+    campaign_id: uuid.UUID | None = Field(default=None, foreign_key="campaigns.id")
+    assigned_to_user_id: uuid.UUID | None = Field(default=None, foreign_key="users.id")
     campaign: Campaign | None = Relationship(back_populates="coupons")
     owner: "User" | None = Relationship()
 
 
 class CouponPublic(CouponBase):
     id: uuid.UUID
-    campaign_id: uuid.UUID | None = None
-    assigned_to_user_id: uuid.UUID | None = None
+    created_at: datetime.datetime
+    
+    class Config:
+        from_attributes = True
 
 
 class CouponsPublic(SQLModel):

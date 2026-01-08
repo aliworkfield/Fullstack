@@ -66,7 +66,7 @@ class CouponService:
         # Get unassigned coupons for campaign
         statement = select(Coupon).where(
             Coupon.campaign_id == campaign_id,
-            Coupon.assigned_user_id.is_(None)
+            Coupon.assigned_to_user_id.is_(None)
         )
         coupons = self.session.exec(statement).all()
         
@@ -78,7 +78,7 @@ class CouponService:
             if user_index >= len(users):
                 user_index = 0
                 
-            coupon.assigned_user_id = users[user_index].id
+            coupon.assigned_to_user_id = users[user_index].id
             self.session.add(coupon)
             assigned_count += 1
             user_index += 1
@@ -103,7 +103,7 @@ class CouponService:
             raise ValueError("Coupon not found")
             
         # Check if coupon is already assigned
-        if coupon.assigned_user_id is not None:
+        if coupon.assigned_to_user_id is not None:
             raise ValueError("Coupon is already assigned")
             
         # Check if coupon is redeemed
@@ -116,7 +116,7 @@ class CouponService:
             raise ValueError("User not found")
             
         # Assign coupon to user
-        coupon.assigned_user_id = user_id
+        coupon.assigned_to_user_id = user_id
         self.session.add(coupon)
         self.session.commit()
         self.session.refresh(coupon)
@@ -140,7 +140,7 @@ class CouponService:
             raise ValueError("Coupon not found")
             
         # Check ownership
-        if coupon.assigned_user_id != current_user.id:
+        if coupon.assigned_to_user_id != current_user.id:
             raise ValueError("Not authorized to redeem this coupon")
             
         # Check if already redeemed
@@ -178,7 +178,7 @@ class CouponService:
         total = len(all_coupons)
         
         # Count assigned coupons
-        assigned = sum(1 for coupon in all_coupons if coupon.assigned_user_id is not None)
+        assigned = sum(1 for coupon in all_coupons if coupon.assigned_to_user_id is not None)
         
         # Count redeemed coupons
         redeemed = sum(1 for coupon in all_coupons if coupon.redeemed)
@@ -207,6 +207,6 @@ class CouponService:
         # Get unassigned coupons
         statement = select(Coupon).where(
             Coupon.campaign_id == campaign_id,
-            Coupon.assigned_user_id.is_(None)
+            Coupon.assigned_to_user_id.is_(None)
         )
         return self.session.exec(statement).all()

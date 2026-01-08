@@ -28,7 +28,7 @@ class CampaignService:
         all_coupons = self.session.exec(statement).all()
         
         total = len(all_coupons)
-        assigned = sum(1 for coupon in all_coupons if coupon.assigned_user_id is not None)
+        assigned = sum(1 for coupon in all_coupons if coupon.assigned_to_user_id is not None)
         redeemed = sum(1 for coupon in all_coupons if coupon.redeemed)
         
         return {
@@ -63,7 +63,7 @@ class CampaignService:
             all_coupons = self.session.exec(statement).all()
             
             total = len(all_coupons)
-            assigned = sum(1 for coupon in all_coupons if coupon.assigned_user_id is not None)
+            assigned = sum(1 for coupon in all_coupons if coupon.assigned_to_user_id is not None)
             redeemed = sum(1 for coupon in all_coupons if coupon.redeemed)
             
             result.append({
