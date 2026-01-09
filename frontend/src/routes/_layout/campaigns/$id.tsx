@@ -24,6 +24,7 @@ import { announcementColumns } from './announcementColumns';
 import { CouponPublic } from '@/client';
 import { app__schemas__user__UserPublic } from '@/client';
 import { CampaignUpdate } from '@/client';
+import keycloak from '@/keycloak';
 
 export const Route = createFileRoute('/_layout/campaigns/$id')({
   component: CampaignDetail,
@@ -133,15 +134,49 @@ function CampaignDetail() {
     }
 
     try {
-      // In a real implementation, we would send the file to the backend
-      // For now, we'll simulate the upload
-      toast.success('Coupons uploaded successfully');
+      // Create form data to send the file
+      const formData = new FormData();
+      formData.append('file', excelFile);
+      
+      // Call the API to upload coupons from Excel
+      // We need to use fetch directly since we're sending file data
+      
+      // Get the token from Keycloak
+      let token = keycloak.token;
+      if (!token || keycloak.isTokenExpired()) {
+        // Refresh the token if needed
+        const refreshed = await keycloak.updateToken(5);
+        if (!refreshed) {
+          throw new Error('Failed to refresh authentication token');
+        }
+        token = keycloak.token;
+      }
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/admin/coupons/upload/${id}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to upload coupons');
+      }
+
+      const result = await response.json();
+      toast.success(`Successfully uploaded ${result.count} coupons`);
       setUploadModalOpen(false);
       setExcelFile(null);
       refetchCoupons();
     } catch (error) {
       console.error('Error uploading coupons:', error);
-      toast.error('Failed to upload coupons');
+      if (error instanceof Error) {
+        toast.error(error.message || 'Failed to upload coupons');
+      } else {
+        toast.error('Failed to upload coupons');
+      }
     }
   };
 
@@ -438,8 +473,12 @@ function CampaignDetail() {
                       <FileSpreadsheet className="h-8 w-8 text-muted-foreground" />
                     </div>
                     <p className="mt-2 text-sm text-muted-foreground">
-                      Excel format: code, user_id (optional)
+                      Excel format: code, discount_type ('fixed' or 'percentage'), discount_value, expires_at (optional YYYY-MM-DD HH:MM:SS or NULL)
                     </p>
+                    <div className="mt-4 p-3 bg-gray-100 rounded-md text-xs">
+                      <p className="font-semibold">Example format:</p>
+                      <pre className="mt-1">code,discount_type,discount_value,expires_at<br />ABC123,fixed,10.00,2027-01-01 00:00:00<br />XYZ789,percentage,15.00,<br />DEF456,fixed,5.50,2026-12-31 23:59:59</pre>
+                    </div>
                   </div>
                 </div>
                 <DialogFooter>

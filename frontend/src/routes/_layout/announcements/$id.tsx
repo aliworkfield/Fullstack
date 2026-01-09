@@ -161,8 +161,8 @@ export function AnnouncementDetailRoute() {
                         <p className="text-lg font-bold text-center text-blue-800">{userCoupon.code}</p>
                         <p className="text-sm text-center text-blue-600 mt-1">
                           {userCoupon.discount_type === "percentage"
-                            ? `${userCoupon.discount_value}% discount`
-                            : `Fixed discount of ${userCoupon.discount_value}`}
+                            ? `${userCoupon.discount_value}% indirim`
+                            : `Değeri: ${userCoupon.discount_value}`}
                         </p>
                         {userCoupon.redeemed && (
                           <p className="text-sm text-center text-red-600 mt-2">

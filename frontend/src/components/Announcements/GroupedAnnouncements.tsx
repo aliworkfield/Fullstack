@@ -1,9 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, ChevronDown, ChevronRight } from "lucide-react";
 import { app__models__announcement__AnnouncementPublic } from "@/client";
-import { AnnouncementCard } from "./AnnouncementCard";
 
 interface GroupedAnnouncementsProps {
   announcements: app__models__announcement__AnnouncementPublic[];
@@ -11,73 +10,81 @@ interface GroupedAnnouncementsProps {
 
 export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [selectedCategory, setSelectedCategory] = useState("all"); // Add category filter
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
 
-  /* -------------------- helpers -------------------- */
+  // Calculate "New" announcements (created within last 10 days)
+  const tenDaysAgo = new Date();
+  tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
 
-  const matchesSearch = (a: app__models__announcement__AnnouncementPublic) =>
-    !searchTerm ||
-    a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (a.description?.toLowerCase().includes(searchTerm.toLowerCase()));
+  const newAnnouncements = announcements.filter(announcement => {
+    const createdDate = new Date(announcement.created_date || '');
+    return createdDate > tenDaysAgo;
+  });
 
-  const isNew = (a: app__models__announcement__AnnouncementPublic) => {
-    if (!a.created_date) return false;
-    const d = new Date(a.created_date);
-    const limit = new Date();
-    limit.setDate(limit.getDate() - 10);
-    return d > limit;
-  };
+  // Group all announcements by category (including those that are also "New")
+  const groupedByCategory: Record<string, app__models__announcement__AnnouncementPublic[]> = {};
+  announcements.forEach(announcement => {
+    const category = announcement.category || 'Uncategorized';
+    if (!groupedByCategory[category]) {
+      groupedByCategory[category] = [];
+    }
+    groupedByCategory[category].push(announcement);
+  });
 
-  const toggle = (key: string) =>
-    setExpanded((p) => ({ ...p, [key]: p[key] === false }));
+  // Sort categories alphabetically
+  const sortedCategories = Object.keys(groupedByCategory).sort();
 
-  /* -------------------- data -------------------- */
+  // Apply search and category filtering to each section
+  const filteredNewAnnouncements = newAnnouncements.filter(announcement => {
+    const matchesSearch = !searchTerm || 
+      announcement.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (announcement.description && announcement.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesCategory = selectedCategory === "all" || selectedCategory === "new";
+    
+    return matchesSearch && matchesCategory;
+  });
 
-  // Filter new announcements
-  const newAnnouncements = useMemo(
-    () => announcements.filter((a) => isNew(a) && matchesSearch(a)),
-    [announcements, searchTerm]
-  );
-
-  // Group by category
-  const grouped = useMemo(() => {
-    const map: Record<string, app__models__announcement__AnnouncementPublic[]> = {};
-    announcements.forEach((a) => {
-      if (!matchesSearch(a)) return;
-      const cat = a.category || "Uncategorized";
-      map[cat] = map[cat] || [];
-      map[cat].push(a);
+  const filteredByCategory: Record<string, app__models__announcement__AnnouncementPublic[]> = {};
+  sortedCategories.forEach(category => {
+    filteredByCategory[category] = groupedByCategory[category].filter(announcement => {
+      const matchesSearch = !searchTerm || 
+        announcement.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (announcement.description && announcement.description.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      const matchesCategory = selectedCategory === "all" || selectedCategory === category;
+      
+      return matchesSearch && matchesCategory;
     });
-    return map;
-  }, [announcements, searchTerm]);
+  });
 
-  const categories = Object.keys(grouped).sort();
-
-  /* -------------------- UI -------------------- */
+  const toggleCategory = (category: string) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">Announcements</h1>
-
-        <div className="flex items-center gap-4 shrink-0">
-          <select
-            value={selectedCategory}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold">Announcements</h1>
+        </div>
+        <div className="flex gap-4">
+          <select 
+            value={selectedCategory} 
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="border rounded-md px-3 py-2 w-56 min-w-[14rem]"
+            className="border rounded-md px-3 py-2 w-48"
           >
             <option value="all">All Categories</option>
             <option value="new">New</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
+            {sortedCategories.map(category => (
+              <option key={`cat-opt-${category}`} value={category}>{category}</option>
             ))}
           </select>
-
-          <div className="relative w-64 min-w-[16rem]">
+          <div className="relative w-64">
             <Input
               placeholder="Search announcements..."
               value={searchTerm}
@@ -89,65 +96,65 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
         </div>
       </div>
 
-      {/* NEW (virtual) */}
-      {(selectedCategory === "all" || selectedCategory === "new") &&
-        newAnnouncements.length > 0 && (
-          <div className="space-y-4">
-            <div
-              onClick={() => toggle("new")}
-              className="flex items-center gap-3 cursor-pointer bg-muted/60 px-4 py-3 rounded-md"
-            >
-              <div className="w-5 flex justify-center shrink-0">
-                {expanded["new"] !== false ? (
-                  <ChevronDown className="h-5 w-5" />
-                ) : (
-                  <ChevronRight className="h-5 w-5" />
-                )}
-              </div>
-              <div className="w-64 min-w-[16rem] truncate font-semibold text-blue-600">
-                New
-              </div>
-              <Badge variant="secondary" className="shrink-0">
-                {newAnnouncements.length}
-              </Badge>
-            </div>
-
-            {expanded["new"] !== false && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {newAnnouncements.map((a) => (
-                  <AnnouncementCard key={`new-${a.id}`} announcement={a} />
-                ))}
-              </div>
-            )}
+      {/* New Announcements Section - Only show if category filter is "all" or "new" */}
+      {(selectedCategory === "all" || selectedCategory === "new") && filteredNewAnnouncements.length > 0 && (
+        <div className="space-y-4">
+          <div 
+            className="flex items-center gap-2 cursor-pointer"
+            onClick={() => toggleCategory('new')}
+          >
+            {expandedCategories['new'] !== false ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+            <h2 className="text-xl font-bold text-blue-600">New</h2>
+            <Badge variant="secondary">{filteredNewAnnouncements.length}</Badge>
           </div>
-        )}
+          
+          {expandedCategories['new'] !== false && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredNewAnnouncements.map((announcement) => (
+                <div 
+                  key={`new-${announcement.id}`} 
+                  className="border rounded-lg p-4 hover:bg-muted cursor-pointer"
+                >
+                  <h3 className="font-semibold">{announcement.title}</h3>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
-      {/* Categories */}
-      {categories.map((category) => {
-        if (selectedCategory !== "all" && selectedCategory !== category) return null;
-        if (grouped[category].length === 0) return null;
-
-        const open = expanded[category] !== false;
-
+      {/* Other Categories - Only show if category filter is "all" or matches this category */}
+      {sortedCategories.map(category => {
+        const categoryAnnouncements = filteredByCategory[category];
+        const isExpanded = expandedCategories[category] !== false;
+        
+        // Only show this category if it matches the selected filter
+        const shouldShowCategory = selectedCategory === "all" || selectedCategory === category;
+        
+        if (!shouldShowCategory || categoryAnnouncements.length === 0) {
+          return null;
+        }
+        
         return (
           <div key={category} className="space-y-4">
-            <div
-              onClick={() => toggle(category)}
-              className="flex items-center gap-3 cursor-pointer bg-muted/60 px-4 py-3 rounded-md"
+            <div 
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => toggleCategory(category)}
             >
-              <div className="w-5 flex justify-center shrink-0">
-                {open ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-              </div>
-              <div className="w-64 min-w-[16rem] truncate font-semibold">{category}</div>
-              <Badge variant="outline" className="shrink-0">
-                {grouped[category].length}
-              </Badge>
+              {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+              <h2 className="text-xl font-bold">{category}</h2>
+              <Badge variant="outline">{categoryAnnouncements.length}</Badge>
             </div>
-
-            {open && (
+            
+            {isExpanded && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {grouped[category].map((a) => (
-                  <AnnouncementCard key={a.id} announcement={a} />
+                {categoryAnnouncements.map((announcement) => (
+                  <div 
+                    key={`cat-${announcement.id}`} 
+                    className="border rounded-lg p-4 hover:bg-muted cursor-pointer"
+                  >
+                    <h3 className="font-semibold">{announcement.title}</h3>
+                  </div>
                 ))}
               </div>
             )}
@@ -155,20 +162,31 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
         );
       })}
 
-      {/* Empty states */}
-      {announcements.length === 0 && (
+      {/* Show message if no announcements match the filters */}
+      {selectedCategory === "all" && 
+       filteredNewAnnouncements.length === 0 && 
+       Object.values(filteredByCategory).every(cat => cat.length === 0) && (
         <div className="text-center py-8 text-muted-foreground">
-          No announcements available.
+          No announcements match your search.
         </div>
       )}
-
-      {announcements.length > 0 &&
-        newAnnouncements.length === 0 &&
-        categories.every((c) => grouped[c].length === 0) && (
-          <div className="text-center py-8 text-muted-foreground">
-            No announcements match your search.
-          </div>
-        )}
+      
+      {/* Show message if specific category is selected but no matches */}
+      {selectedCategory !== "all" && 
+       selectedCategory !== "new" && 
+       (!filteredByCategory[selectedCategory] || filteredByCategory[selectedCategory].length === 0) && (
+        <div className="text-center py-8 text-muted-foreground">
+          No announcements found in {selectedCategory} category.
+        </div>
+      )}
+      
+      {/* Show message if "new" category is selected but no matches */}
+      {selectedCategory === "new" && 
+       filteredNewAnnouncements.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          No new announcements found.
+        </div>
+      )}
     </div>
   );
 }
