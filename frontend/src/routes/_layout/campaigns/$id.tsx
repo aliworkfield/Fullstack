@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/Sidebar/AppSidebar";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -102,6 +102,15 @@ function CampaignDetail() {
     redeemed: coupons.filter((c: CouponPublic) => c.redeemed).length,
   };
 
+  // State for edit form - moved before any conditional returns
+  const [editFormData, setEditFormData] = useState({
+    title: campaign?.title || '',
+    description: campaign?.description || '',
+    start_date: campaign?.start_date || '',
+    end_date: campaign?.end_date || '',
+    active: campaign?.active !== undefined ? campaign?.active : true,
+  });
+
   // Handle Excel file upload
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -112,6 +121,7 @@ function CampaignDetail() {
       } else {
         toast.error('Please upload an Excel file (.xlsx or .xls)');
       }
+      e.target.value = ''; // Clear the file input
     }
   };
 
@@ -174,23 +184,6 @@ function CampaignDetail() {
     }
   };
 
-  if (campaignLoading) {
-    return <div>Loading campaign...</div>;
-  }
-
-  if (!campaign) {
-    return <div>Campaign not found</div>;
-  }
-
-  // State for edit form
-  const [editFormData, setEditFormData] = useState({
-    title: campaign.title || '',
-    description: campaign.description || '',
-    start_date: campaign.start_date || '',
-    end_date: campaign.end_date || '',
-    active: campaign.active !== undefined ? campaign.active : true,
-  });
-
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateCampaignMutation.mutate(editFormData);
@@ -205,6 +198,33 @@ function CampaignDetail() {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
+
+
+
+  // Update editFormData when campaign changes to ensure form is pre-populated
+  useEffect(() => {
+    if (campaign) {
+      setEditFormData({
+        title: campaign.title || '',
+        description: campaign.description || '',
+        start_date: campaign.start_date || '',
+        end_date: campaign.end_date || '',
+        active: campaign.active !== undefined ? campaign.active : true,
+      });
+    }
+  }, [campaign]);
+
+    // Conditional renders - all hooks are called before this point
+  if (campaignLoading) {
+    return <div>Loading campaign...</div>;
+  }
+
+  if (!campaign) {
+    return <div>Campaign not found</div>;
+  }
+
+
+  // -----------
 
   return (
     <SidebarProvider>

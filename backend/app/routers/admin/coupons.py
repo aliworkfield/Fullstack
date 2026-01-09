@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Response
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 from app.api.deps import SessionDep, require_role, CurrentUser
 from app.models import User, Coupon, Campaign
 from app.schemas import CouponCreate, CouponUpdate, CouponsPublic
@@ -81,7 +81,7 @@ def get_all_coupons(
         coupons = session.exec(statement.offset(skip).limit(limit)).all()
         
         # Count total for pagination
-        count_statement = select(Coupon)
+        count_statement = select(func.count(Coupon.id))
         if search:
             count_statement = count_statement.where(Coupon.code.ilike(search_filter))
         if category:
@@ -94,9 +94,10 @@ def get_all_coupons(
         if assigned_to_user_id:
             count_statement = count_statement.where(Coupon.assigned_to_user_id == assigned_to_user_id)
         
-        total_count = session.exec(count_statement).count()
+        total_count = session.exec(count_statement).one()
         
-        return {"coupons": coupons, "count": total_count}
+        # Return in the format expected by the frontend (using 'data' instead of 'coupons')
+        return {"data": coupons, "count": total_count}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -209,5 +210,61 @@ def assign_campaign_to_all_users(
         return {"message": f"Assigned {assigned_count} coupons", "count": assigned_count}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/unassigned/{campaign_id}", response_model=dict, dependencies=[require_role(["admin", "manager"])])
+def get_unassigned_coupons(
+    campaign_id: uuid.UUID,
+    current_user: CurrentUser,
+    session: SessionDep
+):
+    """Get unassigned coupons for a campaign"""
+    try:
+        statement = select(Coupon).where(
+            Coupon.campaign_id == campaign_id,
+            Coupon.assigned_to_user_id.is_(None)
+        )
+        coupons = session.exec(statement).all()
+        
+        # Count total unassigned for pagination
+        count_statement = select(func.count(Coupon.id)).where(
+            Coupon.campaign_id == campaign_id,
+            Coupon.assigned_to_user_id.is_(None)
+        )
+        total_count = session.exec(count_statement).one()
+        
+        # Return in the format expected by the frontend (using 'data' instead of 'coupons')
+        return {"data": coupons, "count": total_count}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/stats/{campaign_id}", response_model=dict, dependencies=[require_role(["admin", "manager"])])
+def get_campaign_coupon_stats(
+    campaign_id: uuid.UUID,
+    current_user: CurrentUser,
+    session: SessionDep
+):
+    """Get campaign coupon statistics"""
+    try:
+        # Get all coupons for the campaign
+        statement = select(Coupon).where(Coupon.campaign_id == campaign_id)
+        all_coupons = session.exec(statement).all()
+        
+        total = len(all_coupons)
+        assigned = sum(1 for coupon in all_coupons if coupon.assigned_to_user_id is not None)
+        redeemed = sum(1 for coupon in all_coupons if coupon.redeemed)
+        unassigned = total - assigned
+        
+        return {
+            "stats": {
+                "total": total,
+                "assigned": assigned,
+                "unassigned": unassigned,
+                "redeemed": redeemed
+            }
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
