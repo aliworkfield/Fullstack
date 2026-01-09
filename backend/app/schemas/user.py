@@ -1,5 +1,6 @@
 from pydantic import EmailStr
 from sqlmodel import Field, SQLModel
+import uuid
 
 
 class UserBase(SQLModel):
@@ -22,7 +23,6 @@ class UserUpdate(UserBase):
     keycloak_user_id: str | None = Field(default=None, max_length=255)
 
 
-
 class UserUpdateMe(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     email: EmailStr | None = Field(default=None, max_length=255)
@@ -35,7 +35,7 @@ class UserRegister(SQLModel):
 
 
 class UserPublic(UserBase):
-    id: int
+    id: uuid.UUID
 
 
 class UserInDB(UserPublic):

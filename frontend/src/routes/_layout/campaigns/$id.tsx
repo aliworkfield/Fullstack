@@ -2,13 +2,13 @@ import { createFileRoute } from '@tanstack/react-router';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/Sidebar/AppSidebar";
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminCampaignsService, AdminCouponsService, AnnouncementsService, UsersService } from '@/client';
 import { toast } from 'sonner';
-import { Upload, Users, FileSpreadsheet, UserRound } from 'lucide-react';
+import { Upload, Users, FileSpreadsheet, UserRound, Pencil } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
@@ -23,6 +23,7 @@ import { couponColumns } from './couponColumns';
 import { announcementColumns } from './announcementColumns';
 import { CouponPublic } from '@/client';
 import { app__schemas__user__UserPublic } from '@/client';
+import { CampaignUpdate } from '@/client';
 
 export const Route = createFileRoute('/_layout/campaigns/$id')({
   component: CampaignDetail,
@@ -32,16 +33,41 @@ function CampaignDetail() {
   const { id } = Route.useParams();
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedCouponId, setSelectedCouponId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [isAutoAssigning, setIsAutoAssigning] = useState(false);
+  const queryClient = useQueryClient();
 
   // Fetch campaign data
   const { data: campaignData, isLoading: campaignLoading } = useQuery({
     queryKey: ['campaign', id],
     queryFn: () => AdminCampaignsService.getCampaign({ campaignId: id }),
     enabled: !!id,
+  });
+
+  // Mutation for updating campaign
+  const updateCampaignMutation = useMutation({
+    mutationFn: (data: CampaignUpdate) => 
+      AdminCampaignsService.updateCampaign({
+        campaignId: id,
+        requestBody: data
+      }),
+    onSuccess: () => {
+      toast.success('Campaign updated successfully');
+      setEditModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['campaign', id] });
+      queryClient.invalidateQueries({ queryKey: ['campaigns'] });
+    },
+    onError: (error: any) => {
+      console.error('Error updating campaign:', error);
+      toast.error(
+        error?.response?.data?.detail || 
+        error?.data?.detail || 
+        "Failed to update campaign"
+      );
+    },
   });
 
   // Fetch campaign coupons
@@ -156,6 +182,30 @@ function CampaignDetail() {
     return <div>Campaign not found</div>;
   }
 
+  // State for edit form
+  const [editFormData, setEditFormData] = useState({
+    title: campaign.title || '',
+    description: campaign.description || '',
+    start_date: campaign.start_date || '',
+    end_date: campaign.end_date || '',
+    active: campaign.active !== undefined ? campaign.active : true,
+  });
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateCampaignMutation.mutate(editFormData);
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -168,6 +218,14 @@ function CampaignDetail() {
                 <p className="text-muted-foreground">{campaign.description}</p>
               </div>
               <div className="flex items-center gap-2">
+                <Button 
+                  onClick={() => setEditModalOpen(true)}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Pencil className="h-4 w-4" />
+                  Edit Campaign
+                </Button>
                 <Button 
                   onClick={() => setUploadModalOpen(true)}
                   variant="outline"
@@ -260,6 +318,86 @@ function CampaignDetail() {
                 </Card>
               </TabsContent>
             </Tabs>
+
+            {/* Edit Campaign Modal */}
+            <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit Campaign</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleEditSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      id="title"
+                      name="title"
+                      type="text"
+                      value={editFormData.title}
+                      onChange={handleEditChange}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Input
+                      id="description"
+                      name="description"
+                      type="text"
+                      value={editFormData.description}
+                      onChange={handleEditChange}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="start_date">Start Date</Label>
+                    <Input
+                      id="start_date"
+                      name="start_date"
+                      type="datetime-local"
+                      value={editFormData.start_date}
+                      onChange={handleEditChange}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="end_date">End Date</Label>
+                    <Input
+                      id="end_date"
+                      name="end_date"
+                      type="datetime-local"
+                      value={editFormData.end_date}
+                      onChange={handleEditChange}
+                      required
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      id="active"
+                      name="active"
+                      type="checkbox"
+                      checked={editFormData.active}
+                      onChange={handleEditChange}
+                      className="h-4 w-4"
+                    />
+                    <Label htmlFor="active">Active</Label>
+                  </div>
+                  <DialogFooter>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setEditModalOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      disabled={updateCampaignMutation.isPending}
+                    >
+                      {updateCampaignMutation.isPending ? "Updating..." : "Update Campaign"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
 
             {/* Upload Coupons Modal */}
             <Dialog open={uploadModalOpen} onOpenChange={setUploadModalOpen}>

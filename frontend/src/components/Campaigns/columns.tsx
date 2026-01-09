@@ -1,6 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Link } from "@tanstack/react-router"
 
 // Define a type that includes coupon statistics
 interface CampaignWithStats {
@@ -28,6 +29,17 @@ export const columns: ColumnDef<CampaignWithStats>[] = [
           Title
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
+      )
+    },
+    cell: ({ row }) => {
+      return (
+        <Link 
+          to="/campaigns/$id" 
+          params={{ id: row.original.id }} 
+          className="text-blue-600 hover:underline font-medium"
+        >
+          {row.original.title}
+        </Link>
       )
     },
   },

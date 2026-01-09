@@ -16,11 +16,11 @@ from app.models import (
     Item,
     User,
     UserCreate,
-    UserPublic,
     UserUpdate,
 )
 from app.schemas import (
     Message,
+    UserPublic,
 )
 from app.schemas import (
     UsersPublic,
@@ -50,14 +50,10 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
     statement = select(User).offset(skip).limit(limit)
     users = session.exec(statement).all()
     
-    # Ensure boolean fields are not None for all users
-    for user in users:
-        if user.is_active is None:
-            user.is_active = True
-        if user.is_superuser is None:
-            user.is_superuser = False
+    # Convert model instances to schema instances
+    user_schemas = [UserPublic.model_validate(user) for user in users]
 
-    return UsersPublic(data=users, count=count)
+    return UsersPublic(data=user_schemas, count=count)
 
 
 @router.post(
