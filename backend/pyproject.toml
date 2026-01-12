@@ -24,6 +24,7 @@ dependencies = [
     "python-keycloak<4.0.0,>=3.7.0",
     "python-jose<4.0.0,>=3.3.0",
     "pandas<3.0.0,>=2.0.0",
+    "openpyxl<4.0.0,>=3.0.0",
 ]
 
 [tool.uv]
