@@ -69,7 +69,10 @@ export function CouponManagement() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-3xl font-bold">Coupon Management</h1>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Coupon Management</h1>
+          <p className="text-muted-foreground mt-1">Manage and track your promotional campaigns</p>
+        </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -84,7 +87,7 @@ export function CouponManagement() {
             <select
               value={selectedCampaign || ""}
               onChange={(e) => setSelectedCampaign(e.target.value || null)}
-              className="border rounded-md px-3 py-2 text-sm"
+              className="border rounded-md px-3 py-2 text-sm min-w-[180px]"
             >
               <option value="">All Campaigns</option>
               {campaigns.map((campaign: CampaignPublic) => (
@@ -93,9 +96,9 @@ export function CouponManagement() {
                 </option>
               ))}
             </select>
-            <Button onClick={handleGenerateCoupons}>
+            <Button onClick={handleGenerateCoupons} className="whitespace-nowrap">
               <Plus className="h-4 w-4 mr-2" />
-              Generate
+              Generate Coupons
             </Button>
           </div>
         </div>
@@ -140,24 +143,44 @@ export function CouponManagement() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCoupons.map((coupon: CouponPublic) => (
-          <Card key={coupon.id}>
-            <CardHeader>
+          <Card key={coupon.id} className="hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold">{coupon.code}</h3>
-                  <p className="text-sm text-muted-foreground">{coupon.discount_value}{coupon.discount_type === "percentage" ? "%" : ""} off</p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-lg truncate">{coupon.code}</h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-2xl font-bold">
+                      {coupon.discount_value}{coupon.discount_type === "percentage" ? "%" : ""}
+                    </span>
+                    <span className="text-sm text-muted-foreground">off</span>
+                  </div>
                 </div>
-                <Badge variant={coupon.redeemed ? "destructive" : "secondary"}>
-                  {coupon.redeemed ? "Redeemed" : "Available"}
-                </Badge>
+                <div className="ml-2">
+                  <Badge variant={coupon.redeemed ? "destructive" : coupon.assigned_to_user_id ? "default" : "secondary"}>
+                    {coupon.redeemed ? "Redeemed" : coupon.assigned_to_user_id ? "Assigned" : "Available"}
+                  </Badge>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 text-sm">
-                <p><span className="font-medium">Campaign:</span> {getCampaignName(coupon.campaign_id)}</p>
-                <p><span className="font-medium">Assigned to:</span> {coupon.assigned_to_user_id ? "Assigned" : "Unassigned"}</p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between py-2 border-b border-muted">
+                  <span className="text-sm text-muted-foreground">Campaign</span>
+                  <span className="text-sm font-medium truncate max-w-[120px] text-right">{getCampaignName(coupon.campaign_id)}</span>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b border-muted">
+                  <span className="text-sm text-muted-foreground">Status</span>
+                  <span className="text-sm">
+                    {coupon.assigned_to_user_id ? "Assigned" : "Unassigned"}
+                  </span>
+                </div>
                 {coupon.expires_at && (
-                  <p><span className="font-medium">Expires:</span> {new Date(coupon.expires_at).toLocaleDateString()}</p>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm text-muted-foreground">Expires</span>
+                    <span className="text-sm">
+                      {new Date(coupon.expires_at).toLocaleDateString()}
+                    </span>
+                  </div>
                 )}
               </div>
             </CardContent>

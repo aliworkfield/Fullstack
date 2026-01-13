@@ -69,15 +69,16 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold">Announcements</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Announcements</h1>
+          <p className="text-muted-foreground mt-1">Important updates and notifications</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           <select 
             value={selectedCategory} 
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="border rounded-md px-3 py-2 w-48"
+            className="border rounded-md px-3 py-2 text-sm min-w-[180px]"
           >
             <option value="all">All Categories</option>
             <option value="new">New</option>
@@ -85,12 +86,12 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
               <option key={`cat-opt-${category}`} value={category}>{category}</option>
             ))}
           </select>
-          <div className="relative w-64">
+          <div className="relative">
             <Input
               placeholder="Search announcements..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
+              className="pl-9 w-full sm:w-64"
             />
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           </div>
@@ -116,9 +117,21 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
                   key={`new-${announcement.id}`} 
                   to="/announcements/$id"
                   params={{ id: announcement.id }}
-                  className="border rounded-lg p-4 hover:bg-muted cursor-pointer"
+                  className="border rounded-lg p-5 hover:shadow-md transition-shadow cursor-pointer bg-card hover:bg-accent"
                 >
-                  <h3 className="font-semibold">{announcement.title}</h3>
+                  <div className="flex justify-between items-start gap-2">
+                    <h3 className="font-semibold text-lg truncate">{announcement.title}</h3>
+                    <Badge variant="secondary" className="text-xs">
+                      New
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                    {announcement.description}
+                  </p>
+                  <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
+                    <span>{new Date(announcement.created_date || '').toLocaleDateString()}</span>
+                    <span className="capitalize">{announcement.category}</span>
+                  </div>
                 </Link>
               ))}
             </div>
@@ -156,9 +169,23 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
                     key={`cat-${announcement.id}`} 
                     to="/announcements/$id"
                     params={{ id: announcement.id }}
-                    className="border rounded-lg p-4 hover:bg-muted cursor-pointer"
+                    className="border rounded-lg p-5 hover:shadow-md transition-shadow cursor-pointer bg-card hover:bg-accent"
                   >
-                    <h3 className="font-semibold">{announcement.title}</h3>
+                    <div className="flex justify-between items-start gap-2">
+                      <h3 className="font-semibold text-lg truncate">{announcement.title}</h3>
+                      {new Date(announcement.created_date || '') > tenDaysAgo && (
+                        <Badge variant="secondary" className="text-xs">
+                          New
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                      {announcement.description}
+                    </p>
+                    <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
+                      <span>{new Date(announcement.created_date || '').toLocaleDateString()}</span>
+                      <span className="capitalize">{announcement.category}</span>
+                    </div>
                   </Link>
                 ))}
               </div>

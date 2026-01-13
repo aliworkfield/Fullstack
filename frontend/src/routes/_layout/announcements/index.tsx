@@ -62,20 +62,19 @@ function Announcements() {
   const expiredAnnouncements = filterAnnouncements(allAnnouncements, "expired");
 
   if (isLoading) {
-    return <div>Kampanyalar Yükleniyor...</div>;
+    return <div>Loading announcements...</div>;
   }
 
   return (
     <SidebarProvider> 
       <AppSidebar />
-      <main className="flex flex-1 flex-col gap-4 p-4 pt-0 overflow-y-scroll">
+      <main className="flex flex-1 flex-col gap-6 p-6 pt-0 overflow-y-scroll bg-muted/10">
         <div className="flex-1 overflow-auto">
-          <div className='p-4'>
-            <div className="flex items-center justify-between mb-6">
+          <div className='max-w-7xl mx-auto w-full'>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <div>
-                <h1 className="text-3xl font-bold mb-6">Kurumsal İndirim Çalışmaları</h1>
-                {/* <h1 className='text-2xl font-bold'>Announcements</h1>
-                <p className='text-muted-foreground'>Broadcast important messages</p> */}
+                <h1 className='text-3xl font-bold tracking-tight'>Announcements</h1>
+                <p className='text-muted-foreground'>Broadcast important messages and updates</p>
               </div>
               {isManagerOrAdmin && (
                 <Button onClick={() => setIsCreateModalOpen(true)}>
@@ -83,9 +82,8 @@ function Announcements() {
                 </Button>
               )}
             </div>
-            <div className='rounded-md border'>
+            <div className='rounded-xl border bg-card shadow-sm'>
               <div className="p-6">
-
                 {isManagerOrAdmin ? (
                   <Tabs defaultValue="published" className="w-full">
                     <TabsList className="grid w-full grid-cols-3">

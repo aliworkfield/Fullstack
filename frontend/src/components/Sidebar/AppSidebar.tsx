@@ -8,6 +8,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarRail,
 } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
 import useRoles from "@/hooks/useRoles"
@@ -67,6 +68,7 @@ export function AppSidebar() {
         <SidebarAppearance />
         <User user={currentUser} />
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   )
 }

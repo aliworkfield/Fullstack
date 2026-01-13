@@ -11,16 +11,16 @@ function Campaigns() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <main className="flex flex-1 flex-col gap-6 p-6 pt-0 bg-muted/10">
         <div className="flex-1 overflow-auto">
-          <div className='p-4'>
-            <div className="flex items-center justify-between mb-6">
+          <div className='max-w-7xl mx-auto w-full'>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <div>
-                <h1 className='text-2xl font-bold'>Campaigns</h1>
+                <h1 className='text-3xl font-bold tracking-tight'>Campaigns</h1>
                 <p className='text-muted-foreground'>Manage your marketing campaigns</p>
               </div>
             </div>
-            <div className='rounded-md border'>
+            <div className='rounded-xl border bg-card shadow-sm'>
               <div className="p-6">
                 <CampaignsTable />
               </div>

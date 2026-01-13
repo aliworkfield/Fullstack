@@ -7,6 +7,12 @@ import iconLight from "/assets/images/fastapi-icon-light.svg"
 import logo from "/assets/images/fastapi-logo.svg"
 import logoLight from "/assets/images/fastapi-logo-light.svg"
 
+// Default to FastAPI branding - replace with your company's logo assets
+import companyLogo from "/assets/images/company-logo.svg"  // Add your company logo
+import companyLogoLight from "/assets/images/company-logo-light.svg"  // Add your company logo for light theme
+import companyIcon from "/assets/images/company-icon.svg"  // Add your company icon
+import companyIconLight from "/assets/images/company-icon-light.svg"  // Add your company icon for light theme
+
 interface LogoProps {
   variant?: "full" | "icon" | "responsive"
   className?: string
