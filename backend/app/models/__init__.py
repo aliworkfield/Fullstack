@@ -25,14 +25,6 @@ from .coupon import (
     CouponsPublic,
 )
 
-from .item import (
-    Item,
-    ItemBase,
-    ItemCreate,
-    ItemUpdate,
-    ItemPublic,
-    ItemsPublic,
-)
 from .announcement import (
     Announcement,
     AnnouncementBase,

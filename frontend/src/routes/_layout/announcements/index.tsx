@@ -40,13 +40,17 @@ function Announcements() {
   const filterAnnouncements = (announcements: app__models__announcement__AnnouncementPublic[], statusFilter?: string) => {
     return announcements.filter(announcement => {
       let matchesStatus = true;
+      const isExpired = announcement.expiry_date ? new Date(announcement.expiry_date) < new Date() : false;
+      
       if (statusFilter === "published") {
-        matchesStatus = announcement.is_published === true;
+        // Published and not expired
+        matchesStatus = announcement.is_published === true && !isExpired;
       } else if (statusFilter === "drafts") {
+        // Not published
         matchesStatus = announcement.is_published === false;
       } else if (statusFilter === "expired") {
-        // Check if announcement is expired based on expiry_date field if available
-        matchesStatus = announcement.expiry_date ? new Date(announcement.expiry_date) < new Date() : false;
+        // Published and expired
+        matchesStatus = announcement.is_published === true && isExpired;
       }
       
       return matchesStatus;
@@ -69,8 +73,9 @@ function Announcements() {
           <div className='p-4'>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h1 className='text-2xl font-bold'>Announcements</h1>
-                <p className='text-muted-foreground'>Broadcast important messages</p>
+                <h1 className="text-3xl font-bold mb-6">Kurumsal İndirim Çalışmaları</h1>
+                {/* <h1 className='text-2xl font-bold'>Announcements</h1>
+                <p className='text-muted-foreground'>Broadcast important messages</p> */}
               </div>
               {isManagerOrAdmin && (
                 <Button onClick={() => setIsCreateModalOpen(true)}>

@@ -13,15 +13,7 @@ from app.models import (
 from app.models import (
     Campaign, 
     Coupon, 
-    User,
-    Item
-)
-from app.schemas import (
-    CampaignCreate,
-    CouponCreate,
-    UserCreate,
-    UserUpdate,
-    ItemCreate
+    User
 )
 
 
@@ -58,37 +50,6 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     # In Keycloak-only mode, we assume authentication was handled by Keycloak
     # and the user is valid
     return user
-
-
-def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -> Item:
-    item = Item.model_validate(item_in, update={"owner_id": owner_id})
-    session.add(item)
-    session.commit()
-    session.refresh(item)
-    return item
-
-
-def get_item(*, session: Session, item_id: uuid.UUID) -> Item | None:
-    return session.get(Item, item_id)
-
-
-def get_items(*, session: Session, owner_id: uuid.UUID, skip: int = 0, limit: int = 100) -> list[Item]:
-    statement = select(Item).where(Item.owner_id == owner_id).offset(skip).limit(limit)
-    return session.exec(statement).all()
-
-
-def update_item(*, session: Session, item: Item, item_in: ItemCreate) -> Item:
-    item_data = item_in.model_dump(exclude_unset=True)
-    item.sqlmodel_update(item_data)
-    session.add(item)
-    session.commit()
-    session.refresh(item)
-    return item
-
-
-def delete_item(*, session: Session, item: Item) -> None:
-    session.delete(item)
-    session.commit()
 
 
 # Campaign CRUD operations
