@@ -43,15 +43,6 @@ export type app__models__announcement__AnnouncementUpdate = {
     expiry_date?: (string | null);
 };
 
-export type app__models__user__UserPublic = {
-    email: string;
-    is_active?: boolean;
-    is_superuser?: boolean;
-    full_name?: (string | null);
-    keycloak_user_id?: (string | null);
-    id: string;
-};
-
 export type app__schemas__announcement__AnnouncementCreate = {
     title: string;
     description?: (string | null);
@@ -86,13 +77,8 @@ export type app__schemas__announcement__AnnouncementUpdate = {
     expires_at?: (string | null);
 };
 
-export type app__schemas__user__UserPublic = {
-    email: string;
-    is_active?: boolean;
-    is_superuser?: boolean;
-    full_name?: (string | null);
-    keycloak_user_id?: (string | null);
-    id: number;
+export type Body_admin_coupons_upload_coupons_from_excel = {
+    file: (Blob | File);
 };
 
 export type CampaignCreate = {
@@ -121,9 +107,9 @@ export type CampaignsPublic = {
 export type CampaignUpdate = {
     title?: (string | null);
     description?: (string | null);
-    start_date?: (string | null);
-    end_date?: (string | null);
-    active?: (boolean | null);
+    start_date: string;
+    end_date: string;
+    active?: boolean;
 };
 
 export type CouponCreate = {
@@ -131,7 +117,7 @@ export type CouponCreate = {
     discount_type: string;
     discount_value: number;
     campaign_id?: (string | null);
-    assigned_user_id?: (string | null);
+    assigned_to_user_id?: (string | null);
     redeemed?: boolean;
     redeemed_at?: (string | null);
     expires_at?: (string | null);
@@ -142,7 +128,7 @@ export type CouponPublic = {
     discount_type: string;
     discount_value: number;
     campaign_id?: (string | null);
-    assigned_user_id?: (string | null);
+    assigned_to_user_id?: (string | null);
     redeemed?: boolean;
     redeemed_at?: (string | null);
     expires_at?: (string | null);
@@ -160,7 +146,7 @@ export type CouponUpdate = {
     discount_type?: (string | null);
     discount_value?: (number | null);
     campaign_id?: (string | null);
-    assigned_user_id?: (string | null);
+    assigned_to_user_id?: (string | null);
     redeemed?: (boolean | null);
     redeemed_at?: (string | null);
     expires_at?: (string | null);
@@ -210,6 +196,15 @@ export type UserCreate = {
     keycloak_user_id?: (string | null);
 };
 
+export type UserPublic = {
+    email: string;
+    is_active?: boolean;
+    is_superuser?: boolean;
+    full_name?: (string | null);
+    keycloak_user_id?: (string | null);
+    id: string;
+};
+
 export type UserRegister = {
     email: string;
     password: string;
@@ -217,7 +212,7 @@ export type UserRegister = {
 };
 
 export type UsersPublic = {
-    data: Array<app__schemas__user__UserPublic>;
+    data: Array<UserPublic>;
     count: number;
 };
 
@@ -323,6 +318,15 @@ export type AdminCampaignsDeleteCampaignResponse = ({
     [key: string]: unknown;
 });
 
+export type AdminCouponsUploadCouponsFromExcelData = {
+    campaignId: string;
+    formData: Body_admin_coupons_upload_coupons_from_excel;
+};
+
+export type AdminCouponsUploadCouponsFromExcelResponse = ({
+    [key: string]: unknown;
+});
+
 export type AdminCouponsGetUserCouponForCampaignData = {
     campaignId: string;
     userId: string;
@@ -333,7 +337,7 @@ export type AdminCouponsGetUserCouponForCampaignResponse = ({
 });
 
 export type AdminCouponsGetAllCouponsData = {
-    assignedUserId?: (string | null);
+    assignedToUserId?: (string | null);
     campaignId?: (string | null);
     category?: (string | null);
     limit?: number;
@@ -541,17 +545,15 @@ export type PrivateCreateUserData = {
     requestBody: PrivateUserCreate;
 };
 
-export type PrivateCreateUserResponse = (app__models__user__UserPublic);
+export type PrivateCreateUserResponse = (UserPublic);
 
-export type UserCouponsGetMyCouponsResponse = ({
-    [key: string]: unknown;
-});
+export type UserCouponsGetMyCouponsResponse = (CouponsPublic);
 
-export type UserCouponsGetCouponData = {
-    couponId: string;
+export type UserCouponsGetMyCouponForCampaignData = {
+    campaignId: string;
 };
 
-export type UserCouponsGetCouponResponse = ({
+export type UserCouponsGetMyCouponForCampaignResponse = ({
     [key: string]: unknown;
 });
 
@@ -563,13 +565,11 @@ export type UserCouponsRedeemCouponResponse = ({
     [key: string]: unknown;
 });
 
-export type UserCouponsGetMyCouponForCampaignData = {
-    campaignId: string;
+export type UserCouponsGetCouponData = {
+    couponId: string;
 };
 
-export type UserCouponsGetMyCouponForCampaignResponse = ({
-    [key: string]: unknown;
-});
+export type UserCouponsGetCouponResponse = (CouponPublic);
 
 export type UsersReadUsersData = {
     limit?: number;
@@ -582,9 +582,9 @@ export type UsersCreateUserData = {
     requestBody: UserCreate;
 };
 
-export type UsersCreateUserResponse = (app__models__user__UserPublic);
+export type UsersCreateUserResponse = (UserPublic);
 
-export type UsersReadUserMeResponse = (app__models__user__UserPublic);
+export type UsersReadUserMeResponse = (UserPublic);
 
 export type UsersDeleteUserMeResponse = (Message);
 
@@ -592,26 +592,26 @@ export type UsersUpdateUserMeData = {
     requestBody: UserUpdateMe;
 };
 
-export type UsersUpdateUserMeResponse = (app__models__user__UserPublic);
+export type UsersUpdateUserMeResponse = (UserPublic);
 
 export type UsersRegisterUserData = {
     requestBody: UserRegister;
 };
 
-export type UsersRegisterUserResponse = (app__models__user__UserPublic);
+export type UsersRegisterUserResponse = (UserPublic);
 
 export type UsersReadUserByIdData = {
     userId: string;
 };
 
-export type UsersReadUserByIdResponse = (app__models__user__UserPublic);
+export type UsersReadUserByIdResponse = (UserPublic);
 
 export type UsersUpdateUserData = {
     requestBody: UserUpdate;
     userId: string;
 };
 
-export type UsersUpdateUserResponse = (app__models__user__UserPublic);
+export type UsersUpdateUserResponse = (UserPublic);
 
 export type UsersDeleteUserData = {
     userId: string;

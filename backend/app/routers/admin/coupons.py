@@ -382,6 +382,44 @@ def assign_campaign_to_all_users(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.post("/assign/{coupon_id}/user/{user_id}", response_model=dict, dependencies=[require_role(["admin", "manager"])])
+def assign_coupon_to_user(
+    coupon_id: uuid.UUID,
+    user_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_db)
+):
+    """Assign specific coupon to specific user"""
+    try:
+        service = CouponService(session)
+        coupon = service.assign_coupon_to_user(coupon_id, user_id)
+        return {"coupon": coupon, "message": "Coupon assigned successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.put("/unassign/{coupon_id}", response_model=dict, dependencies=[require_role(["admin", "manager"])])
+def unassign_coupon_from_user(
+    coupon_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_db)
+):
+    """Unassign coupon from user"""
+    try:
+        service = CouponService(session)
+        coupon = service.unassign_coupon_from_user(coupon_id)
+        
+        return {"coupon": coupon, "message": "Coupon unassigned successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/unassigned/{campaign_id}", response_model=dict, dependencies=[require_role(["admin", "manager"])])
 def get_unassigned_coupons(
     campaign_id: uuid.UUID,

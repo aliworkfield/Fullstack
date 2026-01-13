@@ -63,12 +63,20 @@ class CouponService:
         # Get all users
         users = self.session.exec(select(User)).all()
         
+        # Check if there are users to assign to
+        if not users:
+            return 0  # No users to assign to
+        
         # Get unassigned coupons for campaign
         statement = select(Coupon).where(
             Coupon.campaign_id == campaign_id,
             Coupon.assigned_to_user_id.is_(None)
         )
         coupons = self.session.exec(statement).all()
+        
+        # Check if there are coupons to assign
+        if not coupons:
+            return 0  # No coupons to assign
         
         # Assign coupons to users in round-robin fashion
         assigned_count = 0
@@ -84,6 +92,11 @@ class CouponService:
             user_index += 1
         
         self.session.commit()
+        
+        # Refresh objects to ensure they reflect the changes
+        for coupon in coupons:
+            self.session.refresh(coupon)
+        
         return assigned_count
 
     def assign_coupon_to_user(self, coupon_id: uuid.UUID, user_id: uuid.UUID) -> Coupon:
@@ -210,3 +223,31 @@ class CouponService:
             Coupon.assigned_to_user_id.is_(None)
         )
         return self.session.exec(statement).all()
+
+    def unassign_coupon_from_user(self, coupon_id: uuid.UUID) -> Coupon:
+        """
+        Unassign coupon from user
+        
+        Args:
+            coupon_id: ID of the coupon
+            
+        Returns:
+            Updated coupon
+        """
+        # Get coupon
+        coupon = self.session.get(Coupon, coupon_id)
+        if not coupon:
+            raise ValueError("Coupon not found")
+        
+        # Check if coupon is currently assigned
+        if coupon.assigned_to_user_id is None:
+            raise ValueError("Coupon is not assigned to any user")
+        
+        # Unassign the coupon by setting assigned_to_user_id to None
+        coupon.assigned_to_user_id = None
+        
+        self.session.add(coupon)
+        self.session.commit()
+        self.session.refresh(coupon)
+        
+        return coupon

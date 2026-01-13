@@ -38,6 +38,12 @@ export function AdminRoute() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  // Map users to have string IDs to match the expected type
+  const mappedUsers = users.map((user: { id: string | number; [key: string]: any }) => ({
+    ...user,
+    id: user.id.toString()
+  }));
+
   // Fetch announcements for both admin and manager
   const { data: announcements = [] } = useQuery({
     queryKey: ["announcements"],
@@ -57,18 +63,12 @@ export function AdminRoute() {
 
   // Group announcements by category
   const groupedAnnouncements: Record<string, app__models__announcement__AnnouncementPublic[]> = {};
-  announcements.forEach((announcement: app__models__announcement__AnnouncementPublic) => {
+  (announcements as app__models__announcement__AnnouncementPublic[]).forEach((announcement: app__models__announcement__AnnouncementPublic) => {
     if (!groupedAnnouncements[announcement.category]) {
       groupedAnnouncements[announcement.category] = [];
     }
     groupedAnnouncements[announcement.category].push(announcement);
   });
-
-  // Map users to have string IDs to match the expected type
-  const mappedUsers = users.map(user => ({
-    ...user,
-    id: user.id.toString()
-  }));
 
   if (rolesLoading) {
     return <div>Loading...</div>;

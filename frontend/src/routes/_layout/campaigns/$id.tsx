@@ -19,10 +19,9 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { DataTable } from '@/components/Common/DataTable';
-import { couponColumns } from './couponColumns';
-import { announcementColumns } from './announcementColumns';
-import { CouponPublic } from '@/client';
-import { app__schemas__user__UserPublic } from '@/client';
+import { ColumnDef } from "@tanstack/react-table";
+import { ArrowUpDown } from "lucide-react";
+import { CouponPublic, UserPublic } from '@/client';
 import { CampaignUpdate } from '@/client';
 import keycloak from '@/keycloak';
 
@@ -39,6 +38,7 @@ function CampaignDetail() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [isAutoAssigning, setIsAutoAssigning] = useState(false);
+  const [isUnassigning, setIsUnassigning] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch campaign data
@@ -96,10 +96,169 @@ function CampaignDetail() {
   const announcements = (announcementsData as any)?.data || [];
   const users = usersData?.data || [];
 
+  // Create a user map for quick lookup
+  const userMap = new Map<string, UserPublic>();
+  users.forEach((user: UserPublic) => {
+    userMap.set(user.id.toString(), user);
+  });
+
+  // Define coupon columns with user names
+  const couponColumns: ColumnDef<CouponPublic>[] = [
+    {
+      accessorKey: "code",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Code
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
+    },
+    {
+      accessorKey: "discount_type",
+      header: "Discount Type",
+    },
+    {
+      accessorKey: "discount_value",
+      header: "Discount Value",
+      cell: ({ row }) => {
+        const value = parseFloat(row.getValue("discount_value"));
+        return `${value}${row.getValue("discount_type") === "percentage" ? "%" : ""}`;
+      },
+    },
+    {
+      accessorKey: "assigned_to_user_id",
+      header: "Assigned User",
+      cell: ({ row }) => {
+        const userId = row.getValue("assigned_to_user_id") as string | null;
+        if (!userId) {
+          return "Unassigned";
+        }
+        
+        const user = userMap.get(userId);
+        return user ? user.full_name || user.email : "User not found";
+      },
+    },
+    {
+      accessorKey: "redeemed",
+      header: "Status",
+      cell: ({ row }) => {
+        const isRedeemed = row.getValue("redeemed") as boolean;
+        const isAssigned = row.getValue("assigned_to_user_id") as string | null;
+        
+        let statusText = "Unassigned";
+        let statusClass = "bg-gray-100 text-gray-800";
+        
+        if (isAssigned) {
+          if (isRedeemed) {
+            statusText = "Redeemed";
+            statusClass = "bg-red-100 text-red-800";
+          } else {
+            statusText = "Assigned";
+            statusClass = "bg-green-100 text-green-800";
+          }
+        }
+        
+        return (
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClass}`}>
+            {statusText}
+          </span>
+        );
+      },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => {
+        const coupon = row.original;
+        const isAssigned = !!coupon.assigned_to_user_id;
+        
+        return (
+          <div className="flex gap-2">
+            {isAssigned && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleUnassignCoupon(coupon.id)}
+                disabled={isUnassigning}
+              >
+                {isUnassigning ? "Unassigning..." : "Unassign"}
+              </Button>
+            )}
+          </div>
+        );
+      },
+    },
+  ];
+
+  // Define announcement columns
+  const announcementColumns: ColumnDef<any>[] = [
+    {
+      accessorKey: "title",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Title
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
+    },
+    {
+      accessorKey: "category",
+      header: "Category",
+    },
+    {
+      accessorKey: "is_published",
+      header: "Status",
+      cell: ({ row }) => {
+        const isPublished = row.getValue("is_published") as boolean;
+        const expiryDate = row.getValue("expiry_date") as string | null;
+        
+        let statusText = "Draft";
+        let statusClass = "bg-yellow-100 text-yellow-800";
+        
+        if (isPublished) {
+          const now = new Date();
+          const expiry = expiryDate ? new Date(expiryDate) : null;
+          
+          if (expiry && now > expiry) {
+            statusText = "Expired";
+            statusClass = "bg-red-100 text-red-800";
+          } else {
+            statusText = "Published";
+            statusClass = "bg-green-100 text-green-800";
+          }
+        }
+        
+        return (
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClass}`}>
+            {statusText}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "created_date",
+      header: "Created Date",
+      cell: ({ row }) => {
+        const date = row.getValue("created_date") as string;
+        return date ? new Date(date).toLocaleDateString() : "N/A";
+      },
+    },
+  ];
+
   const stats = {
     total: coupons.length,
-    assigned: coupons.filter((c: CouponPublic) => c.assigned_user_id).length,
-    unassigned: coupons.filter((c: CouponPublic) => !c.assigned_user_id).length,
+    assigned: coupons.filter((c: CouponPublic) => c.assigned_to_user_id).length,
+    unassigned: coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length,
     redeemed: coupons.filter((c: CouponPublic) => c.redeemed).length,
   };
 
@@ -188,7 +347,7 @@ function CampaignDetail() {
     }
 
     try {
-      // Call the API to assign the coupon to the user
+      // Call the API to assign the coupon to the user using the generated client
       await AdminCouponsService.assignCouponToUser({
         couponId: selectedCouponId,
         userId: selectedUserId
@@ -219,6 +378,43 @@ function CampaignDetail() {
     }
   };
 
+  // Unassign coupon from user
+  const handleUnassignCoupon = async (couponId: string) => {
+    setIsUnassigning(true);
+    try {
+      // Call the API to unassign the coupon from the user using fetch
+      let token = keycloak.token;
+      if (!token || keycloak.isTokenExpired()) {
+        const refreshed = await keycloak.updateToken(5);
+        if (!refreshed) {
+          throw new Error('Failed to refresh authentication token');
+        }
+        token = keycloak.token;
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/admin/coupons/unassign/${couponId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to unassign coupon');
+      }
+
+      toast.success('Coupon unassigned successfully');
+      refetchCoupons();
+    } catch (error) {
+      console.error('Error unassigning coupon:', error);
+      toast.error('Failed to unassign coupon');
+    } finally {
+      setIsUnassigning(false);
+    }
+  };
+
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateCampaignMutation.mutate(editFormData);
@@ -233,7 +429,6 @@ function CampaignDetail() {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-
 
 
   // Update editFormData when campaign changes to ensure form is pre-populated
@@ -516,7 +711,7 @@ function CampaignDetail() {
                     >
                       <option value="">Select a coupon</option>
                       {coupons
-                        .filter((coupon: CouponPublic) => !coupon.assigned_user_id)
+                        .filter((coupon: CouponPublic) => !coupon.assigned_to_user_id)
                         .map((coupon: CouponPublic) => (
                           <option key={coupon.id} value={coupon.id}>
                             {coupon.code} ({coupon.discount_value} {coupon.discount_type})
@@ -533,7 +728,7 @@ function CampaignDetail() {
                       onChange={(e) => setSelectedUserId(e.target.value)}
                     >
                       <option value="">Select a user</option>
-                      {users.map((user: app__schemas__user__UserPublic) => (
+                      {users.map((user: UserPublic) => (
                         <option key={user.id} value={user.id}>
                           {user.email} ({user.full_name})
                         </option>

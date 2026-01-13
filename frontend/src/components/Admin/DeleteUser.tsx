@@ -7,63 +7,36 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
-import { app__models__user__UserPublic as UserPublic } from "@/client";
-import { UsersService } from "@/client";
+import { UserPublic } from "@/client";
 
 interface DeleteUserProps {
-  open: boolean;
-  onClose: () => void;
   user: UserPublic;
-  onSuccess?: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onDelete: (userId: string) => void;
+  isDeleting: boolean;
 }
 
-export function DeleteUser({ open, onClose, user, onSuccess }: DeleteUserProps) {
-  const queryClient = useQueryClient();
-  
-  const mutation = useMutation({
-    mutationFn: (id: string) => 
-      UsersService.deleteUser({ userId: id }),
-    onSuccess: () => {
-      toast.success("User deleted successfully");
-      onClose();
-      onSuccess?.();
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-    },
-    onError: (error: any) => {
-      console.error("Error deleting user:", error);
-      toast.error(
-        error?.response?.data?.detail || 
-        error?.data?.detail || 
-        "Failed to delete user"
-      );
-    },
-  });
-
+export function DeleteUser({ user, open, onOpenChange, onDelete, isDeleting }: DeleteUserProps) {
   const handleDelete = () => {
-    mutation.mutate(user.id);
+    onDelete(user.id);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogTitle>Confirm Deletion</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete user "{user.email}"? This action cannot be undone.
+            Are you sure you want to delete user <strong>{user.email}</strong>? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button 
-            variant="destructive" 
-            onClick={handleDelete} 
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? "Deleting..." : "Delete"}
+          <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+            {isDeleting ? "Deleting..." : "Delete"}
           </Button>
         </DialogFooter>
       </DialogContent>

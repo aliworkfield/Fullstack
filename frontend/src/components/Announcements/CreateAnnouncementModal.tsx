@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { app__models__announcement__AnnouncementCreate, app__models__announcement__AnnouncementPublic, AnnouncementsService } from "@/client";
+import { app__models__announcement__AnnouncementCreate, app__models__announcement__AnnouncementPublic, CampaignPublic, AnnouncementsService, CampaignsService } from "@/client";
 import useCustomToast from "@/hooks/useCustomToast";
 import { handleError } from "@/utils";
 import { useEffect } from "react";
@@ -73,6 +73,19 @@ export function CreateAnnouncementModal({
   const queryClient = useQueryClient();
   const { showSuccessToast, showErrorToast } = useCustomToast();
 
+  // Fetch campaigns for the dropdown
+  const { data: campaigns = [], isLoading: campaignsLoading } = useQuery({
+    queryKey: ["campaigns"],
+    queryFn: async () => {
+      const response = await CampaignsService.readCampaigns({
+        skip: 0,
+        limit: 100,
+      });
+      return response.data || [];
+    },
+    enabled: open, // Only fetch when modal is open
+  });
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -80,7 +93,7 @@ export function CreateAnnouncementModal({
       description: "",
       category: "",
       requires_coupon: false,
-      campaign_id: "",
+      campaign_id: "none", // Use "none" as default instead of empty string
       is_published: false,
       expiry_date: "",
     },
@@ -94,7 +107,7 @@ export function CreateAnnouncementModal({
         description: announcement.description || "",
         category: announcement.category || "",
         requires_coupon: Boolean(announcement.requires_coupon),
-        campaign_id: announcement.campaign_id ? announcement.campaign_id.toString() : "",
+        campaign_id: announcement.campaign_id ? announcement.campaign_id.toString() : "none",
         is_published: Boolean(announcement.is_published),
         expiry_date: announcement.expiry_date || "",
       });
@@ -104,7 +117,7 @@ export function CreateAnnouncementModal({
         description: "",
         category: "",
         requires_coupon: false,
-        campaign_id: "",
+        campaign_id: "none",
         is_published: false,
         expiry_date: "",
       });
@@ -132,7 +145,7 @@ export function CreateAnnouncementModal({
   const onSubmit = (data: FormData) => {
     const announcementData: app__models__announcement__AnnouncementCreate = {
       ...data,
-      campaign_id: data.campaign_id ? data.campaign_id : null,
+      campaign_id: data.campaign_id && data.campaign_id !== "none" ? data.campaign_id : null,
       expiry_date: data.expiry_date || null,
     };
     mutation.mutate(announcementData);
@@ -231,14 +244,26 @@ export function CreateAnnouncementModal({
                 name="campaign_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Campaign ID</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="text" 
-                        placeholder="Enter campaign ID (UUID)" 
-                        {...field} 
-                      />
-                    </FormControl>
+                    <FormLabel>Campaign</FormLabel>
+                    {campaignsLoading ? (
+                      <div className="text-muted-foreground">Loading campaigns...</div>
+                    ) : (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a campaign (optional)" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">No campaign</SelectItem>
+                          {campaigns.map((campaign: CampaignPublic) => (
+                            <SelectItem key={campaign.id} value={campaign.id}>
+                              {campaign.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}

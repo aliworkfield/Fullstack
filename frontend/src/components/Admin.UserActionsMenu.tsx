@@ -9,6 +9,7 @@ import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { EditUser } from "./Admin/EditUser";
 import { DeleteUser } from "./Admin/DeleteUser";
+import { UsersService } from "@/client";
 
 interface User {
   id: string;
@@ -23,6 +24,7 @@ interface UserActionsMenuProps {
 
 export function UserActionsMenu({ user, onEditSuccess }: UserActionsMenuProps) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleEditSuccess = () => {
     onEditSuccess?.();
@@ -30,6 +32,17 @@ export function UserActionsMenu({ user, onEditSuccess }: UserActionsMenuProps) {
 
   const handleDeleteSuccess = () => {
     setIsDeleteModalOpen(false);
+  };
+
+  const handleDelete = async (userId: string) => {
+    setIsDeleting(true);
+    try {
+      // Call the API to delete the user
+      await UsersService.deleteUser({ userId });
+      handleDeleteSuccess();
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -58,9 +71,10 @@ export function UserActionsMenu({ user, onEditSuccess }: UserActionsMenuProps) {
       />
       <DeleteUser
         open={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
+        onOpenChange={setIsDeleteModalOpen}
         user={user}
-        onSuccess={handleDeleteSuccess}
+        onDelete={handleDelete}
+        isDeleting={isDeleting}
       />
     </>
   );

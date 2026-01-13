@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { UsersService } from "@/client";
+import { UsersService, OpenAPI } from "@/client";
 import keycloak from "@/keycloak";
 
 // Define UserPublic type to match backend schema
@@ -13,9 +13,16 @@ export type UserPublic = {
 };
 
 export default function useAuth() {
-  const { data: user, isLoading, isError, error, refetch } = useQuery<UserPublic>({
+  const { data: user, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
+      // Configure OpenAPI with the current token before making the request
+      if (keycloak.authenticated && keycloak.token) {
+        OpenAPI.HEADERS = {
+          'Authorization': `Bearer ${keycloak.token}`
+        };
+      }
+      
       const response = await UsersService.readUserMe();
       return response as UserPublic;
     },

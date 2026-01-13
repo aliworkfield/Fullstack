@@ -9,30 +9,46 @@ import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { EditUser } from "./EditUser";
 import { DeleteUser } from "./DeleteUser";
-
-interface User {
-  id: string;
-  email: string;
-  full_name: string | null;
-}
+import { UserPublic, UsersService } from "@/client";
 
 interface UserActionsMenuProps {
-  user: User;
+  user: UserPublic;
   onEditSuccess?: () => void;
 }
 
 export function UserActionsMenu({ user, onEditSuccess }: UserActionsMenuProps) {
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleEditSuccess = () => {
-    setIsEditModalOpen(false);
     onEditSuccess?.();
   };
 
   const handleDeleteSuccess = () => {
     setIsDeleteModalOpen(false);
   };
+
+  const handleDelete = async (userId: string) => {
+    setIsDeleting(true);
+    try {
+      // Call the API to delete the user
+      await UsersService.deleteUser({ userId });
+      handleDeleteSuccess();
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Render DeleteUser modal if needed
+  const deleteUserModal = isDeleteModalOpen ? (
+    <DeleteUser
+      open={isDeleteModalOpen}
+      onOpenChange={setIsDeleteModalOpen}
+      user={user}
+      onDelete={handleDelete}
+      isDeleting={isDeleting}
+    />
+  ) : null;
 
   return (
     <>
@@ -44,11 +60,10 @@ export function UserActionsMenu({ user, onEditSuccess }: UserActionsMenuProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={() => setIsEditModalOpen(true)}
-          >
-            Edit
-          </DropdownMenuItem>
+          <EditUser
+            user={user}
+            onSuccess={handleEditSuccess}
+          />
           <DropdownMenuItem
             onClick={() => setIsDeleteModalOpen(true)}
           >
@@ -56,18 +71,7 @@ export function UserActionsMenu({ user, onEditSuccess }: UserActionsMenuProps) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <EditUser
-        open={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        user={user}
-        onSuccess={handleEditSuccess}
-      />
-      <DeleteUser
-        open={isDeleteModalOpen}
-        onClose={() => setIsDeleteModalOpen(false)}
-        user={user}
-        onSuccess={handleDeleteSuccess}
-      />
+      {deleteUserModal}
     </>
   );
 }

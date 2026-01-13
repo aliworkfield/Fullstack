@@ -1,10 +1,11 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
-import { app__models__user__UserPublic } from "@/client";
+
+import { Button } from "@/components/ui/button";
+import { UserPublic } from "@/client";
 import { UserActionsMenu } from "./UserActionsMenu";
 
-export const columns: ColumnDef<app__models__user__UserPublic>[] = [
+export const columns: ColumnDef<UserPublic>[] = [
   {
     accessorKey: "email",
     header: ({ column }) => {

@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { AdminAnnouncementsAnnouncementsOptionsResponse, AdminAnnouncementsGetAllAnnouncementsData, AdminAnnouncementsGetAllAnnouncementsResponse, AdminAnnouncementsCreateAnnouncementData, AdminAnnouncementsCreateAnnouncementResponse, AdminAnnouncementsAnnouncementItemOptionsResponse, AdminAnnouncementsGetAnnouncementByIdData, AdminAnnouncementsGetAnnouncementByIdResponse, AdminAnnouncementsUpdateAnnouncementData, AdminAnnouncementsUpdateAnnouncementResponse, AdminAnnouncementsDeleteAnnouncementData, AdminAnnouncementsDeleteAnnouncementResponse, AdminCampaignsGetAllCampaignsData, AdminCampaignsGetAllCampaignsResponse, AdminCampaignsCreateCampaignData, AdminCampaignsCreateCampaignResponse, AdminCampaignsGetCampaignData, AdminCampaignsGetCampaignResponse, AdminCampaignsUpdateCampaignData, AdminCampaignsUpdateCampaignResponse, AdminCampaignsDeleteCampaignData, AdminCampaignsDeleteCampaignResponse, AdminCouponsGetUserCouponForCampaignData, AdminCouponsGetUserCouponForCampaignResponse, AdminCouponsGetAllCouponsData, AdminCouponsGetAllCouponsResponse, AdminCouponsCreateCouponData, AdminCouponsCreateCouponResponse, AdminCouponsGetCouponData, AdminCouponsGetCouponResponse, AdminCouponsUpdateCouponData, AdminCouponsUpdateCouponResponse, AdminCouponsDeleteCouponData, AdminCouponsDeleteCouponResponse, AdminCouponsGenerateCouponsData, AdminCouponsGenerateCouponsResponse, AdminCouponsAssignCampaignToAllUsersData, AdminCouponsAssignCampaignToAllUsersResponse, AdminCouponsAssignCouponToUserData, AdminCouponsAssignCouponToUserResponse, AdminCouponsGetUnassignedCouponsData, AdminCouponsGetUnassignedCouponsResponse, AdminCouponsGetCampaignCouponStatsData, AdminCouponsGetCampaignCouponStatsResponse, AnnouncementsAnnouncementsOptionsResponse, AnnouncementsCreateAnnouncementEndpointData, AnnouncementsCreateAnnouncementEndpointResponse, AnnouncementsReadAnnouncementsData, AnnouncementsReadAnnouncementsResponse, AnnouncementsReadPublishedAnnouncementsData, AnnouncementsReadPublishedAnnouncementsResponse, AnnouncementsReadAnnouncementData, AnnouncementsReadAnnouncementResponse, AnnouncementsUpdateAnnouncementEndpointData, AnnouncementsUpdateAnnouncementEndpointResponse, AnnouncementsDeleteAnnouncementEndpointData, AnnouncementsDeleteAnnouncementEndpointResponse, CampaignsCreateCampaignEndpointData, CampaignsCreateCampaignEndpointResponse, CampaignsReadCampaignsData, CampaignsReadCampaignsResponse, CampaignsReadCampaignData, CampaignsReadCampaignResponse, CampaignsUpdateCampaignEndpointData, CampaignsUpdateCampaignEndpointResponse, CampaignsDeleteCampaignEndpointData, CampaignsDeleteCampaignEndpointResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, PrivateCreateUserData, PrivateCreateUserResponse, UserCouponsGetMyCouponsResponse, UserCouponsGetCouponData, UserCouponsGetCouponResponse, UserCouponsRedeemCouponData, UserCouponsRedeemCouponResponse, UserCouponsGetMyCouponForCampaignData, UserCouponsGetMyCouponForCampaignResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
+import type { AdminAnnouncementsAnnouncementsOptionsResponse, AdminAnnouncementsGetAllAnnouncementsData, AdminAnnouncementsGetAllAnnouncementsResponse, AdminAnnouncementsCreateAnnouncementData, AdminAnnouncementsCreateAnnouncementResponse, AdminAnnouncementsAnnouncementItemOptionsResponse, AdminAnnouncementsGetAnnouncementByIdData, AdminAnnouncementsGetAnnouncementByIdResponse, AdminAnnouncementsUpdateAnnouncementData, AdminAnnouncementsUpdateAnnouncementResponse, AdminAnnouncementsDeleteAnnouncementData, AdminAnnouncementsDeleteAnnouncementResponse, AdminCampaignsGetAllCampaignsData, AdminCampaignsGetAllCampaignsResponse, AdminCampaignsCreateCampaignData, AdminCampaignsCreateCampaignResponse, AdminCampaignsGetCampaignData, AdminCampaignsGetCampaignResponse, AdminCampaignsUpdateCampaignData, AdminCampaignsUpdateCampaignResponse, AdminCampaignsDeleteCampaignData, AdminCampaignsDeleteCampaignResponse, AdminCouponsUploadCouponsFromExcelData, AdminCouponsUploadCouponsFromExcelResponse, AdminCouponsGetUserCouponForCampaignData, AdminCouponsGetUserCouponForCampaignResponse, AdminCouponsGetAllCouponsData, AdminCouponsGetAllCouponsResponse, AdminCouponsCreateCouponData, AdminCouponsCreateCouponResponse, AdminCouponsGetCouponData, AdminCouponsGetCouponResponse, AdminCouponsUpdateCouponData, AdminCouponsUpdateCouponResponse, AdminCouponsDeleteCouponData, AdminCouponsDeleteCouponResponse, AdminCouponsGenerateCouponsData, AdminCouponsGenerateCouponsResponse, AdminCouponsAssignCampaignToAllUsersData, AdminCouponsAssignCampaignToAllUsersResponse, AdminCouponsAssignCouponToUserData, AdminCouponsAssignCouponToUserResponse, AdminCouponsGetUnassignedCouponsData, AdminCouponsGetUnassignedCouponsResponse, AdminCouponsGetCampaignCouponStatsData, AdminCouponsGetCampaignCouponStatsResponse, AnnouncementsAnnouncementsOptionsResponse, AnnouncementsCreateAnnouncementEndpointData, AnnouncementsCreateAnnouncementEndpointResponse, AnnouncementsReadAnnouncementsData, AnnouncementsReadAnnouncementsResponse, AnnouncementsReadPublishedAnnouncementsData, AnnouncementsReadPublishedAnnouncementsResponse, AnnouncementsReadAnnouncementData, AnnouncementsReadAnnouncementResponse, AnnouncementsUpdateAnnouncementEndpointData, AnnouncementsUpdateAnnouncementEndpointResponse, AnnouncementsDeleteAnnouncementEndpointData, AnnouncementsDeleteAnnouncementEndpointResponse, CampaignsCreateCampaignEndpointData, CampaignsCreateCampaignEndpointResponse, CampaignsReadCampaignsData, CampaignsReadCampaignsResponse, CampaignsReadCampaignData, CampaignsReadCampaignResponse, CampaignsUpdateCampaignEndpointData, CampaignsUpdateCampaignEndpointResponse, CampaignsDeleteCampaignEndpointData, CampaignsDeleteCampaignEndpointResponse, ItemsReadItemsData, ItemsReadItemsResponse, ItemsCreateItemData, ItemsCreateItemResponse, ItemsReadItemData, ItemsReadItemResponse, ItemsUpdateItemData, ItemsUpdateItemResponse, ItemsDeleteItemData, ItemsDeleteItemResponse, PrivateCreateUserData, PrivateCreateUserResponse, UserCouponsGetMyCouponsResponse, UserCouponsGetMyCouponForCampaignData, UserCouponsGetMyCouponForCampaignResponse, UserCouponsRedeemCouponData, UserCouponsRedeemCouponResponse, UserCouponsGetCouponData, UserCouponsGetCouponResponse, UsersReadUsersData, UsersReadUsersResponse, UsersCreateUserData, UsersCreateUserResponse, UsersReadUserMeResponse, UsersDeleteUserMeResponse, UsersUpdateUserMeData, UsersUpdateUserMeResponse, UsersRegisterUserData, UsersRegisterUserResponse, UsersReadUserByIdData, UsersReadUserByIdResponse, UsersUpdateUserData, UsersUpdateUserResponse, UsersDeleteUserData, UsersDeleteUserResponse, UtilsTestEmailData, UtilsTestEmailResponse, UtilsHealthCheckResponse } from './types.gen';
 
 export class AdminAnnouncementsService {
     /**
@@ -190,7 +190,7 @@ export class AdminCampaignsService {
     
     /**
      * Get Campaign
-     * Get a specific campaign with coupon statistics
+     * Get a specific campaign by ID
      * @param data The data for the request.
      * @param data.campaignId
      * @returns unknown Successful Response
@@ -257,6 +257,37 @@ export class AdminCampaignsService {
 
 export class AdminCouponsService {
     /**
+     * Upload Coupons From Excel
+     * Upload coupons from Excel file
+     *
+     * Excel format:
+     * - code (required)
+     * - discount_type (required, 'fixed' or 'percentage')
+     * - discount_value (required)
+     * - expires_at (optional, formats: YYYY-MM-DD HH:MM:SS, YYYY.MM.DD HH:MM:SS, DD/MM/YYYY HH:MM:SS, etc.)
+     * - user_id (optional)
+     * @param data The data for the request.
+     * @param data.campaignId
+     * @param data.formData
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static uploadCouponsFromExcel(data: AdminCouponsUploadCouponsFromExcelData): CancelablePromise<AdminCouponsUploadCouponsFromExcelResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/admin/coupons/upload/{campaign_id}',
+            path: {
+                campaign_id: data.campaignId
+            },
+            formData: data.formData,
+            mediaType: 'multipart/form-data',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
      * Get User Coupon For Campaign
      * Get the coupon assigned to a specific user for a specific campaign
      * @param data The data for the request.
@@ -288,7 +319,7 @@ export class AdminCouponsService {
      * @param data.search
      * @param data.category
      * @param data.campaignId
-     * @param data.assignedUserId
+     * @param data.assignedToUserId
      * @returns unknown Successful Response
      * @throws ApiError
      */
@@ -302,7 +333,7 @@ export class AdminCouponsService {
                 search: data.search,
                 category: data.category,
                 campaign_id: data.campaignId,
-                assigned_user_id: data.assignedUserId
+                assigned_to_user_id: data.assignedToUserId
             },
             errors: {
                 422: 'Validation Error'
@@ -898,7 +929,7 @@ export class PrivateService {
      * Create a new user.
      * @param data The data for the request.
      * @param data.requestBody
-     * @returns app__models__user__UserPublic Successful Response
+     * @returns UserPublic Successful Response
      * @throws ApiError
      */
     public static createUser(data: PrivateCreateUserData): CancelablePromise<PrivateCreateUserResponse> {
@@ -918,7 +949,7 @@ export class UserCouponsService {
     /**
      * Get My Coupons
      * Get current user's coupons
-     * @returns unknown Successful Response
+     * @returns CouponsPublic Successful Response
      * @throws ApiError
      */
     public static getMyCoupons(): CancelablePromise<UserCouponsGetMyCouponsResponse> {
@@ -929,19 +960,19 @@ export class UserCouponsService {
     }
     
     /**
-     * Get Coupon
-     * Get a specific coupon
+     * Get My Coupon For Campaign
+     * Get the coupon assigned to current user for a specific campaign
      * @param data The data for the request.
-     * @param data.couponId
+     * @param data.campaignId
      * @returns unknown Successful Response
      * @throws ApiError
      */
-    public static getCoupon(data: UserCouponsGetCouponData): CancelablePromise<UserCouponsGetCouponResponse> {
+    public static getMyCouponForCampaign(data: UserCouponsGetMyCouponForCampaignData): CancelablePromise<UserCouponsGetMyCouponForCampaignResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/user/coupons/{coupon_id}',
+            url: '/api/v1/user/coupons/campaign/{campaign_id}',
             path: {
-                coupon_id: data.couponId
+                campaign_id: data.campaignId
             },
             errors: {
                 422: 'Validation Error'
@@ -971,19 +1002,19 @@ export class UserCouponsService {
     }
     
     /**
-     * Get My Coupon For Campaign
-     * Get the coupon assigned to current user for a specific campaign
+     * Get Coupon
+     * Get a specific coupon
      * @param data The data for the request.
-     * @param data.campaignId
-     * @returns unknown Successful Response
+     * @param data.couponId
+     * @returns CouponPublic Successful Response
      * @throws ApiError
      */
-    public static getMyCouponForCampaign(data: UserCouponsGetMyCouponForCampaignData): CancelablePromise<UserCouponsGetMyCouponForCampaignResponse> {
+    public static getCoupon(data: UserCouponsGetCouponData): CancelablePromise<UserCouponsGetCouponResponse> {
         return __request(OpenAPI, {
             method: 'GET',
-            url: '/api/v1/user/coupons/campaign/{campaign_id}',
+            url: '/api/v1/user/coupons/{coupon_id}',
             path: {
-                campaign_id: data.campaignId
+                coupon_id: data.couponId
             },
             errors: {
                 422: 'Validation Error'
@@ -1021,7 +1052,7 @@ export class UsersService {
      * Create new user.
      * @param data The data for the request.
      * @param data.requestBody
-     * @returns app__models__user__UserPublic Successful Response
+     * @returns UserPublic Successful Response
      * @throws ApiError
      */
     public static createUser(data: UsersCreateUserData): CancelablePromise<UsersCreateUserResponse> {
@@ -1039,7 +1070,7 @@ export class UsersService {
     /**
      * Read User Me
      * Get current user.
-     * @returns app__models__user__UserPublic Successful Response
+     * @returns UserPublic Successful Response
      * @throws ApiError
      */
     public static readUserMe(): CancelablePromise<UsersReadUserMeResponse> {
@@ -1067,7 +1098,7 @@ export class UsersService {
      * Update own user.
      * @param data The data for the request.
      * @param data.requestBody
-     * @returns app__models__user__UserPublic Successful Response
+     * @returns UserPublic Successful Response
      * @throws ApiError
      */
     public static updateUserMe(data: UsersUpdateUserMeData): CancelablePromise<UsersUpdateUserMeResponse> {
@@ -1087,7 +1118,7 @@ export class UsersService {
      * Create new user without the need to be logged in.
      * @param data The data for the request.
      * @param data.requestBody
-     * @returns app__models__user__UserPublic Successful Response
+     * @returns UserPublic Successful Response
      * @throws ApiError
      */
     public static registerUser(data: UsersRegisterUserData): CancelablePromise<UsersRegisterUserResponse> {
@@ -1107,7 +1138,7 @@ export class UsersService {
      * Get a specific user by id.
      * @param data The data for the request.
      * @param data.userId
-     * @returns app__models__user__UserPublic Successful Response
+     * @returns UserPublic Successful Response
      * @throws ApiError
      */
     public static readUserById(data: UsersReadUserByIdData): CancelablePromise<UsersReadUserByIdResponse> {
@@ -1129,7 +1160,7 @@ export class UsersService {
      * @param data The data for the request.
      * @param data.userId
      * @param data.requestBody
-     * @returns app__models__user__UserPublic Successful Response
+     * @returns UserPublic Successful Response
      * @throws ApiError
      */
     public static updateUser(data: UsersUpdateUserData): CancelablePromise<UsersUpdateUserResponse> {

@@ -19,6 +19,19 @@ export const AnnouncementsPublicSchema = {
     title: 'AnnouncementsPublic'
 } as const;
 
+export const Body_admin_coupons_upload_coupons_from_excelSchema = {
+    properties: {
+        file: {
+            type: 'string',
+            format: 'binary',
+            title: 'File'
+        }
+    },
+    type: 'object',
+    required: ['file'],
+    title: 'Body_admin/coupons-upload_coupons_from_excel'
+} as const;
+
 export const CampaignCreateSchema = {
     properties: {
         title: {
@@ -136,42 +149,23 @@ export const CampaignUpdateSchema = {
             title: 'Description'
         },
         start_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date-time'
-                },
-                {
-                    type: 'null'
-                }
-            ],
+            type: 'string',
+            format: 'date-time',
             title: 'Start Date'
         },
         end_date: {
-            anyOf: [
-                {
-                    type: 'string',
-                    format: 'date-time'
-                },
-                {
-                    type: 'null'
-                }
-            ],
+            type: 'string',
+            format: 'date-time',
             title: 'End Date'
         },
         active: {
-            anyOf: [
-                {
-                    type: 'boolean'
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Active'
+            type: 'boolean',
+            title: 'Active',
+            default: true
         }
     },
     type: 'object',
+    required: ['start_date', 'end_date'],
     title: 'CampaignUpdate'
 } as const;
 
@@ -222,7 +216,7 @@ export const CouponCreateSchema = {
             ],
             title: 'Campaign Id'
         },
-        assigned_user_id: {
+        assigned_to_user_id: {
             anyOf: [
                 {
                     type: 'string',
@@ -232,7 +226,7 @@ export const CouponCreateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Assigned User Id'
+            title: 'Assigned To User Id'
         },
         redeemed: {
             type: 'boolean',
@@ -297,7 +291,7 @@ export const CouponPublicSchema = {
             ],
             title: 'Campaign Id'
         },
-        assigned_user_id: {
+        assigned_to_user_id: {
             anyOf: [
                 {
                     type: 'string',
@@ -307,7 +301,7 @@ export const CouponPublicSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Assigned User Id'
+            title: 'Assigned To User Id'
         },
         redeemed: {
             type: 'boolean',
@@ -403,7 +397,7 @@ export const CouponUpdateSchema = {
             ],
             title: 'Campaign Id'
         },
-        assigned_user_id: {
+        assigned_to_user_id: {
             anyOf: [
                 {
                     type: 'string',
@@ -413,7 +407,7 @@ export const CouponUpdateSchema = {
                     type: 'null'
                 }
             ],
-            title: 'Assigned User Id'
+            title: 'Assigned To User Id'
         },
         redeemed: {
             anyOf: [
@@ -682,6 +676,59 @@ export const UserCreateSchema = {
     title: 'UserCreate'
 } as const;
 
+export const UserPublicSchema = {
+    properties: {
+        email: {
+            type: 'string',
+            maxLength: 255,
+            format: 'email',
+            title: 'Email'
+        },
+        is_active: {
+            type: 'boolean',
+            title: 'Is Active',
+            default: true
+        },
+        is_superuser: {
+            type: 'boolean',
+            title: 'Is Superuser',
+            default: false
+        },
+        full_name: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Full Name'
+        },
+        keycloak_user_id: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 255
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Keycloak User Id'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['email', 'id'],
+    title: 'UserPublic'
+} as const;
+
 export const UserRegisterSchema = {
     properties: {
         email: {
@@ -802,7 +849,7 @@ export const UsersPublicSchema = {
     properties: {
         data: {
             items: {
-                '$ref': '#/components/schemas/app__schemas__user__UserPublic'
+                '$ref': '#/components/schemas/UserPublic'
             },
             type: 'array',
             title: 'Data'
@@ -1153,59 +1200,6 @@ export const app__models__announcement__AnnouncementUpdateSchema = {
     title: 'AnnouncementUpdate'
 } as const;
 
-export const app__models__user__UserPublicSchema = {
-    properties: {
-        email: {
-            type: 'string',
-            maxLength: 255,
-            format: 'email',
-            title: 'Email'
-        },
-        is_active: {
-            type: 'boolean',
-            title: 'Is Active',
-            default: true
-        },
-        is_superuser: {
-            type: 'boolean',
-            title: 'Is Superuser',
-            default: false
-        },
-        full_name: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Full Name'
-        },
-        keycloak_user_id: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Keycloak User Id'
-        },
-        id: {
-            type: 'string',
-            format: 'uuid',
-            title: 'Id'
-        }
-    },
-    type: 'object',
-    required: ['email', 'id'],
-    title: 'UserPublic'
-} as const;
-
 export const app__schemas__announcement__AnnouncementCreateSchema = {
     properties: {
         title: {
@@ -1457,56 +1451,4 @@ export const app__schemas__announcement__AnnouncementUpdateSchema = {
     },
     type: 'object',
     title: 'AnnouncementUpdate'
-} as const;
-
-export const app__schemas__user__UserPublicSchema = {
-    properties: {
-        email: {
-            type: 'string',
-            maxLength: 255,
-            format: 'email',
-            title: 'Email'
-        },
-        is_active: {
-            type: 'boolean',
-            title: 'Is Active',
-            default: true
-        },
-        is_superuser: {
-            type: 'boolean',
-            title: 'Is Superuser',
-            default: false
-        },
-        full_name: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Full Name'
-        },
-        keycloak_user_id: {
-            anyOf: [
-                {
-                    type: 'string',
-                    maxLength: 255
-                },
-                {
-                    type: 'null'
-                }
-            ],
-            title: 'Keycloak User Id'
-        },
-        id: {
-            type: 'integer',
-            title: 'Id'
-        }
-    },
-    type: 'object',
-    required: ['email', 'id'],
-    title: 'UserPublic'
 } as const;

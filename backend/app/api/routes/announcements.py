@@ -174,11 +174,14 @@ def read_announcement(
     response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
     
     announcement = get_announcement(session=session, announcement_id=id)
+    print(f"DEBUG: Looking for announcement with id: {id}")
+    print(f"DEBUG: Found announcement: {announcement}")
     if not announcement:
         raise HTTPException(status_code=404, detail="Announcement not found")
     
     # Check if announcement is soft deleted
     if announcement.deleted_at is not None:
+        print(f"DEBUG: Announcement is soft deleted")
         raise HTTPException(status_code=404, detail="Announcement not found")
     
     # Extract roles from the JWT token

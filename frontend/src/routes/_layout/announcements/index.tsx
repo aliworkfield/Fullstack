@@ -37,8 +37,8 @@ function Announcements() {
   });
 
   // Filter announcements based on category and search
-  const filterAnnouncements = (_: app__models__announcement__AnnouncementPublic[], statusFilter?: string) => {
-    return allAnnouncements.filter(announcement => {
+  const filterAnnouncements = (announcements: app__models__announcement__AnnouncementPublic[], statusFilter?: string) => {
+    return announcements.filter(announcement => {
       let matchesStatus = true;
       if (statusFilter === "published") {
         matchesStatus = announcement.is_published === true;

@@ -22,12 +22,14 @@ export function AnnouncementDetailRoute() {
   const { hasAnyRole, isLoading: rolesLoading } = useRoles();
   const canEdit = hasAnyRole(["admin", "manager"]);
 
-  const { data: announcement, isLoading, isError } = useQuery({
+  const { data: announcement, isLoading, isError, error } = useQuery({
     queryKey: ["announcement", id],
     queryFn: async () => {
+      console.log('Fetching announcement with id:', id);
       const response = await AnnouncementsService.readAnnouncement({ id });
+      console.log('Received announcement:', response);
       return response;
-    },
+    }
   });
 
   const { data: userCoupon, isLoading: isCouponLoading } = useQuery({
@@ -39,7 +41,8 @@ export function AnnouncementDetailRoute() {
             campaignId: announcement.campaign_id,
           });
           return response.coupon;
-        } catch {
+        } catch (error) {
+          console.error("Error fetching user coupon:", error);
           return null;
         }
       }
@@ -56,7 +59,7 @@ export function AnnouncementDetailRoute() {
       queryClient.invalidateQueries({ queryKey: ["announcements"] });
       navigate({ to: "/announcements" });
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Error deleting announcement:", error);
       toast.error("Failed to delete announcement");
     },
@@ -71,7 +74,11 @@ export function AnnouncementDetailRoute() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   if (isLoading || rolesLoading) return <div>Loading announcement...</div>;
-  if (isError || !announcement) return <div>Announcement not found</div>;
+  if (isError) {
+    console.error('Error loading announcement:', id, error);
+    return <div>Announcement not found</div>;
+  }
+  if (!announcement) return <div>Announcement not found</div>;
 
   const handleEdit = () => setIsEditModalOpen(true);
 

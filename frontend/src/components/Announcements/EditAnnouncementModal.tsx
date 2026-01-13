@@ -63,7 +63,7 @@ export function EditAnnouncementModal({
       onOpenChange(false);
       onSuccess?.();
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       console.error("Error updating announcement:", error);
       toast.error("Failed to update announcement");
     }

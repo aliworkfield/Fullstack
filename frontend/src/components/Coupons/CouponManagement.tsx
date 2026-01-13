@@ -30,7 +30,7 @@ export function CouponManagement() {
     queryKey: ["coupons", selectedCampaign],
     queryFn: async () => {
       const response = await UserCouponsService.getMyCoupons();
-      return response?.coupons || [];
+      return response?.data || [];
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -131,7 +131,7 @@ export function CouponManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {Array.isArray(coupons) ? coupons.filter((coupon: CouponPublic) => coupon.assigned_user_id).length : 0}
+              {Array.isArray(coupons) ? coupons.filter((coupon: CouponPublic) => coupon.assigned_to_user_id).length : 0}
             </div>
             <p className="text-xs text-muted-foreground">Coupons assigned to users</p>
           </CardContent>
@@ -155,7 +155,7 @@ export function CouponManagement() {
             <CardContent>
               <div className="space-y-2 text-sm">
                 <p><span className="font-medium">Campaign:</span> {getCampaignName(coupon.campaign_id)}</p>
-                <p><span className="font-medium">Assigned to:</span> {coupon.assigned_user_id ? "Assigned" : "Unassigned"}</p>
+                <p><span className="font-medium">Assigned to:</span> {coupon.assigned_to_user_id ? "Assigned" : "Unassigned"}</p>
                 {coupon.expires_at && (
                   <p><span className="font-medium">Expires:</span> {new Date(coupon.expires_at).toLocaleDateString()}</p>
                 )}

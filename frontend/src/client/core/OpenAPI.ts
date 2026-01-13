@@ -40,36 +40,47 @@ export type OpenAPIConfig = {
 	};
 };
 
-// Import keycloak here to get the token
-import keycloak from '@/keycloak';
+// Set up a request interceptor to automatically add the Authorization header
+const setupAxiosInterceptors = () => {
+  // Import axios here to avoid circular dependencies
+  import('axios').then(axios => {
+    axios.default.interceptors.request.use(
+      async (config) => {
+        try {
+          const keycloakModule = await import('../../keycloak');
+          const keycloak = keycloakModule.default;
+          
+          if (keycloak.authenticated) {
+            // Refresh token if needed
+            await keycloak.updateToken(30);
+            
+            if (keycloak.token) {
+              config.headers.Authorization = `Bearer ${keycloak.token}`;
+            }
+          }
+        } catch (error) {
+          console.error('Error adding auth header:', error);
+        }
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+  });
+};
+
+// Setup interceptors when this module is imported
+setupAxiosInterceptors();
+
 export const OpenAPI: OpenAPIConfig = {
-	BASE: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+	BASE: '',
 	CREDENTIALS: 'include',
 	ENCODE_PATH: undefined,
 	HEADERS: undefined,
 	PASSWORD: undefined,
-	TOKEN: async () => {
-		// Ensure the token is valid and refresh if needed
-		if (!keycloak.token) {
-			return ''; // Return empty string instead of undefined
-		}
-		
-		// Check if token needs refresh
-		try {
-			const isTokenExpired = keycloak.isTokenExpired();
-			if (isTokenExpired) {
-				const refreshed = await keycloak.updateToken(5); // Refresh if expiring in 5 seconds
-				if (!refreshed) {
-					console.warn('Failed to refresh Keycloak token');
-					return ''; // Return empty string instead of undefined
-				}
-			}
-			return keycloak.token;
-		} catch (error) {
-			console.error('Error getting Keycloak token:', error);
-			return ''; // Return empty string instead of undefined
-		}
-	},	USERNAME: undefined,
+	TOKEN: undefined,
+	USERNAME: undefined,
 	VERSION: '0.1.0',
 	WITH_CREDENTIALS: false,
 	interceptors: {

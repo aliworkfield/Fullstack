@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, ChevronDown, ChevronRight } from "lucide-react";
 import { app__models__announcement__AnnouncementPublic } from "@/client";
+import { Link } from "@tanstack/react-router";
 
 interface GroupedAnnouncementsProps {
   announcements: app__models__announcement__AnnouncementPublic[];
@@ -111,12 +112,14 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
           {expandedCategories['new'] !== false && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredNewAnnouncements.map((announcement) => (
-                <div 
+                <Link 
                   key={`new-${announcement.id}`} 
+                  to="/announcements/$id"
+                  params={{ id: announcement.id }}
                   className="border rounded-lg p-4 hover:bg-muted cursor-pointer"
                 >
                   <h3 className="font-semibold">{announcement.title}</h3>
-                </div>
+                </Link>
               ))}
             </div>
           )}
@@ -149,12 +152,14 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
             {isExpanded && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {categoryAnnouncements.map((announcement) => (
-                  <div 
+                  <Link 
                     key={`cat-${announcement.id}`} 
+                    to="/announcements/$id"
+                    params={{ id: announcement.id }}
                     className="border rounded-lg p-4 hover:bg-muted cursor-pointer"
                   >
                     <h3 className="font-semibold">{announcement.title}</h3>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
