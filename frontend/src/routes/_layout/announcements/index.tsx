@@ -62,7 +62,7 @@ function Announcements() {
   const expiredAnnouncements = filterAnnouncements(allAnnouncements, "expired");
 
   if (isLoading) {
-    return <div>Loading announcements...</div>;
+    return <div>Kampanyalar Yükleniyor...</div>;
   }
 
   return (

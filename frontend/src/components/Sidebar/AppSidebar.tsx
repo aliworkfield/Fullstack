@@ -16,9 +16,6 @@ import { User } from "./User"
 import keycloak from "@/keycloak"
 
 const baseItems: Item[] = [
-  { icon: Home, title: "Dashboard", path: "/" },
-  { icon: Briefcase, title: "Items", path: "/items" },
-
   { icon: Briefcase, title: "Coupons", path: "/coupons" },
   { icon: Briefcase, title: "Announcements", path: "/announcements" },
 ]
