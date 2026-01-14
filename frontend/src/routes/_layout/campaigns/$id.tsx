@@ -81,7 +81,19 @@ function CampaignDetail() {
   // Fetch campaign announcements
   const { data: announcementsData } = useQuery({
     queryKey: ['campaign-announcements', id],
-    queryFn: () => AnnouncementsService.readAnnouncements({ search: `campaign_id:${id}` }),
+    queryFn: async () => {
+      // First get all announcements
+      const response = await AnnouncementsService.readAnnouncements({
+        skip: 0,
+        limit: 1000,
+      });
+      
+      // Then filter by campaign ID
+      const allAnnouncements = response.data || [];
+      return allAnnouncements.filter(announcement => 
+        announcement.campaign_id === id
+      );
+    },
     enabled: !!id,
   });
 
@@ -93,7 +105,7 @@ function CampaignDetail() {
 
   const campaign = (campaignData as any)?.campaign;
   const coupons = (couponsData as any)?.data || [];
-  const announcements = (announcementsData as any)?.data || [];
+  const announcements = announcementsData || [];
   const users = usersData?.data || [];
 
   // Create a user map for quick lookup
@@ -243,6 +255,14 @@ function CampaignDetail() {
             {statusText}
           </span>
         );
+      },
+    },
+    {
+      accessorKey: "expiry_date",
+      header: "Expiry Date",
+      cell: ({ row }) => {
+        const date = row.getValue("expiry_date") as string;
+        return date ? new Date(date).toLocaleDateString() : "No Expiry";
       },
     },
     {
@@ -457,7 +477,7 @@ function CampaignDetail() {
   // -----------
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <AppSidebar />
       <main className="flex flex-1 flex-col gap-4 p-4 pt-0 overflow-y-scroll">
         <div className="flex-1 overflow-auto">

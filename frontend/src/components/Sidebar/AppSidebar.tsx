@@ -57,7 +57,7 @@ export function AppSidebar() {
   }, [hasRole, keycloak.token])
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" defaultOpen={false}>
       <SidebarHeader className="px-4 py-6 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:items-center">
         <Logo variant="responsive" />
       </SidebarHeader>
