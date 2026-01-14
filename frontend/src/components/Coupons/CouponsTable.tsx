@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, Plus } from "lucide-react";
-import { UserCouponsService } from "@/client";
+import { AdminCouponsService } from "@/client";
 import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "@/components/Common/DataTable";
 import { columns } from "./columns";
@@ -11,17 +11,18 @@ import { columns } from "./columns";
 export function CouponsTable() {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch coupons
+  // Fetch all coupons from the admin service
   const { data: coupons = [], isLoading } = useQuery({
-    queryKey: ["coupons"],
+    queryKey: ["all-coupons"],
     queryFn: async () => {
-      const response = await UserCouponsService.getMyCoupons();
+      const response = await AdminCouponsService.getAllCoupons({
+        skip: 0,
+        limit: 1000, // Get all coupons
+      });
       return response?.data || [];
-
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
-
 
   const filteredCoupons = Array.isArray(coupons) ? coupons.filter((coupon: import('@/client').CouponPublic) => {
     const matchesSearch = coupon.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -37,7 +38,7 @@ export function CouponsTable() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-3xl font-bold">Coupons</h1>
+        <h1 className="text-3xl font-bold">All Coupons</h1>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -57,7 +58,7 @@ export function CouponsTable() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Coupon List</CardTitle>
+          <CardTitle>All Coupons ({filteredCoupons.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable

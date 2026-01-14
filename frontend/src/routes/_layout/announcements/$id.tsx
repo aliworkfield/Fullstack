@@ -83,111 +83,119 @@ export function AnnouncementDetailRoute() {
   const handleEdit = () => setIsEditModalOpen(true);
 
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider>
       <AppSidebar />
-      <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <main className="flex flex-1 flex-col gap-6 p-6 pt-6 overflow-y-scroll bg-muted/10">
         <div className="flex-1 overflow-auto">
-          <div className="p-4 space-y-6">
-            {/* Top Bar: Title left, Back + Edit/Delete right */}
-            <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold">{announcement.title}</h2>
+          <div className='max-w-7xl mx-auto w-full'>
+            <div className='rounded-xl border bg-card shadow-sm'>
+              <div className="p-6 space-y-6">
+                {/* Top Bar: Title left, Back + Edit/Delete right */}
+                <div className="flex items-center justify-between">
+                  <h2 className="text-3xl font-bold">{announcement.title}</h2>
 
-              <div className="flex items-center gap-4">
-                <Link
-                  to="/announcements"
-                  className="text-muted-foreground hover:text-foreground whitespace-nowrap"
-                >
-                  ← Back to Announcements
-                </Link>
-
-                {canEdit && (
-                  <div className="flex gap-2">
-                    <Button onClick={handleEdit}>Edit</Button>
-                    <Button
-                      variant="destructive"
-                      onClick={handleDelete}
-                      disabled={deleteMutation.isPending}
+                  <div className="flex items-center gap-4">
+                    <Link
+                      to="/announcements"
+                      className="text-muted-foreground hover:text-foreground whitespace-nowrap"
                     >
-                      {deleteMutation.isPending ? "Deleting..." : "Delete"}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
+                      ← Back to Announcements
+                    </Link>
 
-            <Card>
-              <CardHeader className="space-y-2">
-                {/* Title + Category Badge */}
-                <div className="flex items-center justify-between gap-4">
-                  <CardTitle className="text-2xl leading-tight">{announcement.title}</CardTitle>
-                  <Badge variant="outline" className="shrink-0">
-                    {announcement.category}
-                  </Badge>
-                </div>
-
-                {/* Status Badge */}
-                <div className="flex items-center gap-2">
-                  {announcement.is_published ? (
-                    <Badge variant="default">Published</Badge>
-                  ) : (
-                    <Badge variant="secondary">Draft</Badge>
-                  )}
-                  {announcement.expiry_date && new Date(announcement.expiry_date) < new Date() && (
-                    <Badge variant="destructive">Expired</Badge>
-                  )}
-                </div>
-
-                {/* Compact Dates */}
-                <div className="text-xs text-muted-foreground flex gap-4">
-                  <span>
-                    Created:{" "}
-                    {announcement.created_date
-                      ? new Date(announcement.created_date).toLocaleDateString()
-                      : "N/A"}
-                  </span>
-                  {announcement.expiry_date && (
-                    <span>Expires: {new Date(announcement.expiry_date).toLocaleDateString()}</span>
-                  )}
-                </div>
-              </CardHeader>
-
-              <CardContent>
-                {/* Description */}
-                <div className="prose max-w-none text-muted-foreground">
-                  {announcement.description || "No description provided"}
-                </div>
-
-                {/* Coupon Section */}
-                {announcement.requires_coupon && (
-                  <div className="mt-6">
-                    <h3 className="font-medium mb-2">Your Discount Code</h3>
-                    {isCouponLoading ? (
-                      <p className="text-muted-foreground">Loading your coupon...</p>
-                    ) : userCoupon ? (
-                      <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-lg font-bold text-center text-blue-800">{userCoupon.code}</p>
-                        <p className="text-sm text-center text-blue-600 mt-1">
-                          {userCoupon.discount_type === "percentage"
-                            ? `${userCoupon.discount_value}% indirim`
-                            : `Değeri: ${userCoupon.discount_value}`}
-                        </p>
-                        {userCoupon.redeemed && (
-                          <p className="text-sm text-center text-red-600 mt-2">
-                            Coupon already redeemed
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                        <p className="text-center text-gray-600">
-                          No coupon assigned to you for this campaign
-                        </p>
+                    {canEdit && (
+                      <div className="flex gap-2">
+                        <Button onClick={handleEdit}>Edit</Button>
+                        <Button
+                          variant="destructive"
+                          onClick={handleDelete}
+                          disabled={deleteMutation.isPending}
+                        >
+                          {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                        </Button>
                       </div>
                     )}
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                </div>
+
+                <Card>
+                  <CardHeader className="space-y-2">
+                    {/* Title + Category Badge */}
+                    <div className="flex items-center justify-between gap-4">
+                      <CardTitle className="text-2xl leading-tight">{announcement.title}</CardTitle>
+                      <Badge variant="outline" className="shrink-0">
+                        {announcement.category}
+                      </Badge>
+                    </div>
+
+                    {/* Compact Dates */}
+                    <div className="text-xs text-muted-foreground flex gap-4">
+                      <span>
+                        Created:{" "}
+                        {announcement.created_date
+                          ? new Date(announcement.created_date).toLocaleDateString()
+                          : "N/A"}
+                      </span>
+                      {announcement.expiry_date && (
+                        <span>Expires: {new Date(announcement.expiry_date).toLocaleDateString()}</span>
+                      )}
+                    </div>
+                  </CardHeader>
+
+                  <CardContent>
+                    {/* Description */}
+                    <div className="prose max-w-none text-muted-foreground">
+                      {announcement.description || "No description provided"}
+                    </div>
+                    
+                    {/* Status Badge - Visible only to admin/manager */}
+                    {canEdit && (
+                      <div className="flex justify-end mt-4">
+                        <div className="flex items-center gap-2">
+                          {announcement.is_published ? (
+                            <Badge variant="default">Published</Badge>
+                          ) : (
+                            <Badge variant="secondary">Draft</Badge>
+                          )}
+                          {announcement.expiry_date && new Date(announcement.expiry_date) < new Date() && (
+                            <Badge variant="destructive">Expired</Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Coupon Section */}
+                    {announcement.requires_coupon && (
+                      <div className="mt-6">
+                        <h3 className="font-medium mb-2">Your Discount Code</h3>
+                        {isCouponLoading ? (
+                          <p className="text-muted-foreground">Loading your coupon...</p>
+                        ) : userCoupon ? (
+                          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <p className="text-lg font-bold text-center text-blue-800">{userCoupon.code}</p>
+                            <p className="text-sm text-center text-blue-600 mt-1">
+                              {userCoupon.discount_type === "percentage"
+                                ? `${userCoupon.discount_value}% indirim`
+                                : `Değeri: ${userCoupon.discount_value}`}
+                            </p>
+                            {userCoupon.redeemed && (
+                              <p className="text-sm text-center text-red-600 mt-2">
+                                Coupon already redeemed
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <p className="text-center text-gray-600">
+                              No coupon assigned to you for this campaign
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         </div>
       </main>

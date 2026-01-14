@@ -66,16 +66,16 @@ function Announcements() {
   }
 
   return (
-    <SidebarProvider defaultOpen={false}> 
+    <SidebarProvider> 
       <AppSidebar />
       <main className="flex flex-1 flex-col gap-6 p-6 pt-0 overflow-y-scroll bg-muted/10">
         <div className="flex-1 overflow-auto">
           <div className='max-w-7xl mx-auto w-full'>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <div>
+              {/* <div>
                 <h1 className='text-3xl font-bold tracking-tight'>Announcements</h1>
                 <p className='text-muted-foreground'>Broadcast important messages and updates</p>
-              </div>
+              </div> */}
               {isManagerOrAdmin && (
                 <Button onClick={() => setIsCreateModalOpen(true)}>
                   Create Announcement

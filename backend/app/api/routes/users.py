@@ -13,7 +13,6 @@ from app.api.deps import (
 from app.core.config import settings
 
 from app.models import (
-    Item,
     User,
     UserCreate,
     UserUpdate,
@@ -217,8 +216,7 @@ def delete_user(
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
-    statement = delete(Item).where(col(Item.owner_id) == user_id)
-    session.exec(statement)  # type: ignore
+    # No owned items to delete in this coupon management system
     session.delete(user)
     session.commit()
     return Message(message="User deleted successfully")

@@ -1,4 +1,4 @@
-import { Briefcase, Home, Users } from "lucide-react"
+import { Briefcase, Users, Megaphone, Ticket } from "lucide-react"
 import { useMemo } from "react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
@@ -17,17 +17,15 @@ import { User } from "./User"
 import keycloak from "@/keycloak"
 
 const baseItems: Item[] = [
-  { icon: Briefcase, title: "Coupons", path: "/coupons" },
-  { icon: Briefcase, title: "Announcements", path: "/announcements" },
+  { icon: Ticket, title: "Coupons", path: "/coupons" },
+  { icon: Megaphone, title: "Announcements", path: "/announcements" },
 ]
 
 const adminItems: Item[] = [
-  { icon: Briefcase, title: "YOU ARE ADMIN/MANAGER", path: "" },
   { icon: Users, title: "Admin Panel", path: "/admin" },
 ]
 
 const couponManagerItems: Item[] = [
-  { icon: Briefcase, title: "YOU ARE MANAGER", path: "" },
   { icon: Briefcase, title: "Campaigns", path: "/campaigns" },
   // Removed duplicate Coupons entry
 ]
@@ -45,11 +43,11 @@ export function AppSidebar() {
     
     let updatedItems = [...baseItems]
     
-    if (isAdmin || isManager) {
+    if (isAdmin) {
       updatedItems = [...updatedItems, ...adminItems]
     }
     
-    if (isManager || isAdmin) {
+    if (isManager) {
       updatedItems = [...updatedItems, ...couponManagerItems]
     }
     
@@ -57,7 +55,7 @@ export function AppSidebar() {
   }, [hasRole, keycloak.token])
 
   return (
-    <Sidebar collapsible="icon" defaultOpen={false}>
+    <Sidebar collapsible="icon">
       <SidebarHeader className="px-4 py-6 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:items-center">
         <Logo variant="responsive" />
       </SidebarHeader>

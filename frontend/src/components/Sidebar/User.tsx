@@ -17,6 +17,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
+import useRoles from "@/hooks/useRoles"
 import { getInitials } from "@/utils"
 
 interface UserInfoProps {
@@ -43,8 +44,14 @@ function UserInfo({ fullName, email }: UserInfoProps) {
 export function User({ user }: { user: any }) {
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
+  const { hasRole } = useRoles()
 
   if (!user) return null
+
+  const isAdmin = hasRole("admin")
+  const isManager = hasRole("manager")
+  const showRoleBadge = isAdmin || isManager
+  const roleText = isAdmin ? "Admin" : isManager ? "Manager" : "User"
 
   const handleMenuClick = () => {
     if (isMobile) {
@@ -76,15 +83,17 @@ export function User({ user }: { user: any }) {
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
-              <UserInfo fullName={user?.full_name} email={user?.email} />
+              <div className="flex flex-col gap-1">
+                <UserInfo fullName={user?.full_name} email={user?.email} />
+                {showRoleBadge && (
+                  <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-semibold rounded-full bg-primary text-primary-foreground">
+                    {roleText}
+                  </span>
+                )}
+              </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <RouterLink to="/settings" onClick={handleMenuClick}>
-              <DropdownMenuItem>
-                <Settings />
-                User Settings
-              </DropdownMenuItem>
-            </RouterLink>
+            
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Log Out

@@ -4,26 +4,23 @@ from typing import Any
 
 from sqlmodel import Session, select
 
-
-from app.models import (
+from app.models.user import User, UserCreate, UserUpdate
+from app.models.announcement import (
     Announcement, 
     AnnouncementCreate,
     AnnouncementUpdate,
 )
-from app.models import (
-    Campaign, 
-    Coupon, 
-    User
-)
+from app.models.campaign import Campaign, CampaignCreate
+from app.models.coupon import Coupon, CouponCreate
 
 
-def create_user(*, session: Session, user_create: UserCreate) -> User:
-    user_data = user_create.model_dump()
-    db_obj = User(**user_data)
-    session.add(db_obj)
-    session.commit()
-    session.refresh(db_obj)
-    return db_obj
+# def create_user(*, session: Session, user_create: UserCreate) -> User:
+#     user_data = user_create.model_dump()
+#     db_obj = User(**user_data)
+#     session.add(db_obj)
+#     session.commit()
+#     session.refresh(db_obj)
+#     return db_obj
 
 
 def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:

@@ -72,7 +72,7 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Announcements</h1>
-          <p className="text-muted-foreground mt-1">Important updates and notifications</p>
+          {/* <p className="text-muted-foreground mt-1">Important updates and notifications</p> */}
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <select 
