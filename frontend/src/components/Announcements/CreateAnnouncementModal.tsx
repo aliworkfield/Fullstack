@@ -256,7 +256,7 @@ export function CreateAnnouncementModal({
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="none">No campaign</SelectItem>
-                          {campaigns.map((campaign: CampaignPublic) => (
+                          {(Array.isArray(campaigns) ? campaigns : []).map((campaign: CampaignPublic) => (
                             <SelectItem key={campaign.id} value={campaign.id}>
                               {campaign.title}
                             </SelectItem>

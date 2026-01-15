@@ -298,10 +298,11 @@ function CampaignDetail() {
       const file = files[0];
       if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
         setExcelFile(file);
+        toast.success(`Selected file: ${file.name}`);
       } else {
         toast.error('Please upload an Excel file (.xlsx or .xls)');
       }
-      e.target.value = ''; // Clear the file input
+      // Don't clear the input to show selected file
     }
   };
 
@@ -313,7 +314,7 @@ function CampaignDetail() {
     }
 
     try {
-      // Create form data to send the file
+      // Create form data with proper field name
       const formData = new FormData();
       formData.append('file', excelFile);
       
@@ -340,7 +341,12 @@ function CampaignDetail() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = { detail: `HTTP ${response.status}: ${response.statusText}` };
+        }
         throw new Error(errorData.detail || 'Failed to upload coupons');
       }
 
@@ -349,6 +355,12 @@ function CampaignDetail() {
       setUploadModalOpen(false);
       setExcelFile(null);
       refetchCoupons();
+      
+      // Reset file input
+      const fileInput = document.getElementById('excel-upload') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
     } catch (error) {
       console.error('Error uploading coupons:', error);
       if (error instanceof Error) {
@@ -687,12 +699,45 @@ function CampaignDetail() {
                       />
                       <FileSpreadsheet className="h-8 w-8 text-muted-foreground" />
                     </div>
-                    <p className="mt-2 text-sm text-muted-foreground">
+                    
+                    {/* Show selected file */}
+                    {excelFile && (
+                      <div className="mt-3 p-3 bg-blue-50 rounded-md border border-blue-200">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <FileSpreadsheet className="h-5 w-5 text-blue-600" />
+                            <span className="text-sm font-medium text-blue-800">
+                              Selected: {excelFile.name}
+                            </span>
+                          </div>
+                          <span className="text-xs text-blue-600">
+                            {(excelFile.size / 1024).toFixed(1)} KB
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <p className="mt-3 text-sm text-muted-foreground">
                       Excel format: code, discount_type ('fixed' or 'percentage'), discount_value, expires_at (optional YYYY-MM-DD HH:MM:SS or NULL)
                     </p>
-                    <div className="mt-4 p-3 bg-gray-100 rounded-md text-xs">
-                      <p className="font-semibold">Example format:</p>
-                      <pre className="mt-1">code,discount_type,discount_value,expires_at<br />ABC123,fixed,10.00,2027-01-01 00:00:00<br />XYZ789,percentage,15.00,<br />DEF456,fixed,5.50,2026-12-31 23:59:59</pre>
+                    
+                    <div className="mt-4 p-4 bg-gray-50 rounded-md border border-gray-200">
+                      <h4 className="font-semibold text-sm mb-2 text-gray-800">📋 Required Columns:</h4>
+                      <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
+                        <li><strong>code</strong> - Unique coupon code (required)</li>
+                        <li><strong>discount_type</strong> - Either 'fixed' or 'percentage' (required)</li>
+                        <li><strong>discount_value</strong> - Numeric value (required)</li>
+                        <li><strong>expires_at</strong> - Date/time (optional, format: YYYY-MM-DD HH:MM:SS)</li>
+                      </ul>
+                      
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <h4 className="font-semibold text-sm mb-2 text-gray-800">📝 Example:</h4>
+                        <pre className="text-xs bg-white p-2 rounded border text-gray-700">
+code,discount_type,discount_value,expires_at
+SAVE10,fixed,10.00,2027-12-31 23:59:59
+WELCOME15,percentage,15.00,
+HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -706,9 +751,13 @@ function CampaignDetail() {
                   >
                     Cancel
                   </Button>
-                  <Button onClick={handleUpload} disabled={!excelFile}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Upload
+                  <Button 
+                    onClick={handleUpload} 
+                    disabled={!excelFile}
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    {excelFile ? `Upload ${excelFile.name}` : 'Upload Coupons'}
                   </Button>
                 </DialogFooter>
               </DialogContent>

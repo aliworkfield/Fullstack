@@ -9,7 +9,8 @@ import AppSidebar from "@/components/Sidebar/AppSidebar";
 import useRoles from "@/hooks/useRoles";
 import { toast } from "sonner";
 import { CreateAnnouncementModal } from "@/components/Announcements/CreateAnnouncementModal";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/_layout/announcements/$id")({
   component: AnnouncementDetailRoute,
@@ -32,24 +33,24 @@ export function AnnouncementDetailRoute() {
     }
   });
 
-  const { data: userCoupon, isLoading: isCouponLoading } = useQuery({
-    queryKey: ["user-coupon", announcement?.campaign_id],
+  const { data: userCoupons, isLoading: isCouponLoading } = useQuery({
+    queryKey: ["user-coupons"],
     queryFn: async () => {
-      if (announcement?.requires_coupon && announcement?.campaign_id) {
-        try {
-          const response: any = await UserCouponsService.getMyCouponForCampaign({
-            campaignId: announcement.campaign_id,
-          });
-          return response.coupon;
-        } catch (error) {
-          console.error("Error fetching user coupon:", error);
-          return null;
-        }
+      try {
+        const response: any = await UserCouponsService.getMyCoupons();
+        return response.data || [];
+      } catch (error) {
+        console.error("Error fetching user coupons:", error);
+        return [];
       }
-      return null;
     },
-    enabled: !!announcement && announcement.requires_coupon && !!announcement.campaign_id,
   });
+
+  // Filter user coupons by the current announcement's campaign ID
+  const campaignCoupons = useMemo(() => {
+    if (!announcement?.campaign_id || !userCoupons) return [];
+    return userCoupons.filter((coupon: any) => coupon.campaign_id === announcement.campaign_id);
+  }, [userCoupons, announcement?.campaign_id]);
 
   const deleteMutation = useMutation({
     mutationFn: async (announcementId: string) =>
@@ -72,6 +73,22 @@ export function AnnouncementDetailRoute() {
   };
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isRedeemed, setIsRedeemed] = useState<string | boolean>(false);
+
+  // Mutation to redeem coupon
+  const redeemMutation = useMutation({
+    mutationFn: async (couponId: string) => {
+      return await UserCouponsService.redeemCoupon({ couponId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-coupons"] });
+      queryClient.invalidateQueries({ queryKey: ["coupons"] });
+    },
+    onError: (error: unknown) => {
+      console.error("Error redeeming coupon:", error);
+      toast.error("Failed to redeem coupon");
+    },
+  });
 
   if (isLoading || rolesLoading) return <div>Loading announcement...</div>;
   if (isError) {
@@ -166,22 +183,59 @@ export function AnnouncementDetailRoute() {
                     {/* Coupon Section */}
                     {announcement.requires_coupon && (
                       <div className="mt-6">
-                        <h3 className="font-medium mb-2">Your Discount Code</h3>
+                        <h3 className="font-medium mb-2 ">    Your Discount Code{campaignCoupons.length !== 1 ? 's' : ''}</h3>
                         {isCouponLoading ? (
-                          <p className="text-muted-foreground">Loading your coupon...</p>
-                        ) : userCoupon ? (
-                          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                            <p className="text-lg font-bold text-center text-blue-800">{userCoupon.code}</p>
-                            <p className="text-sm text-center text-blue-600 mt-1">
-                              {userCoupon.discount_type === "percentage"
-                                ? `${userCoupon.discount_value}% indirim`
-                                : `Değeri: ${userCoupon.discount_value}`}
-                            </p>
-                            {userCoupon.redeemed && (
-                              <p className="text-sm text-center text-red-600 mt-2">
-                                Coupon already redeemed
-                              </p>
-                            )}
+                          <p className="text-muted-foreground">Loading your coupon{campaignCoupons.length !== 1 ? 's' : ''}...</p>
+                        ) : campaignCoupons.length > 0 ? (
+                          <div className="space-y-4">
+                            {campaignCoupons.map((coupon: any) => {
+                              const isRedeemedForCoupon = isRedeemed && isRedeemed === coupon.id;
+                              return (
+                                <div key={coupon.id} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                                  {coupon.redeemed ? (
+                                    <div>
+                                      <div className="relative mb-2">
+                                        <p className="text-lg font-bold text-center text-blue-800">
+                                          {isRedeemedForCoupon ? coupon.code : '••••••••••••'}
+                                        </p>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm"
+                                          onClick={() => setIsRedeemed(isRedeemedForCoupon ? false : coupon.id)}
+                                          className="absolute right-0 top-1/2 -translate-y-1/2 text-blue-600 hover:text-blue-800"
+                                        >
+                                          {isRedeemedForCoupon ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </Button>
+                                      </div>
+                                      <p className="text-sm text-center text-blue-600">
+                                        {coupon.discount_type === "percentage"
+                                          ? `${coupon.discount_value}% discount`
+                                          : `Value: ${coupon.discount_value}`}
+                                      </p>
+                                    </div>
+                                  ) : (
+                                    <div className="text-center">
+                                      <Button 
+                                        onClick={() => {
+                                          setIsRedeemed(coupon.id);
+                                          if (coupon && !coupon.redeemed) {
+                                            redeemMutation.mutate(coupon.id);
+                                          }
+                                        }}
+                                        className="flex items-center gap-2 mx-auto"
+                                        disabled={redeemMutation.isPending}
+                                      >
+                                        <Eye className="w-4 h-4" />
+                                        {redeemMutation.isPending ? "Redeeming..." : "Show Coupon Code"}
+                                      </Button>
+                                      <p className="text-sm text-blue-600 mt-2">
+                                        Kodu görüntüle
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
                         ) : (
                           <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">

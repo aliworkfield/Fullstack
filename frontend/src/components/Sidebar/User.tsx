@@ -1,5 +1,4 @@
-import { Link as RouterLink } from "@tanstack/react-router"
-import { ChevronsUpDown, LogOut, Settings } from "lucide-react"
+import { ChevronsUpDown, LogOut } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -43,7 +42,7 @@ function UserInfo({ fullName, email }: UserInfoProps) {
 
 export function User({ user }: { user: any }) {
   const { logout } = useAuth()
-  const { isMobile, setOpenMobile } = useSidebar()
+  const { isMobile } = useSidebar()
   const { hasRole } = useRoles()
 
   if (!user) return null
@@ -53,11 +52,7 @@ export function User({ user }: { user: any }) {
   const showRoleBadge = isAdmin || isManager
   const roleText = isAdmin ? "Admin" : isManager ? "Manager" : "User"
 
-  const handleMenuClick = () => {
-    if (isMobile) {
-      setOpenMobile(false)
-    }
-  }
+
   const handleLogout = async () => {
     logout()
   }

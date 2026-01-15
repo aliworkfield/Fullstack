@@ -38,11 +38,8 @@ export function AdminRoute() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Map users to have string IDs to match the expected type
-  const mappedUsers = users.map((user: { id: string | number; [key: string]: any }) => ({
-    ...user,
-    id: user.id.toString()
-  }));
+  // Ensure users is an array
+  const usersArray = Array.isArray(users) ? users : [];
 
   // Fetch announcements for both admin and manager
   const { data: announcements = [] } = useQuery({
@@ -108,7 +105,7 @@ export function AdminRoute() {
                     {isAdmin ? (
                       <DataTable
                         columns={columns}
-                        data={mappedUsers}
+                        data={usersArray}
                       />
                     ) : (
                       <div className="text-center py-8 text-muted-foreground">

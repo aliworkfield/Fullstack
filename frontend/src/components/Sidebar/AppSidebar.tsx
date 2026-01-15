@@ -17,16 +17,18 @@ import { User } from "./User"
 import keycloak from "@/keycloak"
 
 const baseItems: Item[] = [
-  { icon: Ticket, title: "Coupons", path: "/coupons" },
   { icon: Megaphone, title: "Announcements", path: "/announcements" },
 ]
 
 const adminItems: Item[] = [
+  { icon: Briefcase, title: "Campaigns", path: "/campaigns" },
+  { icon: Ticket, title: "Coupons", path: "/coupons" },
   { icon: Users, title: "Admin Panel", path: "/admin" },
 ]
 
 const couponManagerItems: Item[] = [
   { icon: Briefcase, title: "Campaigns", path: "/campaigns" },
+  { icon: Ticket, title: "Coupons", path: "/coupons" },
   // Removed duplicate Coupons entry
 ]
 

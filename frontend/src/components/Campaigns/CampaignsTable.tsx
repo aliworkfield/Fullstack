@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTable } from "@/components/Common/DataTable"
 import { columns } from "./columns"
-import { AdminCampaignsService } from "@/client"
+import { AdminCampaignsService, AdminCouponsService } from "@/client"
 import useRoles from "@/hooks/useRoles"
 import { CreateCampaignModal } from "./CreateCampaignModal"
 
@@ -21,6 +21,37 @@ function CampaignsTable() {
     queryKey: ["campaigns"],
     queryFn: () => AdminCampaignsService.getAllCampaigns({ search: searchTerm }),
     enabled: canAccessCampaigns, // Only fetch if user has proper role
+  })
+
+  // Fetch coupon statistics for each campaign
+  const { data: couponStats = {} } = useQuery({
+    queryKey: ["campaign-coupon-stats"],
+    queryFn: async () => {
+      if (!campaignsData || !canAccessCampaigns) return {};
+      
+      const campaigns = (campaignsData as any)?.campaigns || [];
+      const statsPromises = campaigns.map(async (campaign: any) => {
+        try {
+          const response: any = await AdminCouponsService.getCampaignCouponStats({ campaignId: campaign.id });
+          const stats = response.stats || { total: 0, assigned: 0, unassigned: 0, redeemed: 0 };
+          // Map backend field names to frontend field names
+          return { [campaign.id]: {
+            total_coupons: stats.total,
+            assigned_coupons: stats.assigned,
+            unassigned_coupons: stats.unassigned,
+            redeemed_coupons: stats.redeemed
+          }};
+        } catch (err) {
+          console.error(`Error fetching stats for campaign ${campaign.id}:`, err);
+          return { [campaign.id]: { total_coupons: 0, assigned_coupons: 0, unassigned_coupons: 0, redeemed_coupons: 0 } };
+        }
+      });
+
+      const statsResults = await Promise.all(statsPromises);
+      return statsResults.reduce((acc, curr) => ({ ...acc, ...curr }), {});
+    },
+    enabled: canAccessCampaigns && !!campaignsData, // Only fetch if user has proper role and campaigns are loaded
+    staleTime: 5 * 60 * 1000, // 5 minutes
   })
 
   if (!canAccessCampaigns) {
@@ -54,8 +85,19 @@ function CampaignsTable() {
   // Extract campaigns from the response
   const campaigns = (campaignsData as any)?.campaigns || []
 
+  // Combine campaigns with coupon statistics
+  const campaignsWithStats = campaigns.map((campaign: any) => {
+    const stats = couponStats[campaign.id] || { total_coupons: 0, assigned_coupons: 0, unassigned_coupons: 0 };
+    return {
+      ...campaign,
+      total_coupons: stats.total_coupons,
+      assigned_coupons: stats.assigned_coupons,
+      unassigned_coupons: stats.unassigned_coupons,
+    };
+  });
+
   // Filter campaigns based on search term
-  const filteredCampaigns = campaigns.filter((campaign: any) =>
+  const filteredCampaigns = campaignsWithStats.filter((campaign: any) =>
     (campaign.title && campaign.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (campaign.description && campaign.description.toLowerCase().includes(searchTerm.toLowerCase()))
   )

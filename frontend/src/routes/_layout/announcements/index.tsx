@@ -76,14 +76,16 @@ function Announcements() {
                 <h1 className='text-3xl font-bold tracking-tight'>Announcements</h1>
                 <p className='text-muted-foreground'>Broadcast important messages and updates</p>
               </div> */}
-              {isManagerOrAdmin && (
-                <Button onClick={() => setIsCreateModalOpen(true)}>
-                  Create Announcement
-                </Button>
-              )}
             </div>
             <div className='rounded-xl border bg-card shadow-sm'>
-              <div className="p-6">
+              <div className="relative p-6">
+                {isManagerOrAdmin && (
+                  <div className="absolute top-4 right-4">
+                    <Button onClick={() => setIsCreateModalOpen(true)}>
+                      +
+                    </Button>
+                  </div>
+                )}
                 {isManagerOrAdmin ? (
                   <Tabs defaultValue="published" className="w-full">
                     <TabsList className="grid w-full grid-cols-3">
