@@ -34,11 +34,13 @@ function CampaignDetail() {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [autoAssignModalOpen, setAutoAssignModalOpen] = useState(false);
   const [selectedCouponId, setSelectedCouponId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [isAutoAssigning, setIsAutoAssigning] = useState(false);
   const [isUnassigning, setIsUnassigning] = useState(false);
+  const [assignOnePerPerson, setAssignOnePerPerson] = useState(false);
   const queryClient = useQueryClient();
 
   // Fetch campaign data
@@ -296,11 +298,11 @@ function CampaignDetail() {
     const files = e.target.files;
     if (files && files.length > 0) {
       const file = files[0];
-      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv')) {
         setExcelFile(file);
         toast.success(`Selected file: ${file.name}`);
       } else {
-        toast.error('Please upload an Excel file (.xlsx or .xls)');
+        toast.error('Please upload an Excel file (.xlsx, .xls) or CSV file (.csv)');
       }
       // Don't clear the input to show selected file
     }
@@ -347,6 +349,7 @@ function CampaignDetail() {
         } catch {
           errorData = { detail: `HTTP ${response.status}: ${response.statusText}` };
         }
+        console.error('Upload error details:', errorData);
         throw new Error(errorData.detail || 'Failed to upload coupons');
       }
 
@@ -395,13 +398,31 @@ function CampaignDetail() {
     }
   };
 
+  // Open auto-assign modal to show details
+  const openAutoAssignModal = () => {
+    setAutoAssignModalOpen(true);
+  };
+  
   // Auto-assign unassigned coupons to users
   const handleAutoAssign = async () => {
+    // Calculate unassigned coupons
+    const unassignedCoupons = coupons.filter((c: CouponPublic) => !c.assigned_to_user_id);
+    
+    if (unassignedCoupons.length === 0) {
+      toast.error('No unassigned coupons available for assignment');
+      setAutoAssignModalOpen(false);
+      return;
+    }
+    
     setIsAutoAssigning(true);
     try {
-      await AdminCouponsService.assignCampaignToAllUsers({ campaignId: id });
-      toast.success('Coupons auto-assigned successfully');
+      // Call the appropriate endpoint based on the checkbox state
+      await AdminCouponsService.assignCampaignToAllUsers({ 
+        campaignId: id 
+      });
+      toast.success(`Successfully assigned ${unassignedCoupons.length} coupons to users`);
       refetchCoupons();
+      setAutoAssignModalOpen(false);
     } catch (error) {
       console.error('Error auto-assigning coupons:', error);
       toast.error('Failed to auto-assign coupons');
@@ -516,11 +537,14 @@ function CampaignDetail() {
                   Upload Coupons (Excel)
                 </Button>
                 <Button 
-                  onClick={handleAutoAssign}
-                  disabled={isAutoAssigning || stats.unassigned === 0}
+                  onClick={openAutoAssignModal}
+                  disabled={stats.unassigned === 0}
                 >
                   <Users className="mr-2 h-4 w-4" />
-                  {isAutoAssigning ? 'Assigning...' : 'Auto-assign Coupons'}
+                  {stats.unassigned > 0 
+                    ? `Auto-assign ${stats.unassigned} Coupon${stats.unassigned !== 1 ? 's' : ''}` 
+                    : 'No Coupons to Assign'
+                  }
                 </Button>
               </div>
             </div>
@@ -694,7 +718,7 @@ function CampaignDetail() {
                       <Input 
                         id="excel-upload" 
                         type="file" 
-                        accept=".xlsx,.xls" 
+                        accept=".xlsx,.xls,.csv" 
                         onChange={handleFileChange}
                       />
                       <FileSpreadsheet className="h-8 w-8 text-muted-foreground" />
@@ -718,7 +742,7 @@ function CampaignDetail() {
                     )}
                     
                     <p className="mt-3 text-sm text-muted-foreground">
-                      Excel format: code, discount_type ('fixed' or 'percentage'), discount_value, expires_at (optional YYYY-MM-DD HH:MM:SS or NULL)
+                      File format: code, discount_type ('fixed' or 'percentage'), discount_value, expires_at (optional YYYY-MM-DD HH:MM:SS or NULL)
                     </p>
                     
                     <div className="mt-4 p-4 bg-gray-50 rounded-md border border-gray-200">
@@ -758,6 +782,97 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                   >
                     <Upload className="h-4 w-4" />
                     {excelFile ? `Upload ${excelFile.name}` : 'Upload Coupons'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* Auto-Assign Coupons Confirmation Modal */}
+            <Dialog open={autoAssignModalOpen} onOpenChange={setAutoAssignModalOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Confirm Auto-Assignment</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
+                    <h3 className="font-semibold text-blue-800 mb-2">Assignment Details</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Unassigned Coupons:</span>
+                        <span className="font-medium">{coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Total Users:</span>
+                        <span className="font-medium">{users.length}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Assign One Per Person:</span>
+                        <span className="font-medium">{assignOnePerPerson ? 'Yes' : 'No'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Will Be Assigned:</span>
+                        <span className="font-medium">
+                          {Math.min(
+                            coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length,
+                            users.length
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                                    
+                  <div className="flex items-center space-x-2">
+                    <input
+                      id="assign-one-per-person"
+                      name="assignOnePerPerson"
+                      type="checkbox"
+                      checked={assignOnePerPerson}
+                      onChange={(e) => {
+                        setAssignOnePerPerson(e.target.checked);
+                        if (e.target.checked) {
+                          toast.info('One coupon per person feature coming soon! Currently assigns all available coupons.');
+                        }
+                      }}
+                      className="h-4 w-4 text-blue-600 rounded"
+                      disabled
+                    />
+                    <Label htmlFor="assign-one-per-person" className="text-sm font-medium text-gray-700 opacity-50 cursor-not-allowed">
+                      Assign one coupon per person (coming soon)
+                    </Label>
+                  </div>
+                  
+                  {coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length < users.length && (
+                    <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
+                      <h4 className="font-semibold text-yellow-800 mb-1">⚠️ Warning</h4>
+                      <p className="text-sm text-yellow-700">
+                        You have fewer unassigned coupons ({coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length}) than users ({users.length}).
+                        Only {coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length} users will receive coupons.
+                      </p>
+                    </div>
+                  )}
+                  
+                  {coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length === 0 && (
+                    <div className="bg-red-50 p-4 rounded-md border border-red-200">
+                      <h4 className="font-semibold text-red-800 mb-1">⚠️ No Coupons Available</h4>
+                      <p className="text-sm text-red-700">
+                        There are no unassigned coupons available for assignment.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setAutoAssignModalOpen(false)}
+                    disabled={isAutoAssigning}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleAutoAssign} 
+                    disabled={isAutoAssigning || coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length === 0}
+                  >
+                    {isAutoAssigning ? 'Assigning...' : 'Confirm Assignment'}
                   </Button>
                 </DialogFooter>
               </DialogContent>

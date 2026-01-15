@@ -39,10 +39,10 @@ def upload_coupons_from_excel(
     """
 
     # 1️⃣ Validate file type
-    if not file.filename.endswith((".xlsx", ".xls")):
+    if not (file.filename.endswith(('.xlsx', '.xls', '.csv'))):
         raise HTTPException(
             status_code=400,
-            detail="File must be an Excel file (.xlsx or .xls)",
+            detail='File must be an Excel file (.xlsx, .xls) or CSV file (.csv)',
         )
 
     # 2️⃣ Read Excel safely
@@ -55,7 +55,12 @@ def upload_coupons_from_excel(
         contents = file.file.read()
         print(f"DEBUG: Raw content length: {len(contents)}")
         
-        df = pd.read_excel(BytesIO(contents))
+        # Read file based on extension
+        if file.filename.endswith('.csv'):
+            import io
+            df = pd.read_csv(BytesIO(contents))
+        else:
+            df = pd.read_excel(BytesIO(contents))
         print(f"DEBUG: DataFrame shape: {df.shape}")
         print(f"DEBUG: DataFrame columns: {list(df.columns)}")
     except Exception as e:
@@ -90,7 +95,13 @@ def upload_coupons_from_excel(
 
     created_coupons = []
     seen_codes = set()
-
+    
+    # Check for duplicate codes in the database
+    codes_list = [str(row["code"]).strip() for _, row in df.iterrows()]
+    existing_codes_query = session.exec(select(Coupon.code).where(Coupon.code.in_(codes_list)))
+    existing_codes_result = existing_codes_query.all()
+    existing_codes_set = set(existing_codes_result) if existing_codes_result else set()
+    
     # 5️⃣ Process rows
     for index, row in df.iterrows():
         code = str(row["code"]).strip()
@@ -105,6 +116,12 @@ def upload_coupons_from_excel(
             raise HTTPException(
                 status_code=400,
                 detail=f"Duplicate coupon code in file: {code}",
+            )
+
+        if code in existing_codes_set:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Coupon code already exists in database: {code}",
             )
 
         seen_codes.add(code)
@@ -368,13 +385,14 @@ def generate_coupons(
 @router.post("/assign/bulk/{campaign_id}", response_model=dict, dependencies=[require_role(["admin", "manager"])])
 def assign_campaign_to_all_users(
     campaign_id: uuid.UUID,
+    assign_one_per_person: bool = False,
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_db)
 ):
     """Assign campaign coupons to all users"""
     try:
         service = CouponService(session)
-        assigned_count = service.assign_campaign_to_all_users(campaign_id)
+        assigned_count = service.assign_campaign_to_all_users(campaign_id, assign_one_per_person)
         return {"message": f"Assigned {assigned_count} coupons", "count": assigned_count}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

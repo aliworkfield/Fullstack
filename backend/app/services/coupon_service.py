@@ -50,12 +50,13 @@ class CouponService:
             
         return coupons
 
-    def assign_campaign_to_all_users(self, campaign_id: uuid.UUID) -> int:
+    def assign_campaign_to_all_users(self, campaign_id: uuid.UUID, assign_one_per_person: bool = False) -> int:
         """
         Assign campaign coupons to all users
         
         Args:
             campaign_id: ID of the campaign
+            assign_one_per_person: If True, assign one coupon per person and leave excess coupons unassigned
             
         Returns:
             Number of coupons assigned
@@ -78,18 +79,28 @@ class CouponService:
         if not coupons:
             return 0  # No coupons to assign
         
-        # Assign coupons to users in round-robin fashion
         assigned_count = 0
-        user_index = 0
         
-        for coupon in coupons:
-            if user_index >= len(users):
-                user_index = 0
-                
-            coupon.assigned_to_user_id = users[user_index].id
-            self.session.add(coupon)
-            assigned_count += 1
-            user_index += 1
+        if assign_one_per_person:
+            # Assign one coupon per person, leaving excess coupons unassigned
+            num_assignments = min(len(coupons), len(users))
+            for i in range(num_assignments):
+                coupon = coupons[i]
+                user = users[i]
+                coupon.assigned_to_user_id = user.id
+                self.session.add(coupon)
+                assigned_count += 1
+        else:
+            # Original behavior: assign coupons to users in round-robin fashion
+            user_index = 0
+            for coupon in coupons:
+                if user_index >= len(users):
+                    user_index = 0
+                    
+                coupon.assigned_to_user_id = users[user_index].id
+                self.session.add(coupon)
+                assigned_count += 1
+                user_index += 1
         
         self.session.commit()
         
