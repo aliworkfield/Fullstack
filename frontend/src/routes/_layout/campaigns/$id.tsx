@@ -40,7 +40,7 @@ function CampaignDetail() {
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [isAutoAssigning, setIsAutoAssigning] = useState(false);
   const [isUnassigning, setIsUnassigning] = useState(false);
-  const [assignOnePerPerson, setAssignOnePerPerson] = useState(false);
+  const [assignOnePerPerson, setAssignOnePerPerson] = useState(true);
   const queryClient = useQueryClient();
 
   // Fetch campaign data
@@ -405,22 +405,55 @@ function CampaignDetail() {
   
   // Auto-assign unassigned coupons to users
   const handleAutoAssign = async () => {
-    // Calculate unassigned coupons
+    // Calculate unassigned coupons and users
     const unassignedCoupons = coupons.filter((c: CouponPublic) => !c.assigned_to_user_id);
+    const allUsers = users;
     
-    if (unassignedCoupons.length === 0) {
-      toast.error('No unassigned coupons available for assignment');
+    // Find users who don't have any coupon from this campaign assigned
+    const assignedUserIds = new Set(coupons
+      .filter((c: CouponPublic) => c.assigned_to_user_id)
+      .map((c: CouponPublic) => c.assigned_to_user_id));
+    
+    const unassignedUsers = allUsers.filter((u: UserPublic) => !assignedUserIds.has(u.id));
+    
+    const assignCount = Math.min(unassignedUsers.length, unassignedCoupons.length);
+    
+    if (assignCount === 0) {
+      if (unassignedCoupons.length === 0) {
+        toast.error('No unassigned coupons available for assignment');
+      } else {
+        toast.error('No unassigned users available for assignment');
+      }
       setAutoAssignModalOpen(false);
       return;
     }
     
     setIsAutoAssigning(true);
     try {
-      // Call the appropriate endpoint based on the checkbox state
-      await AdminCouponsService.assignCampaignToAllUsers({ 
-        campaignId: id 
+      // Call the API directly to pass the assign_one_per_person parameter
+      let token = keycloak.token;
+      if (!token || keycloak.isTokenExpired()) {
+        const refreshed = await keycloak.updateToken(5);
+        if (!refreshed) {
+          throw new Error('Failed to refresh authentication token');
+        }
+        token = keycloak.token;
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/admin/coupons/assign/bulk/${id}?assign_one_per_person=${assignOnePerPerson}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       });
-      toast.success(`Successfully assigned ${unassignedCoupons.length} coupons to users`);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to auto-assign coupons');
+      }
+
+      toast.success(`Successfully assigned ${assignCount} coupons to users`);
       refetchCoupons();
       setAutoAssignModalOpen(false);
     } catch (error) {
@@ -795,30 +828,74 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
-                    <h3 className="font-semibold text-blue-800 mb-2">Assignment Details</h3>
+                    <h3 className="font-semibold text-blue-800 mb-2">Assignment Preview</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Unassigned Coupons:</span>
                         <span className="font-medium">{coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Total Users:</span>
-                        <span className="font-medium">{users.length}</span>
+                        <span className="text-gray-600">Unassigned Users:</span>
+                        <span className="font-medium">{users.filter((u: UserPublic) => !coupons.some((c: CouponPublic) => c.assigned_to_user_id === u.id)).length}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Assign One Per Person:</span>
-                        <span className="font-medium">{assignOnePerPerson ? 'Yes' : 'No'}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Will Be Assigned:</span>
+                        <span className="text-gray-600">To Be Assigned:</span>
                         <span className="font-medium">
                           {Math.min(
                             coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length,
-                            users.length
+                            users.filter((u: UserPublic) => !coupons.some((c: CouponPublic) => c.assigned_to_user_id === u.id)).length
                           )}
                         </span>
                       </div>
                     </div>
+                  </div>
+                                    
+                  {/* Show warnings if there are mismatches */}
+                  {(() => {
+                    const unassignedCouponsCount = coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length;
+                    const unassignedUsersCount = users.filter((u: UserPublic) => !coupons.some((c: CouponPublic) => c.assigned_to_user_id === u.id)).length;
+                                                         
+                    if (unassignedUsersCount > unassignedCouponsCount && unassignedCouponsCount > 0) {
+                      return (
+                        <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
+                          <p className="text-sm text-yellow-700">
+                            {unassignedUsersCount - unassignedCouponsCount} users will remain unassigned.
+                          </p>
+                        </div>
+                      );
+                    } else if (unassignedCouponsCount > unassignedUsersCount && unassignedUsersCount > 0) {
+                      return (
+                        <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
+                          <p className="text-sm text-yellow-700">
+                            {unassignedCouponsCount - unassignedUsersCount} coupons will remain unassigned.
+                          </p>
+                        </div>
+                      );
+                    } else if (unassignedCouponsCount === 0) {
+                      return (
+                        <div className="bg-red-50 p-4 rounded-md border border-red-200">
+                          <p className="text-sm text-red-700">
+                            No unassigned coupons available for assignment.
+                          </p>
+                        </div>
+                      );
+                    } else if (unassignedUsersCount === 0) {
+                      return (
+                        <div className="bg-red-50 p-4 rounded-md border border-red-200">
+                          <p className="text-sm text-red-700">
+                            No unassigned users available for assignment.
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
+                                    
+                  <div className="text-sm text-gray-700">
+                    <p>This will assign <strong>{Math.min(
+                      coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length,
+                      users.filter((u: UserPublic) => !coupons.some((c: CouponPublic) => c.assigned_to_user_id === u.id)).length
+                    )} coupons</strong>.</p>
                   </div>
                                     
                   <div className="flex items-center space-x-2">
@@ -827,38 +904,13 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                       name="assignOnePerPerson"
                       type="checkbox"
                       checked={assignOnePerPerson}
-                      onChange={(e) => {
-                        setAssignOnePerPerson(e.target.checked);
-                        if (e.target.checked) {
-                          toast.info('One coupon per person feature coming soon! Currently assigns all available coupons.');
-                        }
-                      }}
-                      className="h-4 w-4 text-blue-600 rounded"
-                      disabled
+                      onChange={(e) => setAssignOnePerPerson(e.target.checked)}
+                      className="h-4 w-4 text-blue-300 rounded"
                     />
-                    <Label htmlFor="assign-one-per-person" className="text-sm font-medium text-gray-700 opacity-50 cursor-not-allowed">
-                      Assign one coupon per person (coming soon)
+                    <Label htmlFor="assign-one-per-person" className="text-sm font-medium text-gray-500">
+                      Assign one coupon per person (leave excess coupons unassigned)
                     </Label>
                   </div>
-                  
-                  {coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length < users.length && (
-                    <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
-                      <h4 className="font-semibold text-yellow-800 mb-1">⚠️ Warning</h4>
-                      <p className="text-sm text-yellow-700">
-                        You have fewer unassigned coupons ({coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length}) than users ({users.length}).
-                        Only {coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length} users will receive coupons.
-                      </p>
-                    </div>
-                  )}
-                  
-                  {coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length === 0 && (
-                    <div className="bg-red-50 p-4 rounded-md border border-red-200">
-                      <h4 className="font-semibold text-red-800 mb-1">⚠️ No Coupons Available</h4>
-                      <p className="text-sm text-red-700">
-                        There are no unassigned coupons available for assignment.
-                      </p>
-                    </div>
-                  )}
                 </div>
                 <DialogFooter>
                   <Button 

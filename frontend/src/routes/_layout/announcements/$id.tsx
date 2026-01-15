@@ -226,11 +226,11 @@ export function AnnouncementDetailRoute() {
                                         disabled={redeemMutation.isPending}
                                       >
                                         <Eye className="w-4 h-4" />
-                                        {redeemMutation.isPending ? "Redeeming..." : "Show Coupon Code"}
+                                        {redeemMutation.isPending ? "İndirim Kodu Kullanılıyor..." : "İndirim Kodunu Görüntüle"}
                                       </Button>
-                                      <p className="text-sm text-blue-600 mt-2">
-                                        Kodu görüntüle
-                                      </p>
+                                      {/* <p className="text-sm text-blue-600 mt-2">
+                                        İndirim Kodunu Görüntüle
+                                      </p> */}
                                     </div>
                                   )}
                                 </div>
