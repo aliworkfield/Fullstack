@@ -61,10 +61,6 @@ function Announcements() {
   const draftAnnouncements = filterAnnouncements(allAnnouncements, "drafts");
   const expiredAnnouncements = filterAnnouncements(allAnnouncements, "expired");
 
-  if (isLoading) {
-    return <div>Loading announcements...</div>;
-  }
-
   return (
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
@@ -94,25 +90,49 @@ function Announcements() {
                       <TabsTrigger value="expired">Expired</TabsTrigger>
                     </TabsList>
                     <TabsContent value="published">
-                      <GroupedAnnouncements 
-                        announcements={publishedAnnouncements}
-                      />
+                      {isLoading ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          Loading announcements...
+                        </div>
+                      ) : (
+                        <GroupedAnnouncements 
+                          announcements={publishedAnnouncements}
+                        />
+                      )}
                     </TabsContent>
                     <TabsContent value="drafts">
-                      <GroupedAnnouncements 
-                        announcements={draftAnnouncements}
-                      />
+                      {isLoading ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          Loading announcements...
+                        </div>
+                      ) : (
+                        <GroupedAnnouncements 
+                          announcements={draftAnnouncements}
+                        />
+                      )}
                     </TabsContent>
                     <TabsContent value="expired">
-                      <GroupedAnnouncements 
-                        announcements={expiredAnnouncements}
-                      />
+                      {isLoading ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          Loading announcements...
+                        </div>
+                      ) : (
+                        <GroupedAnnouncements 
+                          announcements={expiredAnnouncements}
+                        />
+                      )}
                     </TabsContent>
                   </Tabs>
                 ) : (
-                  <GroupedAnnouncements 
-                    announcements={allAnnouncements}
-                  />
+                  isLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Loading announcements...
+                    </div>
+                  ) : (
+                    <GroupedAnnouncements 
+                      announcements={allAnnouncements}
+                    />
+                  )
                 )}
               </div>
             </div>

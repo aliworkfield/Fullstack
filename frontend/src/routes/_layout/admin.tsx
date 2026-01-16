@@ -34,7 +34,7 @@ export function AdminRoute() {
       });
       return response.data || [];
     },
-    enabled: isAdmin, // Only run query if user is admin
+    enabled: !rolesLoading && isAdmin, // Only run query if roles are loaded and user is admin
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -54,7 +54,7 @@ export function AdminRoute() {
       });
       return response.data || [];
     },
-    enabled: isAdmin || isManager, // Run query if user is admin or manager
+    enabled: !rolesLoading && (isAdmin || isManager), // Run query if roles are loaded and user is admin or manager
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -74,6 +74,12 @@ export function AdminRoute() {
   if (!isAdmin && !isManager) {
     return <div>Access denied. Admin or Manager privileges required.</div>;
   }
+
+  // Determine if users query is loading (either fetching or disabled due to roles not loaded)
+  const isUsersQueryLoading = rolesLoading || (!rolesLoading && isAdmin && usersLoading);
+
+  // Determine if announcements query is loading (either fetching or disabled due to roles not loaded)
+  const isAnnouncementsQueryLoading = rolesLoading || (!rolesLoading && (isAdmin || isManager) && announcementsLoading);
 
   return (
     <SidebarProvider defaultOpen={false}>
@@ -103,7 +109,7 @@ export function AdminRoute() {
                   </CardHeader>
                   <CardContent>
                     {isAdmin ? (
-                      usersLoading ? (
+                      isUsersQueryLoading ? (
                         <div className="text-center py-8 text-muted-foreground">
                           Loading users...
                         </div>
@@ -127,7 +133,7 @@ export function AdminRoute() {
                     <CardTitle>Manage Announcements</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {announcementsLoading ? (
+                    {isAnnouncementsQueryLoading ? (
                       <div className="text-center py-8 text-muted-foreground">
                         Loading announcements...
                       </div>

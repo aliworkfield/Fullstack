@@ -43,6 +43,7 @@ function CampaignDetail() {
   const [isUnassigning, setIsUnassigning] = useState(false);
   const [couponsPerPerson, setCouponsPerPerson] = useState(1);
   const [selectedCouponIds, setSelectedCouponIds] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState('coupons');
   const queryClient = useQueryClient();
 
   // Fetch campaign data
@@ -677,7 +678,7 @@ function CampaignDetail() {
                   Edit Campaign
                 </Button>
                 <Button 
-                  onClick={() => setUploadModalOpen(true)}
+                  onClick={() => setActiveTab('upload')}
                   variant="outline"
                 >
                   <Upload className="mr-2 h-4 w-4" />
@@ -731,7 +732,7 @@ function CampaignDetail() {
               </Card>
             </div>
 
-            <Tabs defaultValue="coupons" className="space-y-4">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
               <TabsList>
                 <TabsTrigger value="coupons">Coupons ({coupons.length})</TabsTrigger>
                 <TabsTrigger value="announcements">Announcements ({announcements.length})</TabsTrigger>
