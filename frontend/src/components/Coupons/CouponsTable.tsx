@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, Plus } from "lucide-react";
-import { AdminCouponsService } from "@/client";
+import { Search } from "lucide-react";
+import { AdminCouponsService, AdminCampaignsService } from "@/client";
 import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "@/components/Common/DataTable";
 import { columns } from "./columns";
@@ -12,7 +12,7 @@ export function CouponsTable() {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch all coupons from the admin service
-  const { data: coupons = [], isLoading } = useQuery({
+  const { data: coupons = [], isLoading: couponsLoading } = useQuery({
     queryKey: ["all-coupons"],
     queryFn: async () => {
       const response = await AdminCouponsService.getAllCoupons({
@@ -23,10 +23,40 @@ export function CouponsTable() {
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
+  
+  // Fetch all campaigns to get campaign names
+  const { data: campaigns = [], isLoading: campaignsLoading } = useQuery({
+    queryKey: ["all-campaigns"],
+    queryFn: async () => {
+      const response = await AdminCampaignsService.getAllCampaigns({});
+      return response?.campaigns || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+  
+  // Create a map of campaign id to campaign name for quick lookup
+  const campaignMap = useMemo(() => {
+    const map = new Map();
+    campaigns.forEach((campaign: any) => {
+      map.set(campaign.id, campaign.title);
+    });
+    return map;
+  }, [campaigns]);
+  
+  // Combine coupon data with campaign names
+  const couponsWithCampaigns = useMemo(() => {
+    return coupons.map((coupon: any) => ({
+      ...coupon,
+      campaign_title: coupon.campaign_id ? campaignMap.get(coupon.campaign_id) || 'Unknown Campaign' : 'No Campaign',
+    }));
+  }, [coupons, campaignMap]);
+  
+  const isLoading = couponsLoading || campaignsLoading;
 
-  const filteredCoupons = Array.isArray(coupons) ? coupons.filter((coupon: import('@/client').CouponPublic) => {
+  const filteredCoupons = Array.isArray(couponsWithCampaigns) ? couponsWithCampaigns.filter((coupon: any) => {
     const matchesSearch = coupon.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         coupon.discount_type.toLowerCase().includes(searchTerm.toLowerCase());
+                         coupon.discount_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         coupon.campaign_title.toLowerCase().includes(searchTerm.toLowerCase());
     
     return matchesSearch;
   }) : [];

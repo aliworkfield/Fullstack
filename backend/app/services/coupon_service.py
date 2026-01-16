@@ -68,11 +68,11 @@ class CouponService:
         if not users:
             return 0  # No users to assign to
         
-        # Get unassigned coupons for campaign
+        # Get unassigned coupons for campaign, ordered by creation date (oldest first) to ensure consistent assignment order
         statement = select(Coupon).where(
             Coupon.campaign_id == campaign_id,
             Coupon.assigned_to_user_id.is_(None)
-        )
+        ).order_by(Coupon.created_at.asc())  # Order by creation date ascending (oldest first)
         coupons = self.session.exec(statement).all()
         
         # Check if there are coupons to assign
@@ -128,11 +128,11 @@ class CouponService:
         if not users:
             return 0  # No users to assign to
         
-        # Get unassigned coupons for campaign
+        # Get unassigned coupons for campaign, ordered by creation date (oldest first) to ensure consistent assignment order
         statement = select(Coupon).where(
             Coupon.campaign_id == campaign_id,
             Coupon.assigned_to_user_id.is_(None)
-        )
+        ).order_by(Coupon.created_at.asc())  # Order by creation date ascending (oldest first)
         coupons = self.session.exec(statement).all()
         
         # Check if there are coupons to assign
@@ -297,11 +297,11 @@ class CouponService:
         if not campaign:
             raise ValueError("Campaign not found")
         
-        # Get unassigned coupons
+        # Get unassigned coupons, ordered by creation date (oldest first) to ensure consistent order
         statement = select(Coupon).where(
             Coupon.campaign_id == campaign_id,
             Coupon.assigned_to_user_id.is_(None)
-        )
+        ).order_by(Coupon.created_at.asc())  # Order by creation date ascending (oldest first)
         return self.session.exec(statement).all()
 
     def unassign_coupon_from_user(self, coupon_id: uuid.UUID) -> Coupon:

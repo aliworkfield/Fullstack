@@ -68,13 +68,13 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="flex flex-col gap-4">
-      <Table>
+      <Table className="border rounded-md">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="hover:bg-transparent">
+            <TableRow key={headerGroup.id} className="hover:bg-transparent border-b">
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="px-4 py-3 text-left font-semibold text-muted-foreground">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -90,9 +90,9 @@ export function DataTable<TData, TValue>({
         <TableBody>
           {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
+              <TableRow key={row.id} className="border-b hover:bg-accent/50 transition-colors">
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className="px-4 py-3">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -102,7 +102,7 @@ export function DataTable<TData, TValue>({
             <TableRow className="hover:bg-transparent">
               <TableCell
                 colSpan={columns.length}
-                className="h-32 text-center text-muted-foreground"
+                className="h-32 text-center text-muted-foreground border-t"
               >
                 No results found.
               </TableCell>

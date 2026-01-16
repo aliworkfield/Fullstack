@@ -2,8 +2,33 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CouponPublic } from "@/client/types.gen"
+import { useQuery } from "@tanstack/react-query"
+import { AdminCampaignsService } from "@/client"
 
-export const columns: ColumnDef<CouponPublic>[] = [
+export const columns: ColumnDef<any>[] = [
+  {
+    accessorKey: "campaign_title",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-0 font-medium"
+        >
+          Campaign
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const campaignTitle = row.getValue("campaign_title") as string;
+      return (
+        <div className="font-medium">
+          {campaignTitle}
+        </div>
+      );
+    },
+  },
   {
     accessorKey: "code",
     header: ({ column }) => {
@@ -11,52 +36,142 @@ export const columns: ColumnDef<CouponPublic>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-0 font-medium"
         >
           Code
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
+    cell: ({ row }) => {
+      const code = row.getValue("code") as string;
+      return (
+        <div className="font-mono text-sm font-medium text-primary">
+          {code}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "discount_type",
-    header: "Discount Type",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-0 font-medium"
+        >
+          Discount Type
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const type = row.getValue("discount_type") as string;
+      return (
+        <div className="capitalize">
+          {type}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "discount_value",
-    header: "Discount Value",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-0 font-medium"
+        >
+          Discount Value
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({ row }) => {
       const type = row.getValue("discount_type") as string
       const value = row.getValue("discount_value") as number
       return (
-        <span>
-          {type === "percentage" ? `${value}%` : `$${value}`}
-        </span>
+        <div className="font-medium">
+          {type === "percentage" ? (
+            <span className="text-emerald-600">{value}%</span>
+          ) : (
+            <span className="text-emerald-600">${value}</span>
+          )}
+        </div>
       )
     },
   },
   {
     accessorKey: "expires_at",
-    header: "Expires At",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-0 font-medium"
+        >
+          Expires At
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({ row }) => {
       const expiresAt = row.getValue("expires_at") as string | null
-      return expiresAt ? new Date(expiresAt).toLocaleDateString() : "Never"
+      if (!expiresAt) {
+        return (
+          <span className="text-muted-foreground">Never</span>
+        );
+      }
+      
+      const date = new Date(expiresAt);
+      const today = new Date();
+      
+      // Check if the coupon has expired
+      const hasExpired = date < today;
+      
+      return (
+        <div className={`text-sm ${hasExpired ? 'text-destructive' : 'text-muted-foreground'}`}>
+          {date.toLocaleDateString()} {hasExpired && '(Expired)'}
+        </div>
+      );
     },
   },
   {
     accessorKey: "redeemed",
-    header: "Status",
-    cell: ({ row }) => {
-      const redeemed = row.getValue("redeemed") as boolean
+    header: ({ column }) => {
       return (
-        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-          redeemed 
-            ? "bg-red-100 text-red-800" 
-            : "bg-green-100 text-green-800"
-        }`}>
-          {redeemed ? "Redeemed" : "Available"}
-        </span>
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-0 font-medium"
+        >
+          Status
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
       )
+    },
+    cell: ({ row }) => {
+      const redeemed = row.getValue("redeemed") as boolean;
+      const assignedToUser = row.original.assigned_to_user_id;
+      
+      let statusText = "Available";
+      let statusColor = "bg-gray-100 text-gray-800";
+      
+      if (redeemed) {
+        statusText = "Redeemed";
+        statusColor = "bg-destructive/20 text-destructive";
+      } else if (assignedToUser) {
+        statusText = "Assigned";
+        statusColor = "bg-blue-100 text-blue-800";
+      }
+      
+      return (
+        <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${statusColor}`}>
+          {statusText}
+        </span>
+      );
     },
   },
 ]
