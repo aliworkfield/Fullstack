@@ -4,6 +4,7 @@ import AppSidebar from "@/components/Sidebar/AppSidebar";
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminCampaignsService, AdminCouponsService, AnnouncementsService, UsersService } from '@/client';
@@ -40,7 +41,8 @@ function CampaignDetail() {
   const [excelFile, setExcelFile] = useState<File | null>(null);
   const [isAutoAssigning, setIsAutoAssigning] = useState(false);
   const [isUnassigning, setIsUnassigning] = useState(false);
-  const [assignOnePerPerson, setAssignOnePerPerson] = useState(true);
+  const [couponsPerPerson, setCouponsPerPerson] = useState(1);
+  const [selectedCouponIds, setSelectedCouponIds] = useState<string[]>([]);
   const queryClient = useQueryClient();
 
   // Fetch campaign data
@@ -119,6 +121,25 @@ function CampaignDetail() {
   // Define coupon columns with user names
   const couponColumns: ColumnDef<CouponPublic>[] = [
     {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+          onCheckedChange={(value: boolean) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
       accessorKey: "code",
       header: ({ column }) => {
         return (
@@ -134,11 +155,31 @@ function CampaignDetail() {
     },
     {
       accessorKey: "discount_type",
-      header: "Discount Type",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Discount Type
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
     },
     {
       accessorKey: "discount_value",
-      header: "Discount Value",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Discount Value
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
       cell: ({ row }) => {
         const value = parseFloat(row.getValue("discount_value"));
         return `${value}${row.getValue("discount_type") === "percentage" ? "%" : ""}`;
@@ -146,7 +187,17 @@ function CampaignDetail() {
     },
     {
       accessorKey: "assigned_to_user_id",
-      header: "Assigned User",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Assigned User
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
       cell: ({ row }) => {
         const userId = row.getValue("assigned_to_user_id") as string | null;
         if (!userId) {
@@ -159,7 +210,17 @@ function CampaignDetail() {
     },
     {
       accessorKey: "redeemed",
-      header: "Status",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Status
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        );
+      },
       cell: ({ row }) => {
         const isRedeemed = row.getValue("redeemed") as boolean;
         const isAssigned = row.getValue("assigned_to_user_id") as string | null;
@@ -440,7 +501,7 @@ function CampaignDetail() {
         token = keycloak.token;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/admin/coupons/assign/bulk/${id}?assign_one_per_person=${assignOnePerPerson}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/admin/coupons/assign/bulk/${id}?coupons_per_person=${couponsPerPerson}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -496,6 +557,59 @@ function CampaignDetail() {
     } catch (error) {
       console.error('Error unassigning coupon:', error);
       toast.error('Failed to unassign coupon');
+    } finally {
+      setIsUnassigning(false);
+    }
+  };
+
+  // Bulk unassign selected coupons
+  const handleBulkUnassign = async () => {
+    if (selectedCouponIds.length === 0) {
+      toast.error('Please select at least one coupon to unassign');
+      return;
+    }
+
+    setIsUnassigning(true);
+    try {
+      // Call the API to unassign multiple coupons
+      let token = keycloak.token;
+      if (!token || keycloak.isTokenExpired()) {
+        const refreshed = await keycloak.updateToken(5);
+        if (!refreshed) {
+          throw new Error('Failed to refresh authentication token');
+        }
+        token = keycloak.token;
+      }
+
+      // Process each selected coupon individually
+      const promises = selectedCouponIds.map(couponId => 
+        fetch(`${import.meta.env.VITE_API_URL}/api/v1/admin/coupons/unassign/${couponId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        })
+      );
+
+      const results = await Promise.allSettled(promises);
+      
+      // Count successful and failed operations
+      const successful = results.filter(result => result.status === 'fulfilled').length;
+      const failed = results.filter(result => result.status === 'rejected').length;
+      
+      if (successful > 0) {
+        toast.success(`Successfully unassigned ${successful} coupon${successful !== 1 ? 's' : ''}`);
+        setSelectedCouponIds([]); // Clear selections after successful unassignment
+        refetchCoupons(); // Refresh the coupon list
+      }
+      
+      if (failed > 0) {
+        toast.error(`Failed to unassign ${failed} coupon${failed !== 1 ? 's' : ''}`);
+      }
+    } catch (error) {
+      console.error('Error bulk unassigning coupons:', error);
+      toast.error('Failed to unassign selected coupons');
     } finally {
       setIsUnassigning(false);
     }
@@ -628,7 +742,19 @@ function CampaignDetail() {
                     <CardTitle>Coupon Management</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="mb-4 flex justify-end">
+                    <div className="mb-4 flex justify-between items-center">
+                      <div>
+                        {selectedCouponIds.length > 0 && (
+                          <Button 
+                            variant="outline" 
+                            onClick={handleBulkUnassign}
+                            disabled={isUnassigning}
+                            className="mr-2"
+                          >
+                            {isUnassigning ? 'Unassigning...' : `Unassign ${selectedCouponIds.length} Coupon${selectedCouponIds.length !== 1 ? 's' : ''}`}
+                          </Button>
+                        )}
+                      </div>
                       <Button 
                         onClick={() => setAssignModalOpen(true)}
                         disabled={stats.unassigned === 0}
@@ -639,6 +765,8 @@ function CampaignDetail() {
                     <DataTable 
                       columns={couponColumns} 
                       data={coupons} 
+                      selectedRowIds={selectedCouponIds}
+                      onRowSelectionChange={setSelectedCouponIds}
                     />
                   </CardContent>
                 </Card>
@@ -898,20 +1026,27 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                     )} coupons</strong>.</p>
                   </div>
                                     
-                  <div className="flex items-center space-x-2">
-                    <input
-                      id="assign-one-per-person"
-                      name="assignOnePerPerson"
-                      type="checkbox"
-                      checked={assignOnePerPerson}
-                      onChange={(e) => setAssignOnePerPerson(e.target.checked)}
-                      className="h-4 w-4 text-blue-300 rounded"
-                    />
-                    <Label htmlFor="assign-one-per-person" className="text-sm font-medium text-gray-500">
-                      Assign one coupon per person (leave excess coupons unassigned)
-                    </Label>
+                  <div className="space-y-2">
+                  <Label
+                    htmlFor="coupons-per-person"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Coupons per person
+                  </Label>
+                  <Input
+                    id="coupons-per-person"
+                    name="couponsPerPerson"
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={couponsPerPerson}
+                    onChange={(e) => setCouponsPerPerson(parseInt(e.target.value) || 1)}
+                    className="w-24"
+                  />
+                  <p className="text-xs text-gray-500">Number of coupons to assign per person</p>
                   </div>
                 </div>
+
                 <DialogFooter>
                   <Button 
                     variant="outline" 

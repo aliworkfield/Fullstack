@@ -16,7 +16,7 @@ function Coupons() {
   if (rolesLoading) return <div>Loading...</div>;
   if (!isAdminOrManager) {
     return (
-      <SidebarProvider>
+      <SidebarProvider defaultOpen={false}>
         <AppSidebar />
         <main className="flex flex-1 flex-col gap-6 p-6 pt-0 bg-muted/10">
           <div className="flex-1 overflow-auto">
@@ -43,7 +43,7 @@ function Coupons() {
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <AppSidebar />
       <main className="flex flex-1 flex-col gap-6 p-6 pt-0 bg-muted/10">
         <div className="flex-1 overflow-auto">

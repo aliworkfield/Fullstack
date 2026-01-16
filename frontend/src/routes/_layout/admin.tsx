@@ -22,7 +22,7 @@ export function AdminRoute() {
   const isManager = hasRole("manager");
 
   // Fetch users only if user is admin
-  const { data: users = [] } = useQuery({
+  const { data: users = [], isLoading: usersLoading } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       if (!isAdmin) {
@@ -42,7 +42,7 @@ export function AdminRoute() {
   const usersArray = Array.isArray(users) ? users : [];
 
   // Fetch announcements for both admin and manager
-  const { data: announcements = [] } = useQuery({
+  const { data: announcements = [], isLoading: announcementsLoading } = useQuery({
     queryKey: ["announcements"],
     queryFn: async () => {
       if (!isAdmin && !isManager) {
@@ -76,7 +76,7 @@ export function AdminRoute() {
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <AppSidebar />
       <main className="flex flex-1 flex-col gap-6 p-6 pt-0 overflow-y-scroll bg-muted/10">
         <div className="flex-1 overflow-auto">
@@ -103,10 +103,16 @@ export function AdminRoute() {
                   </CardHeader>
                   <CardContent>
                     {isAdmin ? (
-                      <DataTable
-                        columns={columns}
-                        data={usersArray}
-                      />
+                      usersLoading ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          Loading users...
+                        </div>
+                      ) : (
+                        <DataTable
+                          columns={columns}
+                          data={usersArray}
+                        />
+                      )
                     ) : (
                       <div className="text-center py-8 text-muted-foreground">
                         User management is only available to administrators.
@@ -121,18 +127,26 @@ export function AdminRoute() {
                     <CardTitle>Manage Announcements</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {Object.entries(groupedAnnouncements).map(([category, announcements]) => (
-                      <AnnouncementsByCategory
-                        key={category}
-                        category={category}
-                        title={category}
-                        announcements={announcements}
-                      />
-                    ))}
-                    {Object.keys(groupedAnnouncements).length === 0 && (
+                    {announcementsLoading ? (
                       <div className="text-center py-8 text-muted-foreground">
-                        No announcements found
+                        Loading announcements...
                       </div>
+                    ) : (
+                      <>
+                        {Object.entries(groupedAnnouncements).map(([category, announcements]) => (
+                          <AnnouncementsByCategory
+                            key={category}
+                            category={category}
+                            title={category}
+                            announcements={announcements}
+                          />
+                        ))}
+                        {Object.keys(groupedAnnouncements).length === 0 && (
+                          <div className="text-center py-8 text-muted-foreground">
+                            No announcements found
+                          </div>
+                        )}
+                      </>
                     )}
                   </CardContent>
                 </Card>

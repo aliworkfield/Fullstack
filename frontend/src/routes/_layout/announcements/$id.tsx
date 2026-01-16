@@ -100,7 +100,7 @@ export function AnnouncementDetailRoute() {
   const handleEdit = () => setIsEditModalOpen(true);
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <AppSidebar />
       <main className="flex flex-1 flex-col gap-6 p-6 pt-6 overflow-y-scroll bg-muted/10">
         <div className="flex-1 overflow-auto">

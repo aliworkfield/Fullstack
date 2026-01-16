@@ -385,14 +385,14 @@ def generate_coupons(
 @router.post("/assign/bulk/{campaign_id}", response_model=dict, dependencies=[require_role(["admin", "manager"])])
 def assign_campaign_to_all_users(
     campaign_id: uuid.UUID,
-    assign_one_per_person: bool = False,
+    coupons_per_person: int = 1,
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_db)
 ):
     """Assign campaign coupons to all users"""
     try:
         service = CouponService(session)
-        assigned_count = service.assign_campaign_to_all_users(campaign_id, assign_one_per_person)
+        assigned_count = service.assign_campaign_to_all_users_v2(campaign_id, coupons_per_person)
         return {"message": f"Assigned {assigned_count} coupons", "count": assigned_count}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

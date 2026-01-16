@@ -4,6 +4,8 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
+  getSortedRowModel,
+  getFilteredRowModel,
 } from "@tanstack/react-table"
 import {
   ChevronLeft,
@@ -32,17 +34,36 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  onRowSelectionChange?: (selectedRowIds: string[]) => void
+  selectedRowIds?: string[]
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onRowSelectionChange,
+  selectedRowIds = [],
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    state: {
+      rowSelection: Object.fromEntries(selectedRowIds.map(id => [id, true])),
+    },
+    onRowSelectionChange: (updater) => {
+      if (onRowSelectionChange) {
+        const newRowSelections = typeof updater === 'function' ? updater(table.getState().rowSelection) : updater;
+        const selectedIds = Object.keys(newRowSelections);
+        onRowSelectionChange(selectedIds);
+      }
+    },
+    enableRowSelection: true,
+    enableMultiRowSelection: true,
+    getRowId: (row) => (row as any).id,
   })
 
   return (
