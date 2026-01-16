@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { UsersService, UserPublic } from "@/client";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogClose,
@@ -66,6 +67,7 @@ export function EditUser({ user, onSuccess, open, onClose }: EditUserProps) {
   
   const queryClient = useQueryClient();
   const { showSuccessToast, showErrorToast } = useCustomToast();
+  const { t } = useTranslation();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -120,13 +122,13 @@ export function EditUser({ user, onSuccess, open, onClose }: EditUserProps) {
         onClick={handleClick}
       >
         <Pencil />
-        Edit User
+        {t('common.edit_user', 'Edit User')}
       </DropdownMenuItem>
       <DialogContent className="sm:max-w-md">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <DialogHeader>
-              <DialogTitle>Edit User</DialogTitle>
+              <DialogTitle>{t('common.edit_user', 'Edit User')}</DialogTitle>
               <DialogDescription>
                 Update the user details below.
               </DialogDescription>
@@ -138,7 +140,7 @@ export function EditUser({ user, onSuccess, open, onClose }: EditUserProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Email <span className="text-destructive">*</span>
+                      {t('users.email', 'Email')} <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -158,7 +160,7 @@ export function EditUser({ user, onSuccess, open, onClose }: EditUserProps) {
                 name="full_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>{t('common.full_name', 'Full Name')}</FormLabel>
                     <FormControl>
                       <Input placeholder="Full name" type="text" {...field} />
                     </FormControl>
@@ -172,7 +174,7 @@ export function EditUser({ user, onSuccess, open, onClose }: EditUserProps) {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Set Password</FormLabel>
+                    <FormLabel>{t('common.set_password', 'Set Password')}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Password"
@@ -190,7 +192,7 @@ export function EditUser({ user, onSuccess, open, onClose }: EditUserProps) {
                 name="confirm_password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
+                    <FormLabel>{t('common.confirm_password', 'Confirm Password')}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Password"
@@ -214,7 +216,7 @@ export function EditUser({ user, onSuccess, open, onClose }: EditUserProps) {
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormLabel className="font-normal">Is superuser?</FormLabel>
+                    <FormLabel className="font-normal">{t('common.is_superuser', 'Is superuser?')}</FormLabel>
                   </FormItem>
                 )}
               />
@@ -230,7 +232,7 @@ export function EditUser({ user, onSuccess, open, onClose }: EditUserProps) {
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormLabel className="font-normal">Is active?</FormLabel>
+                    <FormLabel className="font-normal">{t('common.is_active', 'Is active?')}</FormLabel>
                   </FormItem>
                 )}
               />
@@ -239,11 +241,11 @@ export function EditUser({ user, onSuccess, open, onClose }: EditUserProps) {
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline" disabled={mutation.isPending}>
-                  Cancel
+                  {t('common.cancel', 'Cancel')}
                 </Button>
               </DialogClose>
               <LoadingButton type="submit" loading={mutation.isPending}>
-                Save
+                {t('common.save', 'Save')}
               </LoadingButton>
             </DialogFooter>
           </form>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Search, ChevronDown, ChevronRight } from "lucide-react";
@@ -10,6 +11,7 @@ interface GroupedAnnouncementsProps {
 }
 
 export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProps) {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all"); // Add category filter
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
@@ -71,7 +73,7 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Announcements</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('announcements.title', 'Announcements')}</h1>
           {/* <p className="text-muted-foreground mt-1">Important updates and notifications</p> */}
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
@@ -80,15 +82,15 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="border rounded-md px-3 py-2 text-sm min-w-[180px]"
           >
-            <option value="all">All Categories</option>
-            <option value="new">New</option>
+            <option value="all">{t('common.all_categories', 'All Categories')}</option>
+            <option value="new">{t('common.new', 'New')}</option>
             {sortedCategories.map(category => (
-              <option key={`cat-opt-${category}`} value={category}>{category}</option>
+              <option key={`cat-opt-${category}`} value={category}>{t(`announcements.categories.${category.toLowerCase()}`, category)}</option>
             ))}
           </select>
           <div className="relative">
             <Input
-              placeholder="Search announcements..."
+              placeholder={t('common.search_announcements', 'Search announcements...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-9 w-full sm:w-64"
@@ -106,7 +108,7 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
             onClick={() => toggleCategory('new')}
           >
             {expandedCategories['new'] !== false ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-            <h2 className="text-xl font-bold text-blue-600">New</h2>
+            <h2 className="text-xl font-bold text-blue-600">{t('common.new', 'New')}</h2>
             <Badge variant="secondary">{filteredNewAnnouncements.length}</Badge>
           </div>
           
@@ -158,7 +160,7 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
               onClick={() => toggleCategory(category)}
             >
               {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-              <h2 className="text-xl font-bold">{category}</h2>
+              <h2 className="text-xl font-bold">{category === 'new' ? t('common.new', 'New') : category}</h2>
               <Badge variant="outline">{categoryAnnouncements.length}</Badge>
             </div>
             
@@ -175,7 +177,7 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
                       <h3 className="font-semibold text-lg truncate">{announcement.title}</h3>
                       {new Date(announcement.created_date || '') > tenDaysAgo && (
                         <Badge variant="secondary" className="text-xs">
-                          New
+                          {t('common.new', 'New')}
                         </Badge>
                       )}
                     </div>
@@ -199,7 +201,7 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
        filteredNewAnnouncements.length === 0 && 
        Object.values(filteredByCategory).every(cat => cat.length === 0) && (
         <div className="text-center py-8 text-muted-foreground">
-          No announcements match your search.
+          {t('announcements.no_match', 'No announcements match your search.')}
         </div>
       )}
       
@@ -208,7 +210,7 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
        selectedCategory !== "new" && 
        (!filteredByCategory[selectedCategory] || filteredByCategory[selectedCategory].length === 0) && (
         <div className="text-center py-8 text-muted-foreground">
-          No announcements found in {selectedCategory} category.
+          {t('announcements.no_in_category', 'No announcements found in {{category}} category.', { category: selectedCategory })}
         </div>
       )}
       
@@ -216,7 +218,7 @@ export function GroupedAnnouncements({ announcements }: GroupedAnnouncementsProp
       {selectedCategory === "new" && 
        filteredNewAnnouncements.length === 0 && (
         <div className="text-center py-8 text-muted-foreground">
-          No new announcements found.
+          {t('announcements.no_new', 'No new announcements found.')}
         </div>
       )}
     </div>

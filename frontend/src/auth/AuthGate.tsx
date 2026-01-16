@@ -1,8 +1,10 @@
 import { ReactNode, useEffect } from "react"
 import keycloak from "@/keycloak"
 import useAuth from "@/hooks/useAuth"
+import { useTranslation } from 'react-i18next'
 
 export default function AuthGate({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const { user, isLoading, isError } = useAuth()
 
   // Handle Keycloak authentication state changes
@@ -25,20 +27,20 @@ export default function AuthGate({ children }: { children: ReactNode }) {
   }, [])
 
   if (!keycloak.authenticated) {
-    return <div>Authenticating...</div>
+    return <div>{t('auth.authenticating', 'Authenticating...')}</div>
   }
 
   if (isLoading) {
-    return <div>Loading user...</div>
+    return <div>{t('auth.loading_user', 'Loading user...')}</div>
   }
 
   if (isError) {
-    return <div>Failed to load user</div>
+    return <div>{t('auth.failed_load_user', 'Failed to load user')}</div>
   }
 
   // Use the user variable to prevent TypeScript warning
   if (!user) {
-    return <div>User not authenticated</div>
+    return <div>{t('auth.not_authenticated', 'User not authenticated')}</div>
   }
 
   return <>{children}</>

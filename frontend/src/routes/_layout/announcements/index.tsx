@@ -9,8 +9,10 @@ import { AnnouncementsService, app__models__announcement__AnnouncementPublic } f
 import { GroupedAnnouncements } from '@/components/Announcements/GroupedAnnouncements';
 import { CreateAnnouncementModal } from "@/components/Announcements/CreateAnnouncementModal";
 import useRoles from "@/hooks/useRoles";
+import { useTranslation } from 'react-i18next';
 
 function Announcements() {
+  const { t } = useTranslation();
   const { hasRole } = useRoles()
   const isManagerOrAdmin = hasRole("admin") || hasRole("manager")
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -85,14 +87,14 @@ function Announcements() {
                 {isManagerOrAdmin ? (
                   <Tabs defaultValue="published" className="w-full">
                     <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="published">Published</TabsTrigger>
-                      <TabsTrigger value="drafts">Drafts</TabsTrigger>
-                      <TabsTrigger value="expired">Expired</TabsTrigger>
+                      <TabsTrigger value="published">{t('announcements.published', 'Published')}</TabsTrigger>
+                      <TabsTrigger value="drafts">{t('announcements.drafts', 'Drafts')}</TabsTrigger>
+                      <TabsTrigger value="expired">{t('announcements.expired', 'Expired')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="published">
                       {isLoading ? (
                         <div className="text-center py-8 text-muted-foreground">
-                          Loading announcements...
+                          {t('common.loading_announcements', 'Loading announcements...')}
                         </div>
                       ) : (
                         <GroupedAnnouncements 
@@ -103,7 +105,7 @@ function Announcements() {
                     <TabsContent value="drafts">
                       {isLoading ? (
                         <div className="text-center py-8 text-muted-foreground">
-                          Loading announcements...
+                          {t('common.loading_announcements', 'Loading announcements...')}
                         </div>
                       ) : (
                         <GroupedAnnouncements 
@@ -114,7 +116,7 @@ function Announcements() {
                     <TabsContent value="expired">
                       {isLoading ? (
                         <div className="text-center py-8 text-muted-foreground">
-                          Loading announcements...
+                          {t('common.loading_announcements', 'Loading announcements...')}
                         </div>
                       ) : (
                         <GroupedAnnouncements 
@@ -126,7 +128,7 @@ function Announcements() {
                 ) : (
                   isLoading ? (
                     <div className="text-center py-8 text-muted-foreground">
-                      Loading announcements...
+                      {t('common.loading_announcements', 'Loading announcements...')}
                     </div>
                   ) : (
                     <GroupedAnnouncements 

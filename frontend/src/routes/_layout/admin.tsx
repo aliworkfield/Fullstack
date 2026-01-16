@@ -2,27 +2,29 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UsersService, app__models__announcement__AnnouncementPublic } from "@/client";
+import { UsersService } from "@/client";
 import { DataTable } from "@/components/Common/DataTable";
-import { columns } from "@/components/Admin/columns";
-import { AnnouncementsByCategory } from "@/components/Announcements/AnnouncementsByCategory";
-import { AnnouncementsService } from "@/client";
+import { useUserColumns } from "@/components/Admin/columns";
 import { createFileRoute } from '@tanstack/react-router'
 import { SidebarProvider } from "@/components/ui/sidebar"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
 import useRoles from "@/hooks/useRoles";
+import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/_layout/admin')({
   component: AdminRoute,
 })
 
 export function AdminRoute() {
+  const { t } = useTranslation();
   const { hasRole, isLoading: rolesLoading } = useRoles();
   const isAdmin = hasRole("admin");
   const isManager = hasRole("manager");
+  
+  const columns = useUserColumns();
 
   // Fetch users only if user is admin
-  const { data: users = [], isLoading: usersLoading } = useQuery({
+  const { data: users = [], isLoading: usersLoading, isError: usersError } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       if (!isAdmin) {
@@ -34,38 +36,14 @@ export function AdminRoute() {
       });
       return response.data || [];
     },
-    enabled: !rolesLoading && isAdmin, // Only run query if roles are loaded and user is admin
+    enabled: isAdmin === true, // Only run query when we definitively know user is admin
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Ensure users is an array
   const usersArray = Array.isArray(users) ? users : [];
 
-  // Fetch announcements for both admin and manager
-  const { data: announcements = [], isLoading: announcementsLoading } = useQuery({
-    queryKey: ["announcements"],
-    queryFn: async () => {
-      if (!isAdmin && !isManager) {
-        throw new Error("Insufficient permissions");
-      }
-      const response = await AnnouncementsService.readAnnouncements({
-        skip: 0,
-        limit: 100,
-      });
-      return response.data || [];
-    },
-    enabled: !rolesLoading && (isAdmin || isManager), // Run query if roles are loaded and user is admin or manager
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
 
-  // Group announcements by category
-  const groupedAnnouncements: Record<string, app__models__announcement__AnnouncementPublic[]> = {};
-  (announcements as app__models__announcement__AnnouncementPublic[]).forEach((announcement: app__models__announcement__AnnouncementPublic) => {
-    if (!groupedAnnouncements[announcement.category]) {
-      groupedAnnouncements[announcement.category] = [];
-    }
-    groupedAnnouncements[announcement.category].push(announcement);
-  });
 
   if (rolesLoading) {
     return <div>Loading...</div>;
@@ -75,11 +53,11 @@ export function AdminRoute() {
     return <div>Access denied. Admin or Manager privileges required.</div>;
   }
 
-  // Determine if users query is loading (either fetching or disabled due to roles not loaded)
-  const isUsersQueryLoading = rolesLoading || (!rolesLoading && isAdmin && usersLoading);
+  // Determine if we should show loading state for users
+  const shouldShowUsersLoading = isAdmin === true && usersLoading;
+  const shouldShowUsersError = isAdmin === true && usersError;
 
-  // Determine if announcements query is loading (either fetching or disabled due to roles not loaded)
-  const isAnnouncementsQueryLoading = rolesLoading || (!rolesLoading && (isAdmin || isManager) && announcementsLoading);
+
 
   return (
     <SidebarProvider defaultOpen={false}>
@@ -89,29 +67,32 @@ export function AdminRoute() {
           <div className="space-y-6 max-w-7xl mx-auto w-full">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-                <p className="text-muted-foreground">Manage users and announcements</p>
+                <h1 className="text-3xl font-bold tracking-tight">{t('common.admin_dashboard', 'Admin Dashboard')}</h1>
+                <p className="text-muted-foreground">{t('common.manage_users_and_announcements', 'Manage users and announcements')}</p>
               </div>
               <Button disabled={!isAdmin}>
-                Add User
+                {t('common.add_user', 'Add User')}
               </Button>
             </div>
 
             <Tabs defaultValue="users" className="space-y-4">
               <TabsList>
                 <TabsTrigger value="users" disabled={!isAdmin}>Users</TabsTrigger>
-                <TabsTrigger value="announcements">Announcements</TabsTrigger>
               </TabsList>
               <TabsContent value="users" className="space-y-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Manage Users</CardTitle>
+                    <CardTitle>{t('common.manage_users', 'Manage Users')}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {isAdmin ? (
-                      isUsersQueryLoading ? (
+                    {isAdmin === true ? (
+                      shouldShowUsersLoading ? (
                         <div className="text-center py-8 text-muted-foreground">
                           Loading users...
+                        </div>
+                      ) : shouldShowUsersError ? (
+                        <div className="text-center py-8 text-muted-foreground text-red-500">
+                          Error loading users. Please try refreshing the page.
                         </div>
                       ) : (
                         <DataTable
@@ -119,44 +100,20 @@ export function AdminRoute() {
                           data={usersArray}
                         />
                       )
-                    ) : (
+                    ) : isAdmin === false ? (
                       <div className="text-center py-8 text-muted-foreground">
                         User management is only available to administrators.
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              <TabsContent value="announcements" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Manage Announcements</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {isAnnouncementsQueryLoading ? (
-                      <div className="text-center py-8 text-muted-foreground">
-                        Loading announcements...
-                      </div>
                     ) : (
-                      <>
-                        {Object.entries(groupedAnnouncements).map(([category, announcements]) => (
-                          <AnnouncementsByCategory
-                            key={category}
-                            category={category}
-                            title={category}
-                            announcements={announcements}
-                          />
-                        ))}
-                        {Object.keys(groupedAnnouncements).length === 0 && (
-                          <div className="text-center py-8 text-muted-foreground">
-                            No announcements found
-                          </div>
-                        )}
-                      </>
+                      // Still determining role
+                      <div className="text-center py-8 text-muted-foreground">
+                        Checking permissions...
+                      </div>
                     )}
                   </CardContent>
                 </Card>
               </TabsContent>
+
             </Tabs>
           </div>
         </div>

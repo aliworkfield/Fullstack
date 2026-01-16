@@ -25,6 +25,8 @@ export function DataTable<TData, TValue>({
   data,
   loading = false,
 }: DataTableProps<TData, TValue>) {
+  const { t } = useTranslation();
+  
   const table = useReactTable({
     data,
     columns,
@@ -56,7 +58,7 @@ export function DataTable<TData, TValue>({
           {loading ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                Loading...
+                {t('common.loading', 'Loading...')}
               </TableCell>
             </TableRow>
           ) : table.getRowModel().rows?.length ? (
@@ -75,7 +77,7 @@ export function DataTable<TData, TValue>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                {t('common.no_results', 'No results found')}
               </TableCell>
             </TableRow>
           )}

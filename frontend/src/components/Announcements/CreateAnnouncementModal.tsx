@@ -28,6 +28,7 @@ import useCustomToast from "@/hooks/useCustomToast";
 import { handleError } from "@/utils";
 import { useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTranslation } from 'react-i18next';
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -70,6 +71,7 @@ export function CreateAnnouncementModal({
   onSuccess,
   announcement // For editing
 }: CreateAnnouncementModalProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { showSuccessToast, showErrorToast } = useCustomToast();
 
@@ -246,7 +248,7 @@ export function CreateAnnouncementModal({
                   <FormItem>
                     <FormLabel>Campaign</FormLabel>
                     {campaignsLoading ? (
-                      <div className="text-muted-foreground">Loading campaigns...</div>
+                      <div className="text-muted-foreground">{t('common.loading_campaigns', 'Loading campaigns...')}</div>
                     ) : (
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>

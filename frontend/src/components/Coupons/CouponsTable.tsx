@@ -1,14 +1,16 @@
 import { useState, useMemo } from "react";
-import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search } from "lucide-react";
 import { AdminCouponsService, AdminCampaignsService } from "@/client";
 import { useQuery } from "@tanstack/react-query";
 import { DataTable } from "@/components/Common/DataTable";
-import { columns } from "./columns";
+import { useCouponColumns } from "./translated-columns";
 
 export function CouponsTable() {
+  const { t } = useTranslation();
+  const columns = useCouponColumns();
   const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch all coupons from the admin service
@@ -62,17 +64,17 @@ export function CouponsTable() {
   }) : [];
 
   if (isLoading) {
-    return <div>Loading coupons...</div>;
+    return <div>{t('common.loading')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-3xl font-bold">All Coupons</h1>
+        <h1 className="text-3xl font-bold">{t('coupons.all_coupons')}</h1>
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search coupons..."
+            placeholder={t('coupons.search_coupons')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-8 w-full sm:w-64"
@@ -82,7 +84,7 @@ export function CouponsTable() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Coupons ({filteredCoupons.length})</CardTitle>
+          <CardTitle>{t('coupons.all_coupons')} ({filteredCoupons.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <DataTable

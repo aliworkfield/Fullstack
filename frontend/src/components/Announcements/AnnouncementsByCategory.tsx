@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
 import { app__models__announcement__AnnouncementPublic } from "@/client";
 import { AnnouncementCard } from "./AnnouncementCard";
+import { useTranslation } from 'react-i18next';
 
 interface AnnouncementsByCategoryProps {
   category: string;
@@ -16,6 +17,7 @@ export function AnnouncementsByCategory({
   title, 
   announcements 
 }: AnnouncementsByCategoryProps) {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredAnnouncements = announcements.filter(announcement => {
@@ -35,12 +37,12 @@ export function AnnouncementsByCategory({
         <div className="flex items-center gap-3">
           <h2 className="text-2xl font-bold">{title}</h2>
           <Badge variant="outline" className="text-sm">
-            {filteredAnnouncements.length} {filteredAnnouncements.length === 1 ? 'announcement' : 'announcements'}
+            {filteredAnnouncements.length} {filteredAnnouncements.length === 1 ? t('announcements.singular', 'announcement') : t('announcements.plural', 'announcements')}
           </Badge>
         </div>
         <div className="relative w-64">
           <Input
-            placeholder="Search announcements..."
+            placeholder={t('announcements.search_placeholder', 'Search announcements...')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-9"
@@ -60,7 +62,7 @@ export function AnnouncementsByCategory({
         </div>
       ) : (
         <div className="text-center py-8 text-muted-foreground">
-          No announcements found matching your search.
+          {t('announcements.no_results', 'No announcements found matching your search.')}
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { ChevronsUpDown, LogOut } from "lucide-react"
+import { useTranslation } from 'react-i18next'
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -41,6 +42,7 @@ function UserInfo({ fullName, email }: UserInfoProps) {
 }
 
 export function User({ user }: { user: any }) {
+  const { t } = useTranslation();
   const { logout } = useAuth()
   const { isMobile } = useSidebar()
   const { hasRole } = useRoles()
@@ -91,7 +93,7 @@ export function User({ user }: { user: any }) {
             
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
-              Log Out
+              {t('auth.logout', 'Log Out')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

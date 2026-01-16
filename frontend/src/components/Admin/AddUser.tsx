@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { PrivateService } from "@/client";
+import { useTranslation } from 'react-i18next';
 
 interface AddUserProps {
   open: boolean;
@@ -20,6 +21,7 @@ interface AddUserProps {
 
 export function AddUser({ open, onClose }: AddUserProps) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   
   const mutation = useMutation({
     mutationFn: (userData: { email: string; full_name: string }) => 
@@ -57,23 +59,23 @@ export function AddUser({ open, onClose }: AddUserProps) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add User</DialogTitle>
+          <DialogTitle>{t('common.add_user', 'Add User')}</DialogTitle>
           <DialogDescription>
-            Add a new user to the system
+            {t('common.add_user_description', 'Add a new user to the system')}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" required />
+            <Label htmlFor="email">{t('users.email', 'Email')}</Label>
+            <Input id="email" name="email" type="email" placeholder={t('common.email_placeholder', 'Email')} required />
           </div>
           <div>
-            <Label htmlFor="full_name">Full Name</Label>
-            <Input id="full_name" name="full_name" type="text" />
+            <Label htmlFor="full_name">{t('common.full_name', 'Full Name')}</Label>
+            <Input id="full_name" name="full_name" type="text" placeholder={t('common.full_name_placeholder', 'Full name')} />
           </div>
           <DialogFooter>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Creating..." : "Create User"}
+              {mutation.isPending ? t('common.creating', 'Creating...') : t('common.create_user', 'Create User')}
             </Button>
           </DialogFooter>
         </form>

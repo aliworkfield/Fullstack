@@ -4,16 +4,20 @@ import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 
+// Note: For translations in columns, we'll need to pass t function from parent component
 export const columns: ColumnDef<app__models__announcement__AnnouncementPublic>[] = [
+
   {
     accessorKey: "title",
     header: ({ column }) => {
+      // Translation function t should be passed from parent component
+      const t = (key: string, fallback: string) => fallback;
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Title
+          {t('datatable.headers.title', 'Title')}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -21,11 +25,19 @@ export const columns: ColumnDef<app__models__announcement__AnnouncementPublic>[]
   },
   {
     accessorKey: "category",
-    header: "Category",
+    header: () => {
+      // Translation function t should be passed from parent component
+      const t = (key: string, fallback: string) => fallback;
+      return t('datatable.headers.category', 'Category');
+    },
   },
   {
     accessorKey: "created_date",
-    header: "Created Date",
+    header: () => {
+      // Translation function t should be passed from parent component
+      const t = (key: string, fallback: string) => fallback;
+      return t('datatable.headers.created_date', 'Created Date');
+    },
     cell: ({ row }) => {
       const date = row.getValue("created_date") as string | null;
       return date ? new Date(date).toLocaleDateString() : "N/A";
@@ -33,8 +45,14 @@ export const columns: ColumnDef<app__models__announcement__AnnouncementPublic>[]
   },
   {
     accessorKey: "is_published",
-    header: "Status",
+    header: () => {
+      // Translation function t should be passed from parent component
+      const t = (key: string, fallback: string) => fallback;
+      return t('datatable.headers.status', 'Status');
+    },
     cell: ({ row }) => {
+      // Translation function t should be passed from parent component
+      const t = (key: string, fallback: string) => fallback;
       const isPublished = row.getValue("is_published") as boolean;
       return (
         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -42,7 +60,7 @@ export const columns: ColumnDef<app__models__announcement__AnnouncementPublic>[]
             ? "bg-green-100 text-green-800" 
             : "bg-yellow-100 text-yellow-800"
         }`}>
-          {isPublished ? "Published" : "Draft"}
+          {isPublished ? t('announcements.published', 'Published') : t('announcements.draft', 'Draft')}
         </span>
       );
     },
@@ -50,6 +68,8 @@ export const columns: ColumnDef<app__models__announcement__AnnouncementPublic>[]
   {
     id: "actions",
     cell: ({ row }) => {
+      // Translation function t should be passed from parent component
+      const t = (key: string, fallback: string) => fallback;
       const announcement = row.original;
       const navigate = useNavigate();
       
@@ -62,7 +82,7 @@ export const columns: ColumnDef<app__models__announcement__AnnouncementPublic>[]
             params: { id: announcement.id } 
           })}
         >
-          View
+          {t('common.view', 'View')}
         </Button>
       );
     },

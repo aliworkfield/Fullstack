@@ -1,9 +1,6 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { CouponPublic } from "@/client/types.gen"
-import { useQuery } from "@tanstack/react-query"
-import { AdminCampaignsService } from "@/client"
 
 export const columns: ColumnDef<any>[] = [
   {

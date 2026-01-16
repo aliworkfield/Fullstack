@@ -7,8 +7,10 @@ import { Search, Plus, Users, Tag } from "lucide-react";
 import { CampaignsService, UserCouponsService, CampaignPublic, CouponPublic } from "@/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTranslation } from 'react-i18next';
 
 export function CouponManagement() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCampaign, setSelectedCampaign] = useState<string | null>(null);
 
@@ -70,14 +72,14 @@ export function CouponManagement() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Coupon Management</h1>
-          <p className="text-muted-foreground mt-1">Manage and track your promotional campaigns</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('coupons.management_title', 'Coupon Management')}</h1>
+          <p className="text-muted-foreground mt-1">{t('coupons.management_subtitle', 'Manage and track your promotional campaigns')}</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search coupons..."
+              placeholder={t('coupons.search_placeholder', 'Search coupons...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-8 w-full sm:w-64"
@@ -89,7 +91,7 @@ export function CouponManagement() {
               onChange={(e) => setSelectedCampaign(e.target.value || null)}
               className="border rounded-md px-3 py-2 text-sm min-w-[180px]"
             >
-              <option value="">All Campaigns</option>
+              <option value="">{t('campaigns.all_campaigns', 'All Campaigns')}</option>
               {campaigns.map((campaign: CampaignPublic) => (
                 <option key={campaign.id} value={campaign.id}>
                   {campaign.title}
@@ -98,7 +100,7 @@ export function CouponManagement() {
             </select>
             <Button onClick={handleGenerateCoupons} className="whitespace-nowrap">
               <Plus className="h-4 w-4 mr-2" />
-              Generate Coupons
+              {t('coupons.generate_coupons', 'Generate Coupons')}
             </Button>
           </div>
         </div>
@@ -107,7 +109,7 @@ export function CouponManagement() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Coupons</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('coupons.total_coupons', 'Total Coupons')}</CardTitle>
             <Tag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -118,7 +120,7 @@ export function CouponManagement() {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('campaigns.active_campaigns', 'Active Campaigns')}</CardTitle>
             <Tag className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -129,7 +131,7 @@ export function CouponManagement() {
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Assigned Users</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('coupons.assigned_users', 'Assigned Users')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -190,7 +192,7 @@ export function CouponManagement() {
 
       {filteredCoupons.length === 0 && !couponsLoading && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No coupons found</p>
+          <p className="text-muted-foreground">{t('coupons.no_coupons_found', 'No coupons found')}</p>
         </div>
       )}
     </div>

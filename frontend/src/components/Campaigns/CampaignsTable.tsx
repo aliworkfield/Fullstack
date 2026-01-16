@@ -4,18 +4,22 @@ import { PlusCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTable } from "@/components/Common/DataTable"
-import { columns } from "./columns"
+import { useCampaignColumns } from "./columns"
 import { AdminCampaignsService, AdminCouponsService } from "@/client"
 import useRoles from "@/hooks/useRoles"
 import { CreateCampaignModal } from "./CreateCampaignModal"
+import { useTranslation } from 'react-i18next'
 
 function CampaignsTable() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-  const { hasRole } = useRoles()
+  const { t } = useTranslation();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const { hasRole } = useRoles();
+  
+  const columns = useCampaignColumns();
   
   // Check if user is admin or manager to show create button and access data
-  const canAccessCampaigns = hasRole("admin") || hasRole("manager")
+  const canAccessCampaigns = hasRole("admin") || hasRole("manager");
 
   const { data: campaignsData, isLoading, isError, error } = useQuery({
     queryKey: ["campaigns"],
@@ -65,7 +69,7 @@ function CampaignsTable() {
   }
 
   if (isLoading) {
-    return <div>Loading campaigns...</div>
+    return <div>{t('common.loading_campaigns', 'Loading campaigns...')}</div>
   }
 
   if (isError) {
@@ -79,11 +83,11 @@ function CampaignsTable() {
         </div>
       )
     }
-    return <div>Error loading campaigns: {(error as Error).message}</div>
+    return <div>{t('common.error_loading_campaigns', 'Error loading campaigns')}: {(error as Error).message}</div>
   }
 
   // Extract campaigns from the response
-  const campaigns = (campaignsData as any)?.campaigns || []
+  const campaigns = (campaignsData as any)?.campaigns || [];
 
   // Combine campaigns with coupon statistics
   const campaignsWithStats = campaigns.map((campaign: any) => {
@@ -103,14 +107,14 @@ function CampaignsTable() {
   )
 
   // Check if user is admin or manager to show create button
-  const canCreateCampaign = hasRole("admin") || hasRole("manager")
+  const canCreateCampaign = hasRole("admin") || hasRole("manager");
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Input
-            placeholder="Search campaigns..."
+            placeholder={t('campaigns.search_placeholder', 'Search campaigns...')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-64"
@@ -119,7 +123,7 @@ function CampaignsTable() {
         {canCreateCampaign && (
           <Button onClick={() => setIsCreateModalOpen(true)}>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Create Campaign
+            {t('campaigns.create_campaign_button', 'Create Campaign')}
           </Button>
         )}
       </div>

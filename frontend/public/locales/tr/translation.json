@@ -1,0 +1,92 @@
+{
+  "navigation": {
+    "dashboard": "Panel",
+    "campaigns": "Kampanyalar",
+    "coupons": "Kuponlar",
+    "users": "Kullanıcılar",
+    "announcements": "Duyurular",
+    "admin": "Yönetici"
+  },
+  "common": {
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "create": "Oluştur",
+    "update": "Güncelle",
+    "search": "Ara",
+    "loading": "Yükleniyor...",
+    "no_results": "Sonuç bulunamadı",
+    "actions": "İşlemler",
+    "status": "Durum",
+    "created_at": "Oluşturulma Tarihi",
+    "updated_at": "Güncellenme Tarihi"
+  },
+  "campaigns": {
+    "title": "Kampanya Başlığı",
+    "description": "Açıklama",
+    "start_date": "Başlangıç Tarihi",
+    "end_date": "Bitiş Tarihi",
+    "active": "Aktif",
+    "inactive": "Pasif",
+    "create_campaign": "Kampanya Oluştur",
+    "edit_campaign": "Kampanya Düzenle",
+    "campaign_details": "Kampanya Detayları",
+    "assign_coupons": "Kupon Ata",
+    "upload_coupons": "Kupon Yükle",
+    "coupons_per_person": "Kişi Başı Kupon Sayısı",
+    "assign_to_all": "Tüm Kullanıcılara Ata",
+    "assign_randomly": "Rastgele Ata"
+  },
+  "coupons": {
+    "code": "Kupon Kodu",
+    "discount_type": "İndirim Türü",
+    "discount_value": "İndirim Değeri",
+    "expires_at": "Son Kullanma Tarihi",
+    "redeemed": "Kullanıldı",
+    "available": "Mevcut",
+    "assigned": "Atandı",
+    "expired": "Süresi Doldu",
+    "never": "Asla",
+    "percentage": "Yüzde",
+    "fixed": "Sabit",
+    "all_coupons": "Tüm Kuponlar",
+    "manage_coupons": "Kuponları Yönet",
+    "search_coupons": "Kupon ara...",
+    "no_campaign": "Kampanya Yok"
+  },
+  "users": {
+    "name": "Ad",
+    "email": "E-posta",
+    "role": "Rol",
+    "admin": "Yönetici",
+    "manager": "Yönetici",
+    "user": "Kullanıcı",
+    "active": "Aktif",
+    "inactive": "Pasif"
+  },
+  "announcements": {
+    "title": "Başlık",
+    "content": "İçerik",
+    "publish_date": "Yayın Tarihi",
+    "expires_at": "Son Kullanma Tarihi",
+    "published": "Yayınlandı",
+    "draft": "Taslak",
+    "create_announcement": "Duyuru Oluştur",
+    "edit_announcement": "Duyuru Düzenle"
+  },
+  "auth": {
+    "login": "Giriş Yap",
+    "logout": "Çıkış Yap",
+    "username": "Kullanıcı Adı",
+    "password": "Şifre",
+    "remember_me": "Beni Hatırla",
+    "forgot_password": "Şifremi Unuttum"
+  },
+  "messages": {
+    "success": "İşlem başarıyla tamamlandı",
+    "error": "Bir hata oluştu",
+    "confirm_delete": "Silmek istediğinize emin misiniz?",
+    "no_permission": "Bu işlem için yetkiniz yok"
+  }
+}

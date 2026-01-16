@@ -10,6 +10,7 @@ import { useState } from "react";
 import { EditUser } from "./EditUser";
 import { DeleteUser } from "./DeleteUser";
 import { UserPublic, UsersService } from "@/client";
+import { useTranslation } from 'react-i18next';
 
 interface UserActionsMenuProps {
   user: UserPublic;
@@ -50,6 +51,8 @@ export function UserActionsMenu({ user, onEditSuccess }: UserActionsMenuProps) {
     />
   ) : null;
 
+  const { t } = useTranslation();
+  
   return (
     <>
       <DropdownMenu>
@@ -67,7 +70,7 @@ export function UserActionsMenu({ user, onEditSuccess }: UserActionsMenuProps) {
           <DropdownMenuItem
             onClick={() => setIsDeleteModalOpen(true)}
           >
-            Delete
+            {t('common.delete', 'Delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

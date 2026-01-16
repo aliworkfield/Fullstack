@@ -1,4 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/Sidebar/AppSidebar";
 import { useState, useEffect } from 'react';
@@ -31,6 +33,7 @@ export const Route = createFileRoute('/_layout/campaigns/$id')({
 });
 
 function CampaignDetail() {
+  const { t } = useTranslation();
   const { id } = Route.useParams();
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
@@ -120,160 +123,163 @@ function CampaignDetail() {
   });
 
   // Define coupon columns with user names
-  const couponColumns: ColumnDef<CouponPublic>[] = [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
-          onCheckedChange={(value: boolean) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-    {
-      accessorKey: "code",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Code
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
+  const couponColumns = useMemo(() => {
+    return [
+      {
+        id: "select",
+        header: ({ table }) => (
+          <Checkbox
+            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+            onCheckedChange={(value: boolean) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label={t('datatable.select_all', 'Select all')}
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
+            aria-label={t('datatable.select_row', 'Select row')}
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
       },
-    },
-    {
-      accessorKey: "discount_type",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Discount Type
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
+      {
+        accessorKey: "code",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              {t('datatable.headers.code', 'Code')}
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          );
+        },
       },
-    },
-    {
-      accessorKey: "discount_value",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Discount Value
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
+      {
+        accessorKey: "discount_type",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              {t('datatable.headers.discount_type', 'Discount Type')}
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          );
+        },
       },
-      cell: ({ row }) => {
-        const value = parseFloat(row.getValue("discount_value"));
-        return `${value}${row.getValue("discount_type") === "percentage" ? "%" : ""}`;
+      {
+        accessorKey: "discount_value",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              {t('datatable.headers.discount_value', 'Discount Value')}
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          );
+        },
+        cell: ({ row }) => {
+          const value = parseFloat(row.getValue("discount_value"));
+          return `${value}${row.getValue("discount_type") === "percentage" ? "%" : ""}`;
+        },
       },
-    },
-    {
-      accessorKey: "assigned_to_user_id",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Assigned User
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }) => {
-        const userId = row.getValue("assigned_to_user_id") as string | null;
-        if (!userId) {
-          return "Unassigned";
-        }
-        
-        const user = userMap.get(userId);
-        return user ? user.full_name || user.email : "User not found";
-      },
-    },
-    {
-      accessorKey: "redeemed",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Status
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
-        );
-      },
-      cell: ({ row }) => {
-        const isRedeemed = row.getValue("redeemed") as boolean;
-        const isAssigned = row.getValue("assigned_to_user_id") as string | null;
-        
-        let statusText = "Unassigned";
-        let statusClass = "bg-gray-100 text-gray-800";
-        
-        if (isAssigned) {
-          if (isRedeemed) {
-            statusText = "Redeemed";
-            statusClass = "bg-red-100 text-red-800";
-          } else {
-            statusText = "Assigned";
-            statusClass = "bg-green-100 text-green-800";
+      {
+        accessorKey: "assigned_to_user_id",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              {t('datatable.headers.assigned_user', 'Assigned User')}
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          );
+        },
+        cell: ({ row }) => {
+          const userId = row.getValue("assigned_to_user_id") as string | null;
+          if (!userId) {
+            return t('campaigns.unassigned', 'Unassigned');
           }
-        }
-        
-        return (
-          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClass}`}>
-            {statusText}
-          </span>
-        );
+          
+          const user = userMap.get(userId);
+          return user ? user.full_name || user.email : "User not found";
+        },
       },
-    },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const coupon = row.original;
-        const isAssigned = !!coupon.assigned_to_user_id;
-        
-        return (
-          <div className="flex gap-2">
-            {isAssigned && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleUnassignCoupon(coupon.id)}
-                disabled={isUnassigning}
-              >
-                {isUnassigning ? "Unassigning..." : "Unassign"}
-              </Button>
-            )}
-          </div>
-        );
+      {
+        accessorKey: "redeemed",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              {t('datatable.headers.status', 'Status')}
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          );
+        },
+        cell: ({ row }) => {
+          const isRedeemed = row.getValue("redeemed") as boolean;
+          const isAssigned = row.getValue("assigned_to_user_id") as string | null;
+          
+          let statusText = t('campaigns.unassigned', 'Unassigned');
+          let statusClass = "bg-gray-100 text-gray-800";
+          
+          if (isAssigned) {
+            if (isRedeemed) {
+              statusText = t('campaigns.redeemed_status', 'Redeemed');
+              statusClass = "bg-red-100 text-red-800";
+            } else {
+              statusText = t('campaigns.assigned_status', 'Assigned');
+              statusClass = "bg-green-100 text-green-800";
+            }
+          }
+          
+          return (
+            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusClass}`}>
+              {statusText}
+            </span>
+          );
+        },
       },
-    },
-  ];
+      {
+        id: "actions",
+        header: t('datatable.headers.actions', 'Actions'),
+        cell: ({ row }) => {
+          const coupon = row.original;
+          const isAssigned = !!coupon.assigned_to_user_id;
+          
+          return (
+            <div className="flex gap-2">
+              {isAssigned && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleUnassignCoupon(coupon.id)}
+                  disabled={isUnassigning}
+                >
+                  {isUnassigning ? t('campaigns.unassigning', 'Unassigning...') : t('campaigns.unassign', 'Unassign')}
+                </Button>
+              )}
+            </div>
+          );
+        },
+      },
+    ] as ColumnDef<CouponPublic>[];
+  }, [t]);
 
   // Define announcement columns
-  const announcementColumns: ColumnDef<any>[] = [
-    {
+  const announcementColumns = useMemo(() => {
+    return [
+      {
       accessorKey: "title",
       header: ({ column }) => {
         return (
@@ -281,7 +287,7 @@ function CampaignDetail() {
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Title
+            {t('datatable.headers.title', 'Title')}
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         );
@@ -289,16 +295,16 @@ function CampaignDetail() {
     },
     {
       accessorKey: "category",
-      header: "Category",
+      header: t('datatable.headers.category', 'Category'),
     },
     {
       accessorKey: "is_published",
-      header: "Status",
+      header: t('datatable.headers.status', 'Status'),
       cell: ({ row }) => {
         const isPublished = row.getValue("is_published") as boolean;
         const expiryDate = row.getValue("expiry_date") as string | null;
         
-        let statusText = "Draft";
+        let statusText = t('campaigns.draft_status', 'Draft');
         let statusClass = "bg-yellow-100 text-yellow-800";
         
         if (isPublished) {
@@ -306,10 +312,10 @@ function CampaignDetail() {
           const expiry = expiryDate ? new Date(expiryDate) : null;
           
           if (expiry && now > expiry) {
-            statusText = "Expired";
+            statusText = t('campaigns.expired_status', 'Expired');
             statusClass = "bg-red-100 text-red-800";
           } else {
-            statusText = "Published";
+            statusText = t('campaigns.published_status', 'Published');
             statusClass = "bg-green-100 text-green-800";
           }
         }
@@ -323,21 +329,26 @@ function CampaignDetail() {
     },
     {
       accessorKey: "expiry_date",
-      header: "Expiry Date",
+      header: t('datatable.headers.expiry_date', 'Expiry Date'),
       cell: ({ row }) => {
         const date = row.getValue("expiry_date") as string;
-        return date ? new Date(date).toLocaleDateString() : "No Expiry";
+        return date ? new Date(date).toLocaleDateString() : t('campaigns.no_expiry', 'No Expiry');
       },
     },
     {
       accessorKey: "created_date",
-      header: "Created Date",
+      header: t('datatable.headers.created_date', 'Created Date'),
       cell: ({ row }) => {
         const date = row.getValue("created_date") as string;
-        return date ? new Date(date).toLocaleDateString() : "N/A";
+        return date ? new Date(date).toLocaleDateString() : t('common.na', 'N/A');
       },
     },
-  ];
+    ] as ColumnDef<any>[];
+  }, [t]);
+
+  // Memoize the columns to prevent unnecessary re-renders
+  const memoizedCouponColumns = useMemo(() => couponColumns, [couponColumns]);
+  const memoizedAnnouncementColumns = useMemo(() => announcementColumns, [announcementColumns]);
 
   const stats = {
     total: coupons.length,
@@ -647,11 +658,11 @@ function CampaignDetail() {
 
     // Conditional renders - all hooks are called before this point
   if (campaignLoading) {
-    return <div>Loading campaign...</div>;
+    return <div>{t('common.loading_campaign', 'Loading campaign...')}</div>;
   }
 
   if (!campaign) {
-    return <div>Campaign not found</div>;
+    return <div>{t('campaigns.not_found', 'Campaign not found')}</div>;
   }
 
 
@@ -675,14 +686,14 @@ function CampaignDetail() {
                   className="flex items-center gap-2"
                 >
                   <Pencil className="h-4 w-4" />
-                  Edit Campaign
+                  {t('campaigns.edit_campaign', 'Edit Campaign')}
                 </Button>
                 <Button 
                   onClick={() => setActiveTab('upload')}
                   variant="outline"
                 >
                   <Upload className="mr-2 h-4 w-4" />
-                  Upload Coupons (Excel)
+                  {t('campaigns.upload_coupons_excel', 'Upload Coupons (Excel)')}
                 </Button>
                 <Button 
                   onClick={openAutoAssignModal}
@@ -690,8 +701,8 @@ function CampaignDetail() {
                 >
                   <Users className="mr-2 h-4 w-4" />
                   {stats.unassigned > 0 
-                    ? `Auto-assign ${stats.unassigned} Coupon${stats.unassigned !== 1 ? 's' : ''}` 
-                    : 'No Coupons to Assign'
+                    ? t('campaigns.auto_assign_coupons', 'Auto-assign {{count}} Coupon', { count: stats.unassigned })
+                    : t('campaigns.no_coupons_to_assign', 'No Coupons to Assign')
                   }
                 </Button>
               </div>
@@ -700,7 +711,7 @@ function CampaignDetail() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
                 <CardHeader className="p-4">
-                  <CardTitle className="text-sm font-medium">Total Coupons</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('campaigns.total_coupons', 'Total Coupons')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                   <div className="text-2xl font-bold">{stats.total}</div>
@@ -708,7 +719,7 @@ function CampaignDetail() {
               </Card>
               <Card>
                 <CardHeader className="p-4">
-                  <CardTitle className="text-sm font-medium">Assigned</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('campaigns.assigned', 'Assigned')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                   <div className="text-2xl font-bold">{stats.assigned}</div>
@@ -716,7 +727,7 @@ function CampaignDetail() {
               </Card>
               <Card>
                 <CardHeader className="p-4">
-                  <CardTitle className="text-sm font-medium">Unassigned</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('campaigns.unassigned', 'Unassigned')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                   <div className="text-2xl font-bold">{stats.unassigned}</div>
@@ -724,7 +735,7 @@ function CampaignDetail() {
               </Card>
               <Card>
                 <CardHeader className="p-4">
-                  <CardTitle className="text-sm font-medium">Redeemed</CardTitle>
+                  <CardTitle className="text-sm font-medium">{t('campaigns.redeemed', 'Redeemed')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                   <div className="text-2xl font-bold">{stats.redeemed}</div>
@@ -734,13 +745,13 @@ function CampaignDetail() {
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
               <TabsList>
-                <TabsTrigger value="coupons">Coupons ({coupons.length})</TabsTrigger>
-                <TabsTrigger value="announcements">Announcements ({announcements.length})</TabsTrigger>
+                <TabsTrigger value="coupons">{t('campaigns.coupons_tab', 'Coupons')} ({coupons.length})</TabsTrigger>
+                <TabsTrigger value="announcements">{t('campaigns.announcements_tab', 'Announcements')} ({announcements.length})</TabsTrigger>
               </TabsList>
               <TabsContent value="coupons" className="space-y-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Coupon Management</CardTitle>
+                    <CardTitle>{t('campaigns.coupon_management', 'Coupon Management')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="mb-4 flex justify-between items-center">
@@ -752,7 +763,7 @@ function CampaignDetail() {
                             disabled={isUnassigning}
                             className="mr-2"
                           >
-                            {isUnassigning ? 'Unassigning...' : `Unassign ${selectedCouponIds.length} Coupon${selectedCouponIds.length !== 1 ? 's' : ''}`}
+                            {isUnassigning ? t('campaigns.unassigning', 'Unassigning...') : t('campaigns.bulk_unassign', 'Unassign {{count}} Coupon', { count: selectedCouponIds.length })}
                           </Button>
                         )}
                       </div>
@@ -760,7 +771,7 @@ function CampaignDetail() {
                         onClick={() => setAssignModalOpen(true)}
                         disabled={stats.unassigned === 0}
                       >
-                        Assign Coupon to User
+                        {t('campaigns.assign_coupon_to_user', 'Assign Coupon to User')}
                       </Button>
                     </div>
                     <DataTable 
@@ -775,7 +786,7 @@ function CampaignDetail() {
               <TabsContent value="announcements" className="space-y-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Related Announcements</CardTitle>
+                    <CardTitle>{t('campaigns.related_announcements', 'Related Announcements')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <DataTable 
@@ -791,11 +802,11 @@ function CampaignDetail() {
             <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Edit Campaign</DialogTitle>
+                  <DialogTitle>{t('campaigns.edit_campaign', 'Edit Campaign')}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleEditSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="title">Title</Label>
+                    <Label htmlFor="title">{t('campaigns.title_label', 'Title')}</Label>
                     <Input
                       id="title"
                       name="title"
@@ -806,7 +817,7 @@ function CampaignDetail() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="description">Description</Label>
+                    <Label htmlFor="description">{t('campaigns.description_label', 'Description')}</Label>
                     <Input
                       id="description"
                       name="description"
@@ -816,7 +827,7 @@ function CampaignDetail() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="start_date">Start Date</Label>
+                    <Label htmlFor="start_date">{t('campaigns.start_date_label', 'Start Date')}</Label>
                     <Input
                       id="start_date"
                       name="start_date"
@@ -827,7 +838,7 @@ function CampaignDetail() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="end_date">End Date</Label>
+                    <Label htmlFor="end_date">{t('campaigns.end_date_label', 'End Date')}</Label>
                     <Input
                       id="end_date"
                       name="end_date"
@@ -846,7 +857,7 @@ function CampaignDetail() {
                       onChange={handleEditChange}
                       className="h-4 w-4"
                     />
-                    <Label htmlFor="active">Active</Label>
+                    <Label htmlFor="active">{t('campaigns.active_label', 'Active')}</Label>
                   </div>
                   <DialogFooter>
                     <Button 
@@ -854,13 +865,13 @@ function CampaignDetail() {
                       variant="outline" 
                       onClick={() => setEditModalOpen(false)}
                     >
-                      Cancel
+                      {t('common.cancel', 'Cancel')}
                     </Button>
                     <Button 
                       type="submit" 
                       disabled={updateCampaignMutation.isPending}
                     >
-                      {updateCampaignMutation.isPending ? "Updating..." : "Update Campaign"}
+                      {updateCampaignMutation.isPending ? t('campaigns.updating', 'Updating...') : t('campaigns.update_campaign', 'Update Campaign')}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -871,11 +882,11 @@ function CampaignDetail() {
             <Dialog open={uploadModalOpen} onOpenChange={setUploadModalOpen}>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Upload Coupons via Excel</DialogTitle>
+                  <DialogTitle>{t('campaigns.upload_coupons_excel', 'Upload Coupons via Excel')}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div>
-                    <Label htmlFor="excel-upload">Excel File</Label>
+                    <Label htmlFor="excel-upload">{t('campaigns.excel_file', 'Excel File')}</Label>
                     <div className="mt-2 flex items-center gap-2">
                       <Input 
                         id="excel-upload" 
@@ -893,31 +904,31 @@ function CampaignDetail() {
                           <div className="flex items-center gap-2">
                             <FileSpreadsheet className="h-5 w-5 text-blue-600" />
                             <span className="text-sm font-medium text-blue-800">
-                              Selected: {excelFile.name}
+                              {excelFile ? t('campaigns.selected_file', 'Selected: {{filename}}', { filename: excelFile.name }) : ''}
                             </span>
                           </div>
                           <span className="text-xs text-blue-600">
-                            {(excelFile.size / 1024).toFixed(1)} KB
+                            {excelFile ? (excelFile.size / 1024).toFixed(1) : 0} KB
                           </span>
                         </div>
                       </div>
                     )}
                     
                     <p className="mt-3 text-sm text-muted-foreground">
-                      File format: code, discount_type ('fixed' or 'percentage'), discount_value, expires_at (optional YYYY-MM-DD HH:MM:SS or NULL)
+                      {t('campaigns.file_format_info', 'File format: code, discount_type (\'fixed\' or \'percentage\'), discount_value, expires_at (optional YYYY-MM-DD HH:MM:SS or NULL)')}
                     </p>
                     
                     <div className="mt-4 p-4 bg-gray-50 rounded-md border border-gray-200">
-                      <h4 className="font-semibold text-sm mb-2 text-gray-800">📋 Required Columns:</h4>
+                      <h4 className="font-semibold text-sm mb-2 text-gray-800">{t('campaigns.required_columns', '📋 Required Columns:')}</h4>
                       <ul className="text-xs text-gray-600 space-y-1 ml-4 list-disc">
-                        <li><strong>code</strong> - Unique coupon code (required)</li>
-                        <li><strong>discount_type</strong> - Either 'fixed' or 'percentage' (required)</li>
-                        <li><strong>discount_value</strong> - Numeric value (required)</li>
-                        <li><strong>expires_at</strong> - Date/time (optional, format: YYYY-MM-DD HH:MM:SS)</li>
+                        <li><strong>code</strong> - {t('campaigns.required_code_column', 'Unique coupon code (required)')}</li>
+                        <li><strong>discount_type</strong> - {t('campaigns.required_discount_type_column', "Either 'fixed' or 'percentage' (required)")}</li>
+                        <li><strong>discount_value</strong> - {t('campaigns.required_discount_value_column', 'Numeric value (required)')}</li>
+                        <li><strong>expires_at</strong> - {t('campaigns.required_expires_at_column', 'Date/time (optional, format: YYYY-MM-DD HH:MM:SS)')}</li>
                       </ul>
                       
                       <div className="mt-3 pt-3 border-t border-gray-200">
-                        <h4 className="font-semibold text-sm mb-2 text-gray-800">📝 Example:</h4>
+                        <h4 className="font-semibold text-sm mb-2 text-gray-800">{t('campaigns.example_title', '📝 Example:')}</h4>
                         <pre className="text-xs bg-white p-2 rounded border text-gray-700">
 code,discount_type,discount_value,expires_at
 SAVE10,fixed,10.00,2027-12-31 23:59:59
@@ -943,7 +954,7 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                     className="flex items-center gap-2"
                   >
                     <Upload className="h-4 w-4" />
-                    {excelFile ? `Upload ${excelFile.name}` : 'Upload Coupons'}
+                    {excelFile ? t('campaigns.upload_file', 'Upload {{filename}}', { filename: excelFile.name }) : t('campaigns.upload_coupons', 'Upload Coupons')}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -953,22 +964,22 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
             <Dialog open={autoAssignModalOpen} onOpenChange={setAutoAssignModalOpen}>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Confirm Auto-Assignment</DialogTitle>
+                  <DialogTitle>{t('campaigns.confirm_auto_assignment', 'Confirm Auto-Assignment')}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
-                    <h3 className="font-semibold text-blue-800 mb-2">Assignment Preview</h3>
+                    <h3 className="font-semibold text-blue-800 mb-2">{t('campaigns.assignment_preview', 'Assignment Preview')}</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Unassigned Coupons:</span>
+                        <span className="text-gray-600">{t('campaigns.unassigned_coupons', 'Unassigned Coupons:')}</span>
                         <span className="font-medium">{coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Unassigned Users:</span>
+                        <span className="text-gray-600">{t('campaigns.unassigned_users', 'Unassigned Users:')}</span>
                         <span className="font-medium">{users.filter((u: UserPublic) => !coupons.some((c: CouponPublic) => c.assigned_to_user_id === u.id)).length}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">To Be Assigned:</span>
+                        <span className="text-gray-600">{t('campaigns.to_be_assigned', 'To Be Assigned:')}</span>
                         <span className="font-medium">
                           {Math.min(
                             coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length,
@@ -988,7 +999,7 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                       return (
                         <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
                           <p className="text-sm text-yellow-700">
-                            {unassignedUsersCount - unassignedCouponsCount} users will remain unassigned.
+                            {t('campaigns.users_remain_unassigned', '{{count}} users will remain unassigned.', { count: unassignedUsersCount - unassignedCouponsCount })}
                           </p>
                         </div>
                       );
@@ -996,7 +1007,7 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                       return (
                         <div className="bg-yellow-50 p-4 rounded-md border border-yellow-200">
                           <p className="text-sm text-yellow-700">
-                            {unassignedCouponsCount - unassignedUsersCount} coupons will remain unassigned.
+                            {t('campaigns.coupons_remain_unassigned', '{{count}} coupons will remain unassigned.', { count: unassignedCouponsCount - unassignedUsersCount })}
                           </p>
                         </div>
                       );
@@ -1004,7 +1015,7 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                       return (
                         <div className="bg-red-50 p-4 rounded-md border border-red-200">
                           <p className="text-sm text-red-700">
-                            No unassigned coupons available for assignment.
+                            {t('campaigns.no_unassigned_coupons', 'No unassigned coupons available for assignment.')}
                           </p>
                         </div>
                       );
@@ -1012,7 +1023,7 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                       return (
                         <div className="bg-red-50 p-4 rounded-md border border-red-200">
                           <p className="text-sm text-red-700">
-                            No unassigned users available for assignment.
+                            {t('campaigns.no_unassigned_users', 'No unassigned users available for assignment.')}
                           </p>
                         </div>
                       );
@@ -1021,10 +1032,10 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                   })()}
                                     
                   <div className="text-sm text-gray-700">
-                    <p>This will assign <strong>{Math.min(
+                    <p>{t('campaigns.will_assign_coupons', 'This will assign')} <strong>{Math.min(
                       coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length,
                       users.filter((u: UserPublic) => !coupons.some((c: CouponPublic) => c.assigned_to_user_id === u.id)).length
-                    )} coupons</strong>.</p>
+                    )} {t('campaigns.coupons', 'coupons')}</strong>.</p>
                   </div>
                                     
                   <div className="space-y-2">
@@ -1032,7 +1043,7 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                     htmlFor="coupons-per-person"
                     className="text-sm font-medium text-gray-700"
                   >
-                    Coupons per person
+                    {t('campaigns.coupons_per_person', 'Coupons per person')}
                   </Label>
                   <Input
                     id="coupons-per-person"
@@ -1044,7 +1055,7 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                     onChange={(e) => setCouponsPerPerson(parseInt(e.target.value) || 1)}
                     className="w-24"
                   />
-                  <p className="text-xs text-gray-500">Number of coupons to assign per person</p>
+                  <p className="text-xs text-gray-500">{t('campaigns.coupons_per_person_description', 'Number of coupons to assign per person')}</p>
                   </div>
                 </div>
 
@@ -1054,13 +1065,13 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                     onClick={() => setAutoAssignModalOpen(false)}
                     disabled={isAutoAssigning}
                   >
-                    Cancel
+                    {t('common.cancel', 'Cancel')}
                   </Button>
                   <Button 
                     onClick={handleAutoAssign} 
                     disabled={isAutoAssigning || coupons.filter((c: CouponPublic) => !c.assigned_to_user_id).length === 0}
                   >
-                    {isAutoAssigning ? 'Assigning...' : 'Confirm Assignment'}
+                    {isAutoAssigning ? t('campaigns.assigning', 'Assigning...') : t('campaigns.confirm_assignment', 'Confirm Assignment')}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -1070,18 +1081,18 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
             <Dialog open={assignModalOpen} onOpenChange={setAssignModalOpen}>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Assign Coupon to User</DialogTitle>
+                  <DialogTitle>{t('campaigns.assign_coupon_to_user', 'Assign Coupon to User')}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div>
-                    <Label htmlFor="coupon-select">Select Coupon</Label>
+                    <Label htmlFor="coupon-select">{t('campaigns.select_coupon', 'Select Coupon')}</Label>
                     <select
                       id="coupon-select"
                       className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2"
                       value={selectedCouponId || ''}
                       onChange={(e) => setSelectedCouponId(e.target.value)}
                     >
-                      <option value="">Select a coupon</option>
+                      <option value="">{t('campaigns.select_a_coupon', 'Select a coupon')}</option>
                       {coupons
                         .filter((coupon: CouponPublic) => !coupon.assigned_to_user_id)
                         .map((coupon: CouponPublic) => (
@@ -1092,14 +1103,14 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                     </select>
                   </div>
                   <div>
-                    <Label htmlFor="user-select">Select User</Label>
+                    <Label htmlFor="user-select">{t('campaigns.select_user', 'Select User')}</Label>
                     <select
                       id="user-select"
                       className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2"
                       value={selectedUserId || ''}
                       onChange={(e) => setSelectedUserId(e.target.value)}
                     >
-                      <option value="">Select a user</option>
+                      <option value="">{t('campaigns.select_a_user', 'Select a user')}</option>
                       {users.map((user: UserPublic) => (
                         <option key={user.id} value={user.id}>
                           {user.email} ({user.full_name})
@@ -1117,11 +1128,11 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                       setSelectedUserId(null);
                     }}
                   >
-                    Cancel
+                    {t('common.cancel', 'Cancel')}
                   </Button>
                   <Button onClick={handleAssignCoupon} disabled={!selectedCouponId || !selectedUserId}>
                     <UserRound className="mr-2 h-4 w-4" />
-                    Assign
+                    {t('campaigns.assign', 'Assign')}
                   </Button>
                 </DialogFooter>
               </DialogContent>

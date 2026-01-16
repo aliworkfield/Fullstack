@@ -8,6 +8,7 @@ import keycloak from "./keycloak"
 import AuthGate from "./auth/AuthGate"
 import { ThemeProvider } from "./components/theme-provider"
 import { Toaster } from "./components/ui/sonner"
+import "./i18n/config"
 
 const queryClient = new QueryClient()
 const router = createRouter({ routeTree })

@@ -1,7 +1,9 @@
 import { Briefcase, Users, Megaphone, Ticket } from "lucide-react"
 import { useMemo } from "react"
+import { useTranslation } from 'react-i18next'
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
+import { LanguageSelector } from "@/components/Common/LanguageSelector"
 import { Logo } from "@/components/Common/Logo"
 import {
   Sidebar,
@@ -17,18 +19,18 @@ import { User } from "./User"
 import keycloak from "@/keycloak"
 
 const baseItems: Item[] = [
-  { icon: Megaphone, title: "Announcements", path: "/announcements" },
+  { icon: Megaphone, title: "announcements", path: "/announcements" },
 ]
 
 const adminItems: Item[] = [
-  { icon: Briefcase, title: "Campaigns", path: "/campaigns" },
-  { icon: Ticket, title: "Coupons", path: "/coupons" },
-  { icon: Users, title: "Admin Panel", path: "/admin" },
+  { icon: Briefcase, title: "campaigns", path: "/campaigns" },
+  { icon: Ticket, title: "coupons", path: "/coupons" },
+  { icon: Users, title: "admin_panel", path: "/admin" },
 ]
 
 const couponManagerItems: Item[] = [
-  { icon: Briefcase, title: "Campaigns", path: "/campaigns" },
-  { icon: Ticket, title: "Coupons", path: "/coupons" },
+  { icon: Briefcase, title: "campaigns", path: "/campaigns" },
+  { icon: Ticket, title: "coupons", path: "/coupons" },
   // Removed duplicate Coupons entry
 ]
 
@@ -66,6 +68,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter>
         <SidebarAppearance />
+        <LanguageSelector />
         <User user={currentUser} />
       </SidebarFooter>
       <SidebarRail />

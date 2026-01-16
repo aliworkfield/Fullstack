@@ -11,12 +11,14 @@ import { toast } from "sonner";
 import { CreateAnnouncementModal } from "@/components/Announcements/CreateAnnouncementModal";
 import { useState, useMemo } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute("/_layout/announcements/$id")({
   component: AnnouncementDetailRoute,
 });
 
 export function AnnouncementDetailRoute() {
+  const { t } = useTranslation();
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -116,7 +118,7 @@ export function AnnouncementDetailRoute() {
                       to="/announcements"
                       className="text-muted-foreground hover:text-foreground whitespace-nowrap"
                     >
-                      ← Back to Announcements
+                      ← {t('announcements.back_to_announcements', '← Back to Announcements')}
                     </Link>
 
                     {canEdit && (
@@ -169,12 +171,12 @@ export function AnnouncementDetailRoute() {
                       <div className="flex justify-end mt-4">
                         <div className="flex items-center gap-2">
                           {announcement.is_published ? (
-                            <Badge variant="default">Published</Badge>
+                            <Badge variant="default">{t('announcements.published', 'Published')}</Badge>
                           ) : (
-                            <Badge variant="secondary">Draft</Badge>
+                            <Badge variant="secondary">{t('announcements.draft', 'Draft')}</Badge>
                           )}
                           {announcement.expiry_date && new Date(announcement.expiry_date) < new Date() && (
-                            <Badge variant="destructive">Expired</Badge>
+                            <Badge variant="destructive">{t('announcements.expired', 'Expired')}</Badge>
                           )}
                         </div>
                       </div>
@@ -183,9 +185,9 @@ export function AnnouncementDetailRoute() {
                     {/* Coupon Section */}
                     {announcement.requires_coupon && (
                       <div className="mt-6">
-                        <h3 className="font-medium mb-2 ">    Your Discount Code{campaignCoupons.length !== 1 ? 's' : ''}</h3>
+                        <h3 className="font-medium mb-2 ">{t('coupons.your_discount_codes', 'Your Discount Codes')}</h3>
                         {isCouponLoading ? (
-                          <p className="text-muted-foreground">Loading your coupon{campaignCoupons.length !== 1 ? 's' : ''}...</p>
+                          <p className="text-muted-foreground">{t('coupons.loading_coupons', 'Loading your coupons...')}</p>
                         ) : campaignCoupons.length > 0 ? (
                           <div className="space-y-4">
                             {campaignCoupons.map((coupon: any) => {
@@ -226,7 +228,7 @@ export function AnnouncementDetailRoute() {
                                         disabled={redeemMutation.isPending}
                                       >
                                         <Eye className="w-4 h-4" />
-                                        {redeemMutation.isPending ? "İndirim Kodu Kullanılıyor..." : "İndirim Kodunu Görüntüle"}
+                                        {redeemMutation.isPending ? t('coupons.redeeming', 'İndirim Kodu Kullanılıyor...') : t('coupons.view_code', 'İndirim Kodunu Görüntüle')}
                                       </Button>
                                       {/* <p className="text-sm text-blue-600 mt-2">
                                         İndirim Kodunu Görüntüle
@@ -240,7 +242,7 @@ export function AnnouncementDetailRoute() {
                         ) : (
                           <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                             <p className="text-center text-gray-600">
-                              No coupon assigned to you for this campaign
+                              {t('coupons.no_coupon_assigned', 'No coupon assigned to you for this campaign')}
                             </p>
                           </div>
                         )}
