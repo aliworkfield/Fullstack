@@ -1,5 +1,5 @@
 [project]
-name = "app"
+name = "kurumsal-indirim-backend"
 version = "0.1.0"
 description = ""
 requires-python = ">=3.10,<4.0"
@@ -73,7 +73,7 @@ ignore = [
 keep-runtime-typing = true
 
 [tool.coverage.run]
-source = ["app"]
+source = ["kurumsal-indirim-backend"]
 dynamic_context = "test_function"
 
 [tool.coverage.report]
