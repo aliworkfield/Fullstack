@@ -1,6 +1,5 @@
 import { Briefcase, Users, Megaphone, Ticket } from "lucide-react"
 import { useMemo } from "react"
-import { useTranslation } from 'react-i18next'
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { LanguageSelector } from "@/components/Common/LanguageSelector"

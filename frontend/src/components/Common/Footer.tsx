@@ -1,5 +1,6 @@
-import { FaGithub, FaLinkedinIn } from "react-icons/fa"
-import { FaXTwitter } from "react-icons/fa6"
+import { FaGithub, FaLinkedinIn } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+import { useTranslation } from 'react-i18next';
 
 const socialLinks = [
   { icon: FaGithub, href: "https://github.com/fastapi/fastapi", label: "GitHub" },
@@ -9,23 +10,24 @@ const socialLinks = [
 
 // Company specific links - update with your company's information
 const companyLinks = [
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-  { href: "/privacy", label: "Privacy" },
-  { href: "/terms", label: "Terms" },
+  { href: "/about", key: "about", label: "About" },
+  { href: "/contact", key: "contact", label: "Contact" },
+  { href: "/privacy", key: "privacy", label: "Privacy" },
+  { href: "/terms", key: "terms", label: "Terms" },
 ]
 
 export function Footer() {
-  const currentYear = new Date().getFullYear()
+  const { t } = useTranslation();
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer className="border-t bg-background">
       <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
           <div className="flex flex-col items-center sm:items-start">
-            <p className="text-lg font-semibold text-foreground">Your Company</p>
+            <p className="text-lg font-semibold text-foreground">{t('footer.company_name', 'Your Company')}</p>
             <p className="text-muted-foreground text-sm text-center sm:text-left mt-1">
-              Professional coupon management solution
+              {t('footer.tagline', 'Professional coupon management solution')}
             </p>
           </div>
           
@@ -45,7 +47,7 @@ export function Footer() {
               ))}
             </div>
             <p className="text-muted-foreground text-sm">
-              © {currentYear} Your Company. All rights reserved.
+              © {currentYear} {t('footer.company_name', 'Your Company')}. {t('footer.all_rights_reserved', 'All rights reserved.')}
             </p>
           </div>
         </div>
@@ -58,7 +60,7 @@ export function Footer() {
                 href={link.href}
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
-                {link.label}
+                {t(`footer.${link.key}`, link.label)}
               </a>
             ))}
           </nav>

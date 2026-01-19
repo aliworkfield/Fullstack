@@ -14,7 +14,6 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RecoverPasswordRouteImport } from './routes/recover-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
-import { Route as LayoutSettingsRouteImport } from './routes/_layout/settings'
 import { Route as LayoutAdminRouteImport } from './routes/_layout/admin'
 import { Route as LayoutCouponsIndexRouteImport } from './routes/_layout/coupons/index'
 import { Route as LayoutCampaignsIndexRouteImport } from './routes/_layout/campaigns/index'
@@ -45,11 +44,6 @@ const LoginRoute = LoginRouteImport.update({
 const LayoutIndexRoute = LayoutIndexRouteImport.update({
   id: '/_layout/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LayoutSettingsRoute = LayoutSettingsRouteImport.update({
-  id: '/_layout/settings',
-  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutAdminRoute = LayoutAdminRouteImport.update({
@@ -90,7 +84,6 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
-  '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
   '/announcements/$id': typeof LayoutAnnouncementsIdRoute
   '/campaigns/$id': typeof LayoutCampaignsIdRoute
@@ -104,7 +97,6 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin': typeof LayoutAdminRoute
-  '/settings': typeof LayoutSettingsRoute
   '/': typeof LayoutIndexRoute
   '/announcements/$id': typeof LayoutAnnouncementsIdRoute
   '/campaigns/$id': typeof LayoutCampaignsIdRoute
@@ -119,7 +111,6 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/_layout/admin': typeof LayoutAdminRoute
-  '/_layout/settings': typeof LayoutSettingsRoute
   '/_layout/': typeof LayoutIndexRoute
   '/_layout/announcements/$id': typeof LayoutAnnouncementsIdRoute
   '/_layout/campaigns/$id': typeof LayoutCampaignsIdRoute
@@ -135,7 +126,6 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/admin'
-    | '/settings'
     | '/'
     | '/announcements/$id'
     | '/campaigns/$id'
@@ -149,7 +139,6 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/admin'
-    | '/settings'
     | '/'
     | '/announcements/$id'
     | '/campaigns/$id'
@@ -163,7 +152,6 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/_layout/admin'
-    | '/_layout/settings'
     | '/_layout/'
     | '/_layout/announcements/$id'
     | '/_layout/campaigns/$id'
@@ -178,7 +166,6 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   LayoutAdminRoute: typeof LayoutAdminRoute
-  LayoutSettingsRoute: typeof LayoutSettingsRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutAnnouncementsIdRoute: typeof LayoutAnnouncementsIdRoute
   LayoutCampaignsIdRoute: typeof LayoutCampaignsIdRoute
@@ -222,13 +209,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof LayoutIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_layout/settings': {
-      id: '/_layout/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof LayoutSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout/admin': {
@@ -282,7 +262,6 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   LayoutAdminRoute: LayoutAdminRoute,
-  LayoutSettingsRoute: LayoutSettingsRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutAnnouncementsIdRoute: LayoutAnnouncementsIdRoute,
   LayoutCampaignsIdRoute: LayoutCampaignsIdRoute,

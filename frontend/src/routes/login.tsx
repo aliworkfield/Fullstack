@@ -1,6 +1,7 @@
-import { createFileRoute, Link as RouterLink } from "@tanstack/react-router"
+import { createFileRoute, Link as RouterLink } from "@tanstack/react-router";
+import { useTranslation } from 'react-i18next';
 
-import { AuthLayout } from "@/components/Common/AuthLayout"
+import { AuthLayout } from "@/components/Common/AuthLayout";
 import { Button } from "@/components/ui/button"
 import useAuth from "@/hooks/useAuth"
 import keycloak from "@/keycloak"
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/login")({
 })
 
 function Login() {
+  const { t } = useTranslation();
   const { logout } = useAuth()
 
   const handleLogin = () => {
@@ -31,23 +33,23 @@ function Login() {
     <AuthLayout>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <h1 className="text-2xl font-bold">{t('auth.login_to_account', 'Login to your account')}</h1>
         </div>
 
         <div className="grid gap-4">
           <Button onClick={handleLogin} size="lg">
-            Log In with Keycloak
+            {t('auth.login_with_keycloak', 'Log In with Keycloak')}
           </Button>
           
           <Button variant="outline" onClick={handleLogout} size="lg">
-            Logout
+            {t('auth.logout', 'Logout')}
           </Button>
         </div>
 
         <div className="text-center text-sm">
-          Don't have an account yet?{" "}
+          {t('auth.no_account_yet', "Don't have an account yet?")}{' '}
           <RouterLink to="/signup" className="underline underline-offset-4">
-            Sign up
+            {t('auth.sign_up', 'Sign up')}
           </RouterLink>
         </div>
       </div>

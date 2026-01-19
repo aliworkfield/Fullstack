@@ -10,8 +10,8 @@ export const columns: ColumnDef<app__models__announcement__AnnouncementPublic>[]
   {
     accessorKey: "title",
     header: ({ column }) => {
-      // Translation function t should be passed from parent component
-      const t = (key: string, fallback: string) => fallback;
+      // Translation function should be passed from parent component
+      const t = (_key: string, fallback: string) => fallback;
       return (
         <Button
           variant="ghost"
@@ -26,16 +26,16 @@ export const columns: ColumnDef<app__models__announcement__AnnouncementPublic>[]
   {
     accessorKey: "category",
     header: () => {
-      // Translation function t should be passed from parent component
-      const t = (key: string, fallback: string) => fallback;
+      // Translation function should be passed from parent component
+      const t = (_key: string, fallback: string) => fallback;
       return t('datatable.headers.category', 'Category');
     },
   },
   {
     accessorKey: "created_date",
     header: () => {
-      // Translation function t should be passed from parent component
-      const t = (key: string, fallback: string) => fallback;
+      // Translation function should be passed from parent component
+      const t = (_key: string, fallback: string) => fallback;
       return t('datatable.headers.created_date', 'Created Date');
     },
     cell: ({ row }) => {
@@ -46,13 +46,13 @@ export const columns: ColumnDef<app__models__announcement__AnnouncementPublic>[]
   {
     accessorKey: "is_published",
     header: () => {
-      // Translation function t should be passed from parent component
-      const t = (key: string, fallback: string) => fallback;
+      // Translation function should be passed from parent component
+      const t = (_key: string, fallback: string) => fallback;
       return t('datatable.headers.status', 'Status');
     },
     cell: ({ row }) => {
-      // Translation function t should be passed from parent component
-      const t = (key: string, fallback: string) => fallback;
+      // Translation function should be passed from parent component
+      const t = (_key: string, fallback: string) => fallback;
       const isPublished = row.getValue("is_published") as boolean;
       return (
         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -68,8 +68,8 @@ export const columns: ColumnDef<app__models__announcement__AnnouncementPublic>[]
   {
     id: "actions",
     cell: ({ row }) => {
-      // Translation function t should be passed from parent component
-      const t = (key: string, fallback: string) => fallback;
+      // Translation function should be passed from parent component
+      const t = (_key: string, fallback: string) => fallback;
       const announcement = row.original;
       const navigate = useNavigate();
       

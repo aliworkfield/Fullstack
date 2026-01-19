@@ -111,8 +111,7 @@
       "announcements": "Duyurular",
       "campaigns": "Kampanyalar",
       "coupons": "Kuponlar",
-      "admin_panel": "Yönetim Paneli",
-      "settings": "Ayarlar"
+      "admin_panel": "Yönetim Paneli"
     },
     "edit": "Düzenle",
     "create": "Oluştur",
@@ -146,7 +145,22 @@
     "email_placeholder": "E-posta",
     "full_name_placeholder": "Tam ad",
     "loading_announcements": "Duyurular yükleniyor...",
-    "error_loading_campaigns": "Kampanyalar yüklenirken hata oluştu"
+    "error_loading_campaigns": "Kampanyalar yüklenirken hata oluştu",
+    "appearance": "Görünüm",
+    "toggle_theme": "Temayı değiştir",
+    "language": "Dil",
+    "toggle_language": "Dili değiştir",
+    "users": "Kullanıcılar",
+    "loading_users": "Kullanıcılar yükleniyor...",
+    "error_loading_users": "Kullanıcılar yüklenirken hata oluştu. Lütfen sayfayı yenileyin.",
+    "admin_only_access": "Kullanıcı yönetimi sadece yöneticiler için kullanılabilir.",
+    "checking_permissions": "İzinler kontrol ediliyor...",
+    "yes": "Evet",
+    "no": "Hayır",
+    "not_available": "Mevcut değil",
+    "saving": "Kaydediliyor...",
+    "discount": "İndirim",
+    "access_denied": "Erişim reddedildi. Yönetici veya yönetici ayrıcalıkları gereklidir."
   },
   "datatable": {
     "headers": {
@@ -238,7 +252,58 @@
     "no_results": "Aramanızla eşleşen duyuru bulunamadı.",
     "no_match": "Arama tercihinizle eşleşen duyuru bulunamadı.",
     "no_in_category": "{{category}} kategorisinde duyuru bulunamadı.",
-    "no_new": "Yeni duyuru bulunamadı."
+    "no_new": "Yeni duyuru bulunamadı.",
+    "loading": "Duyuru yükleniyor...",
+    "error_loading": "Duyuru yüklenirken hata oluştu",
+    "details": "Detaylar",
+    "metadata": "Meta Veri",
+    "id": "ID",
+    "published": "Yayınlandı",
+    "created": "Oluşturuldu",
+    "expires": "Son Kullanma Tarihi",
+    "coupon_information": "Kupon Bilgisi",
+    "loading_coupon": "Kupon yükleniyor...",
+    "no_coupon_assigned": "Bu duyuru için size atanmış bir kupon yok.",
+    "coupon_required": "Kupon Gerekli",
+    "create_new": "+",
+    "edit_announcement": "Duyuru Düzenle",
+    "create_announcement": "Duyuru Oluştur",
+    "update_details": "Duyuru detaylarını güncelle.",
+    "add_new": "Sisteme yeni bir duyuru ekle.",
+    "enter_title": "Duyuru başlığı girin",
+    "enter_description": "Duyuru açıklaması girin",
+    "select_category": "Bir kategori seçin",
+    "requires_coupon": "Kupon Gerekli",
+    "select_campaign_optional": "Bir kampanya seçin (isteğe bağlı)",
+    "no_campaign": "Kampanya yok",
+    "is_published": "Yayınlandı",
+    "expiry_date": "Son Kullanma Tarihi",
+    "select_expiry_date": "Son kullanma tarihi seçin"
+  },
+  "footer": {
+    "company_name": "Şirketiniz",
+    "tagline": "Profesyonel kupon yönetim çözümü",
+    "all_rights_reserved": "Tüm hakları saklıdır.",
+    "github": "GitHub",
+    "x": "X",
+    "linkedin": "LinkedIn",
+    "about": "Hakkında",
+    "contact": "İletişim",
+    "privacy": "Gizlilik",
+    "terms": "Şartlar"
+  },
+  "validations": {
+    "title_required": "Başlık gerekli",
+    "category_required": "Kategori gerekli"
+  },
+  "themes": {
+    "light": "Açık",
+    "dark": "Koyu",
+    "system": "Sistem"
+  },
+  "languages": {
+    "turkish": "Türkçe",
+    "english": "İngilizce"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -250,12 +315,54 @@
     "authenticating": "Kimlik doğrulanıyor...",
     "loading_user": "Kullanıcı yükleniyor...",
     "failed_load_user": "Kullanıcı yüklenemedi",
-    "not_authenticated": "Kullanıcı kimliği doğrulanmadı"
+    "not_authenticated": "Kullanıcı kimliği doğrulanmadı",
+    "login_to_account": "Hesabınıza giriş yapın",
+    "login_with_keycloak": "Keycloak ile Giriş Yap",
+    "no_account_yet": "Henüz bir hesabınız yok mu?",
+    "sign_up": "Kayıt ol"
+  },
+  "notfound": {
+    "oops": "Eyvah!",
+    "page_not_found": "Aradığınız sayfa bulunamadı.",
+    "go_back": "Geri Dön"
+  },
+  "errors": {
+    "error": "Hata",
+    "oops": "Eyvah!",
+    "something_went_wrong": "Bir şeyler ters gitti. Lütfen tekrar deneyin.",
+    "go_home": "Ana Sayfaya Git"
   },
   "messages": {
     "success": "İşlem başarıyla tamamlandı",
     "error": "Bir hata oluştu",
     "confirm_delete": "Silmek istediğinize emin misiniz?",
     "no_permission": "Bu işlem için yetkiniz yok"
+  },
+  "pages": {
+    "campaigns": {
+      "title": "Kampanyalar",
+      "subtitle": "Pazarlama kampanyalarınızı yönetin"
+    },
+    "coupons": {
+      "title": "Kuponlar",
+      "subtitle": "Sistemdeki tüm indirim kuponlarını yönetin",
+      "access_denied": "Kupon yönetimi sadece yöneticiler ve yöneticilere açıktır.",
+      "loading": "Yükleniyor..."
+    }
+  },
+  "columns": {
+    "code": "Kod",
+    "discount_type": "İndirim Türü",
+    "discount_value": "İndirim Değeri",
+    "assigned_user": "Atanan Kullanıcı",
+    "status": "Durum",
+    "unassigned": "Atanmamış",
+    "assigned": "Atandı",
+    "redeemed": "Kullanıldı"
+  },
+  "pages": {
+    "recover_password": "Parola Kurtarma Sayfası",
+    "reset_password": "Parola Sıfırlama Sayfası",
+    "signup": "Kayıt Sayfası"
   }
 }

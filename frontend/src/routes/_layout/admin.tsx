@@ -46,11 +46,11 @@ export function AdminRoute() {
 
 
   if (rolesLoading) {
-    return <div>Loading...</div>;
+    return <div>{t('common.loading', 'Loading...')}</div>;
   }
 
   if (!isAdmin && !isManager) {
-    return <div>Access denied. Admin or Manager privileges required.</div>;
+    return <div>{t('common.access_denied', 'Access denied. Admin or Manager privileges required.')}</div>;
   }
 
   // Determine if we should show loading state for users
@@ -70,14 +70,12 @@ export function AdminRoute() {
                 <h1 className="text-3xl font-bold tracking-tight">{t('common.admin_dashboard', 'Admin Dashboard')}</h1>
                 <p className="text-muted-foreground">{t('common.manage_users_and_announcements', 'Manage users and announcements')}</p>
               </div>
-              <Button disabled={!isAdmin}>
-                {t('common.add_user', 'Add User')}
-              </Button>
+
             </div>
 
             <Tabs defaultValue="users" className="space-y-4">
               <TabsList>
-                <TabsTrigger value="users" disabled={!isAdmin}>Users</TabsTrigger>
+                <TabsTrigger value="users" disabled={!isAdmin}>{t('common.users', 'Users')}</TabsTrigger>
               </TabsList>
               <TabsContent value="users" className="space-y-4">
                 <Card>
@@ -88,11 +86,11 @@ export function AdminRoute() {
                     {isAdmin === true ? (
                       shouldShowUsersLoading ? (
                         <div className="text-center py-8 text-muted-foreground">
-                          Loading users...
+                          {t('common.loading_users', 'Loading users...')}
                         </div>
                       ) : shouldShowUsersError ? (
                         <div className="text-center py-8 text-muted-foreground text-red-500">
-                          Error loading users. Please try refreshing the page.
+                          {t('common.error_loading_users', 'Error loading users. Please try refreshing the page.')}
                         </div>
                       ) : (
                         <DataTable
@@ -102,12 +100,12 @@ export function AdminRoute() {
                       )
                     ) : isAdmin === false ? (
                       <div className="text-center py-8 text-muted-foreground">
-                        User management is only available to administrators.
+                        {t('common.admin_only_access', 'User management is only available to administrators.')}
                       </div>
                     ) : (
                       // Still determining role
                       <div className="text-center py-8 text-muted-foreground">
-                        Checking permissions...
+                        {t('common.checking_permissions', 'Checking permissions...')}
                       </div>
                     )}
                   </CardContent>

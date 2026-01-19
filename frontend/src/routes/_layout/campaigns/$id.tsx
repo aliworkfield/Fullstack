@@ -689,7 +689,7 @@ function CampaignDetail() {
                   {t('campaigns.edit_campaign', 'Edit Campaign')}
                 </Button>
                 <Button 
-                  onClick={() => setActiveTab('upload')}
+                  onClick={() => setUploadModalOpen(true)}
                   variant="outline"
                 >
                   <Upload className="mr-2 h-4 w-4" />
@@ -946,7 +946,7 @@ HOLIDAY25,fixed,25.00,2026-12-25 00:00:00</pre>
                       setExcelFile(null);
                     }}
                   >
-                    Cancel
+                    {t('common.cancel', 'Cancel')}
                   </Button>
                   <Button 
                     onClick={handleUpload} 

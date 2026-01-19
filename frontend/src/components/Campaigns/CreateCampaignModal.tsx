@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from 'react-i18next';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { 
@@ -27,6 +28,7 @@ interface CreateCampaignModalProps {
 }
 
 export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   
   const [formData, setFormData] = useState({
@@ -87,11 +89,11 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create Campaign</DialogTitle>
+          <DialogTitle>{t('campaigns.create_campaign', 'Create Campaign')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">{t('common.title', 'Title')}</Label>
             <Input
               id="title"
               name="title"
@@ -102,7 +104,7 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
             />
           </div>
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('common.description', 'Description')}</Label>
             <Input
               id="description"
               name="description"
@@ -112,7 +114,7 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
             />
           </div>
           <div>
-            <Label htmlFor="start_date">Start Date</Label>
+            <Label htmlFor="start_date">{t('campaigns.start_date', 'Start Date')}</Label>
             <Input
               id="start_date"
               name="start_date"
@@ -123,7 +125,7 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
             />
           </div>
           <div>
-            <Label htmlFor="end_date">End Date</Label>
+            <Label htmlFor="end_date">{t('campaigns.end_date', 'End Date')}</Label>
             <Input
               id="end_date"
               name="end_date"
@@ -142,11 +144,11 @@ export function CreateCampaignModal({ open, onClose }: CreateCampaignModalProps)
               onChange={handleChange}
               className="h-4 w-4"
             />
-            <Label htmlFor="active">Active</Label>
+            <Label htmlFor="active">{t('campaigns.active', 'Active')}</Label>
           </div>
           <DialogFooter>
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? "Creating..." : "Create Campaign"}
+              {mutation.isPending ? t('common.creating', 'Creating...') : t('campaigns.create_campaign', 'Create Campaign')}
             </Button>
           </DialogFooter>
         </form>

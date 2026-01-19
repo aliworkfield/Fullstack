@@ -9,8 +9,10 @@ import useAuth from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { CreateAnnouncementModal } from "@/components/Announcements/CreateAnnouncementModal";
 import useRoles from "@/hooks/useRoles";
+import { useTranslation } from 'react-i18next';
 
 export function AnnouncementDetail() {
+  const { t } = useTranslation();
   const { id } = useParams({ from: "/_layout/announcements/$id" });
   const { user } = useAuth();
   const { hasRole } = useRoles();
@@ -34,8 +36,8 @@ export function AnnouncementDetail() {
     }
   }, [announcement, user]);
 
-  if (isLoading) return <div>Loading announcement...</div>;
-  if (isError) return <div>Error loading announcement: {(error as Error).message}</div>;
+  if (isLoading) return <div>{t('announcements.loading', 'Loading announcement...')}</div>;
+  if (isError) return <div>{t('announcements.error_loading', 'Error loading announcement')}: {(error as Error).message}</div>;
 
   const canEdit = hasRole("admin") || hasRole("manager");
 
@@ -49,7 +51,7 @@ export function AnnouncementDetail() {
               <div className="flex items-center space-x-2">
                 <Badge variant="secondary">{announcement.category}</Badge>
                 {announcement.requires_coupon && (
-                  <Badge variant="outline">Coupon Required</Badge>
+                  <Badge variant="outline">{t('announcements.coupon_required', 'Coupon Required')}</Badge>
                 )}
               </div>
             </div>
@@ -57,14 +59,14 @@ export function AnnouncementDetail() {
               <Button onClick={() => {
                 setEditModalOpen(true);
               }}>
-                Edit
+                {t('common.edit', 'Edit')}
               </Button>
             )}
           </div>
 
           <Card>
             <CardHeader>
-              <CardTitle>Details</CardTitle>
+              <CardTitle>{t('announcements.details', 'Details')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="prose max-w-none">
@@ -72,18 +74,18 @@ export function AnnouncementDetail() {
                 
                 {announcement.requires_coupon && (
                   <div className="mt-4 p-4 bg-muted rounded-md">
-                    <h3 className="font-semibold mb-2">Coupon Information</h3>
+                    <h3 className="font-semibold mb-2">{t('announcements.coupon_information', 'Coupon Information')}</h3>
                     {loadingCoupon ? (
-                      <p>Loading coupon...</p>
+                      <p>{t('announcements.loading_coupon', 'Loading coupon...')}</p>
                     ) : coupon ? (
                       <div>
                         <p className="text-lg font-mono bg-background p-2 rounded">{coupon.code}</p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Discount: {coupon.discount_value} {coupon.discount_type}
+                          {t('common.discount', 'Discount')}: {coupon.discount_value} {coupon.discount_type}
                         </p>
                       </div>
                     ) : (
-                      <p>No coupon assigned to you for this announcement.</p>
+                      <p>{t('announcements.no_coupon_assigned', 'No coupon assigned to you for this announcement.')}</p>
                     )}
                   </div>
                 )}
@@ -93,25 +95,25 @@ export function AnnouncementDetail() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Metadata</CardTitle>
+              <CardTitle>{t('announcements.metadata', 'Metadata')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">ID</p>
+                  <p className="text-sm text-muted-foreground">{t('announcements.id', 'ID')}</p>
                   <p className="font-mono text-sm">{announcement.id}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Published</p>
-                  <p>{announcement.is_published ? "Yes" : "No"}</p>
+                  <p className="text-sm text-muted-foreground">{t('announcements.published', 'Published')}</p>
+                  <p>{announcement.is_published ? t('common.yes', 'Yes') : t('common.no', 'No')}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Created</p>
+                  <p className="text-sm text-muted-foreground">{t('announcements.created', 'Created')}</p>
                   <p>{new Date().toLocaleDateString()}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Expires</p>
-                  <p>Not available</p>
+                  <p className="text-sm text-muted-foreground">{t('announcements.expires', 'Expires')}</p>
+                  <p>{t('common.not_available', 'Not available')}</p>
                 </div>
               </div>
             </CardContent>

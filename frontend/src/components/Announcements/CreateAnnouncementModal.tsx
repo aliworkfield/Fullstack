@@ -30,17 +30,24 @@ import { useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from 'react-i18next';
 
-const formSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
+// Define the form schema type explicitly
+const announcementFormSchema = z.object({
+  title: z.string().min(1),
   description: z.string().optional(),
-  category: z.string().min(1, { message: "Category is required" }),
+  category: z.string().min(1),
   requires_coupon: z.boolean(),
   campaign_id: z.string().optional(),
   is_published: z.boolean(),
   expiry_date: z.string().optional(),
 });
 
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof announcementFormSchema>;
+
+// Validation messages function
+const getValidationMessages = (t: (key: string, defaultValue: string) => string) => ({
+  title: t('validations.title_required', 'Title is required'),
+  category: t('validations.category_required', 'Category is required'),
+});
 
 interface CreateAnnouncementModalProps {
   open: boolean;
@@ -88,14 +95,23 @@ export function CreateAnnouncementModal({
     enabled: open, // Only fetch when modal is open
   });
 
+  // Create schema with validation messages
+  const schemaWithMessages = announcementFormSchema.refine((data) => data.title.trim().length > 0, {
+    message: getValidationMessages(t).title,
+    path: ['title'],
+  }).refine((data) => data.category.trim().length > 0, {
+    message: getValidationMessages(t).category,
+    path: ['category'],
+  });
+
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(schemaWithMessages),
     defaultValues: {
       title: "",
       description: "",
       category: "",
       requires_coupon: false,
-      campaign_id: "none", // Use "none" as default instead of empty string
+      campaign_id: undefined, // Use undefined instead of "none"
       is_published: false,
       expiry_date: "",
     },
@@ -109,7 +125,7 @@ export function CreateAnnouncementModal({
         description: announcement.description || "",
         category: announcement.category || "",
         requires_coupon: Boolean(announcement.requires_coupon),
-        campaign_id: announcement.campaign_id ? announcement.campaign_id.toString() : "none",
+        campaign_id: announcement.campaign_id ? announcement.campaign_id.toString() : undefined,
         is_published: Boolean(announcement.is_published),
         expiry_date: announcement.expiry_date || "",
       });
@@ -119,7 +135,7 @@ export function CreateAnnouncementModal({
         description: "",
         category: "",
         requires_coupon: false,
-        campaign_id: "none",
+        campaign_id: undefined,
         is_published: false,
         expiry_date: "",
       });
@@ -147,7 +163,7 @@ export function CreateAnnouncementModal({
   const onSubmit = (data: FormData) => {
     const announcementData: app__models__announcement__AnnouncementCreate = {
       ...data,
-      campaign_id: data.campaign_id && data.campaign_id !== "none" ? data.campaign_id : null,
+      campaign_id: data.campaign_id || null,
       expiry_date: data.expiry_date || null,
     };
     mutation.mutate(announcementData);
@@ -159,9 +175,9 @@ export function CreateAnnouncementModal({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <DialogHeader>
-              <DialogTitle>{announcement ? "Edit Announcement" : "Create Announcement"}</DialogTitle>
+              <DialogTitle>{announcement ? t('announcements.edit_announcement', 'Edit Announcement') : t('announcements.create_announcement', 'Create Announcement')}</DialogTitle>
               <DialogDescription>
-                {announcement ? "Update the announcement details." : "Add a new announcement to the system."}
+                {announcement ? t('announcements.update_details', 'Update the announcement details.') : t('announcements.add_new', 'Add a new announcement to the system.')}
               </DialogDescription>
             </DialogHeader>
 
@@ -171,9 +187,9 @@ export function CreateAnnouncementModal({
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Title *</FormLabel>
+                    <FormLabel>{t('common.title', 'Title')} *</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter announcement title" {...field} />
+                      <Input placeholder={t('announcements.enter_title', 'Enter announcement title')} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -185,10 +201,10 @@ export function CreateAnnouncementModal({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>{t('common.description', 'Description')}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Enter announcement description"
+                        placeholder={t('announcements.enter_description', 'Enter announcement description')}
                         rows={4}
                         {...field}
                       />
@@ -203,11 +219,11 @@ export function CreateAnnouncementModal({
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category *</FormLabel>
+                    <FormLabel>{t('common.category', 'Category')} *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
+                          <SelectValue placeholder={t('announcements.select_category', 'Select a category')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -235,7 +251,7 @@ export function CreateAnnouncementModal({
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Requires Coupon</FormLabel>
+                      <FormLabel>{t('announcements.requires_coupon', 'Requires Coupon')}</FormLabel>
                     </div>
                   </FormItem>
                 )}
@@ -246,18 +262,18 @@ export function CreateAnnouncementModal({
                 name="campaign_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Campaign</FormLabel>
+                    <FormLabel>{t('common.campaign', 'Campaign')}</FormLabel>
                     {campaignsLoading ? (
                       <div className="text-muted-foreground">{t('common.loading_campaigns', 'Loading campaigns...')}</div>
                     ) : (
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select a campaign (optional)" />
+                            <SelectValue placeholder={t('announcements.select_campaign_optional', 'Select a campaign (optional)')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="none">No campaign</SelectItem>
+                          <SelectItem value="none">{t('announcements.no_campaign', 'No campaign')}</SelectItem>
                           {(Array.isArray(campaigns) ? campaigns : []).map((campaign: CampaignPublic) => (
                             <SelectItem key={campaign.id} value={campaign.id}>
                               {campaign.title}
@@ -283,7 +299,7 @@ export function CreateAnnouncementModal({
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Is Published</FormLabel>
+                      <FormLabel>{t('announcements.is_published', 'Is Published')}</FormLabel>
                     </div>
                   </FormItem>
                 )}
@@ -294,11 +310,11 @@ export function CreateAnnouncementModal({
                 name="expiry_date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Expiry Date</FormLabel>
+                    <FormLabel>{t('announcements.expiry_date', 'Expiry Date')}</FormLabel>
                     <FormControl>
                       <Input 
                         type="datetime-local" 
-                        placeholder="Select expiry date" 
+                        placeholder={t('announcements.select_expiry_date', 'Select expiry date')} 
                         {...field} 
                       />
                     </FormControl>
@@ -310,10 +326,10 @@ export function CreateAnnouncementModal({
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
+                {t('common.cancel', 'Cancel')}
               </Button>
               <LoadingButton type="submit" loading={mutation.isPending}>
-                {announcement ? "Update" : "Create"}
+                {announcement ? t('common.update', 'Update') : t('common.create', 'Create')}
               </LoadingButton>
             </DialogFooter>
           </form>

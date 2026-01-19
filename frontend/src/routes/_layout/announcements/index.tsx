@@ -80,7 +80,7 @@ function Announcements() {
                 {isManagerOrAdmin && (
                   <div className="absolute top-4 right-4">
                     <Button onClick={() => setIsCreateModalOpen(true)}>
-                      +
+                      {t('announcements.create_new', '+')}
                     </Button>
                   </div>
                 )}

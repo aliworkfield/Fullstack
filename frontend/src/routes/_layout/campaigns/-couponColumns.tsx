@@ -3,7 +3,7 @@ import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CouponPublic } from "@/client";
 
-export const couponColumns: ColumnDef<CouponPublic>[] = [
+export const getCouponColumns = (t: (key: string, defaultValue: string) => string): ColumnDef<CouponPublic>[] => [
   {
     accessorKey: "code",
     header: ({ column }) => {
@@ -12,7 +12,7 @@ export const couponColumns: ColumnDef<CouponPublic>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Code
+          {t('columns.code', 'Code')}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -20,11 +20,11 @@ export const couponColumns: ColumnDef<CouponPublic>[] = [
   },
   {
     accessorKey: "discount_type",
-    header: "Discount Type",
+    header: t('columns.discount_type', 'Discount Type'),
   },
   {
     accessorKey: "discount_value",
-    header: "Discount Value",
+    header: t('columns.discount_value', 'Discount Value'),
     cell: ({ row }) => {
       const value = parseFloat(row.getValue("discount_value"));
       return `${value}${row.getValue("discount_type") === "percentage" ? "%" : ""}`;
@@ -32,28 +32,28 @@ export const couponColumns: ColumnDef<CouponPublic>[] = [
   },
   {
     accessorKey: "assigned_to_user_id",
-    header: "Assigned User",
+    header: t('columns.assigned_user', 'Assigned User'),
     cell: ({ row }) => {
       const userId = row.getValue("assigned_to_user_id") as string | null;
-      return userId ? "Assigned" : "Unassigned";
+      return userId ? t('columns.assigned', 'Assigned') : t('columns.unassigned', 'Unassigned');
     },
   },
   {
     accessorKey: "redeemed",
-    header: "Status",
+    header: t('columns.status', 'Status'),
     cell: ({ row }) => {
       const isRedeemed = row.getValue("redeemed") as boolean;
       const isAssigned = row.getValue("assigned_to_user_id") as string | null;
       
-      let statusText = "Unassigned";
+      let statusText = t('columns.unassigned', 'Unassigned');
       let statusClass = "bg-gray-100 text-gray-800";
       
       if (isAssigned) {
         if (isRedeemed) {
-          statusText = "Redeemed";
+          statusText = t('columns.redeemed', 'Redeemed');
           statusClass = "bg-red-100 text-red-800";
         } else {
-          statusText = "Assigned";
+          statusText = t('columns.assigned', 'Assigned');
           statusClass = "bg-green-100 text-green-800";
         }
       }

@@ -2,12 +2,14 @@ import { createFileRoute } from '@tanstack/react-router'
 import { SidebarProvider } from "@/components/ui/sidebar"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
 import CampaignsTable from '@/components/Campaigns/CampaignsTable'
+import { useTranslation } from 'react-i18next'
 
 export const Route = createFileRoute('/_layout/campaigns/')({
   component: Campaigns,
 })
 
 function Campaigns() {
+  const { t } = useTranslation();
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -16,8 +18,8 @@ function Campaigns() {
           <div className='max-w-7xl mx-auto w-full'>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
               <div>
-                <h1 className='text-3xl font-bold tracking-tight'>Campaigns</h1>
-                <p className='text-muted-foreground'>Manage your marketing campaigns</p>
+                <h1 className='text-3xl font-bold tracking-tight'>{t('pages.campaigns.title', 'Campaigns')}</h1>
+                <p className='text-muted-foreground'>{t('pages.campaigns.subtitle', 'Manage your marketing campaigns')}</p>
               </div>
             </div>
             <div className='rounded-xl border bg-card shadow-sm'>

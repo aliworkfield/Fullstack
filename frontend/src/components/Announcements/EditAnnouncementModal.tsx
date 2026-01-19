@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +22,7 @@ export function EditAnnouncementModal({
   announcement,
   onSuccess 
 }: EditAnnouncementModalProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   
   const [formData, setFormData] = useState<app__schemas__announcement__AnnouncementUpdate>({
@@ -96,11 +98,11 @@ export function EditAnnouncementModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Announcement</DialogTitle>
+          <DialogTitle>{t('announcements.edit_announcement', 'Edit Announcement')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">{t('common.title', 'Title')}</Label>
             <Input
               id="title"
               name="title"
@@ -111,7 +113,7 @@ export function EditAnnouncementModal({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('common.description', 'Description')}</Label>
             <Textarea
               id="description"
               name="description"
@@ -121,7 +123,7 @@ export function EditAnnouncementModal({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category">{t('common.category', 'Category')}</Label>
             <Input
               id="category"
               name="category"
@@ -140,7 +142,7 @@ export function EditAnnouncementModal({
               onChange={handleCheckboxChange}
               className="h-4 w-4"
             />
-            <Label htmlFor="requires_coupon">Requires Coupon</Label>
+            <Label htmlFor="requires_coupon">{t('announcements.requires_coupon', 'Requires Coupon')}</Label>
           </div>
           
           <div className="flex items-center space-x-2">
@@ -152,7 +154,7 @@ export function EditAnnouncementModal({
               onChange={handleCheckboxChange}
               className="h-4 w-4"
             />
-            <Label htmlFor="is_published">Is Published</Label>
+            <Label htmlFor="is_published">{t('announcements.is_published', 'Is Published')}</Label>
           </div>
           
           <div className="flex gap-2 pt-4">
@@ -161,7 +163,7 @@ export function EditAnnouncementModal({
               className="flex-1"
               disabled={updateMutation.isPending}
             >
-              {updateMutation.isPending ? "Saving..." : "Save"}
+              {updateMutation.isPending ? t('common.saving', 'Saving...') : t('common.save', 'Save')}
             </Button>
             <Button 
               type="button" 
@@ -170,7 +172,7 @@ export function EditAnnouncementModal({
               onClick={() => onOpenChange(false)}
               disabled={updateMutation.isPending}
             >
-              Cancel
+              {t('common.cancel', 'Cancel')}
             </Button>
           </div>
         </form>

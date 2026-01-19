@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/sidebar"
 
 export function LanguageSelector() {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const { isMobile } = useSidebar();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -22,11 +22,6 @@ export function LanguageSelector() {
     i18n.changeLanguage(lng);
     localStorage.setItem('i18nextLng', lng);
     setIsOpen(false);
-  };
-
-  const getCurrentLanguageName = () => {
-    const lang = i18n.language.split('-')[0];
-    return lang === 'tr' ? 'Türkçe' : 'English';
   };
 
   const getCurrentLanguageFlag = () => {
@@ -38,10 +33,10 @@ export function LanguageSelector() {
     <SidebarMenuItem>
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen} modal={false}>
         <DropdownMenuTrigger asChild>
-          <SidebarMenuButton tooltip="Language">
+          <SidebarMenuButton tooltip={t('common.language', 'Language')}>
             <Languages className="size-4 text-muted-foreground" />
-            <span>{getCurrentLanguageName()}</span>
-            <span className="sr-only">Toggle language</span>
+            <span>{t('common.language', 'Language')}</span>
+            <span className="sr-only">{t('common.toggle_language', 'Toggle language')}</span>
           </SidebarMenuButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -54,14 +49,14 @@ export function LanguageSelector() {
             className={i18n.language.startsWith('tr') ? 'bg-accent' : ''}
           >
             <span className="mr-2">{getCurrentLanguageFlag()}</span>
-            🇹🇷 Türkçe
+            🇹🇷 {t('languages.turkish', 'Turkish')}
           </DropdownMenuItem>
           <DropdownMenuItem 
             onClick={() => changeLanguage('en')}
             className={i18n.language.startsWith('en') ? 'bg-accent' : ''}
           >
             <span className="mr-2">{getCurrentLanguageFlag()}</span>
-            🇬🇧 English
+            🇬🇧 {t('languages.english', 'English')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

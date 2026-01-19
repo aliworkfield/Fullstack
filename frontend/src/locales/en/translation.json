@@ -6,10 +6,7 @@
     "users": "Users",
     "announcements": "Announcements",
     "admin": "Admin",
-    "admin_panel": "Admin Panel",
-    "coupons": "Coupons",
-    "campaigns": "Campaigns",
-    "announcements": "Announcements"
+    "admin_panel": "Admin Panel"
   },
   "sidebar": {
     "coupons": "Coupons",
@@ -138,7 +135,22 @@
     "email_placeholder": "Email",
     "full_name_placeholder": "Full name",
     "loading_announcements": "Loading announcements...",
-    "error_loading_campaigns": "Error loading campaigns"
+    "error_loading_campaigns": "Error loading campaigns",
+    "appearance": "Appearance",
+    "toggle_theme": "Toggle theme",
+    "language": "Language",
+    "toggle_language": "Toggle language",
+    "users": "Users",
+    "loading_users": "Loading users...",
+    "error_loading_users": "Error loading users. Please try refreshing the page.",
+    "admin_only_access": "User management is only available to administrators.",
+    "checking_permissions": "Checking permissions...",
+    "yes": "Yes",
+    "no": "No",
+    "not_available": "Not available",
+    "saving": "Saving...",
+    "discount": "Discount",
+    "access_denied": "Access denied. Admin or Manager privileges required."
   },
   "datatable": {
     "headers": {
@@ -230,7 +242,58 @@
     "no_results": "No announcements found matching your search.",
     "no_match": "No announcements match your search.",
     "no_in_category": "No announcements found in {{category}} category.",
-    "no_new": "No new announcements found."
+    "no_new": "No new announcements found.",
+    "loading": "Loading announcement...",
+    "error_loading": "Error loading announcement",
+    "details": "Details",
+    "metadata": "Metadata",
+    "id": "ID",
+    "published": "Published",
+    "created": "Created",
+    "expires": "Expires",
+    "coupon_information": "Coupon Information",
+    "loading_coupon": "Loading coupon...",
+    "no_coupon_assigned": "No coupon assigned to you for this announcement.",
+    "coupon_required": "Coupon Required",
+    "create_new": "+",
+    "edit_announcement": "Edit Announcement",
+    "create_announcement": "Create Announcement",
+    "update_details": "Update the announcement details.",
+    "add_new": "Add a new announcement to the system.",
+    "enter_title": "Enter announcement title",
+    "enter_description": "Enter announcement description",
+    "select_category": "Select a category",
+    "requires_coupon": "Requires Coupon",
+    "select_campaign_optional": "Select a campaign (optional)",
+    "no_campaign": "No campaign",
+    "is_published": "Is Published",
+    "expiry_date": "Expiry Date",
+    "select_expiry_date": "Select expiry date"
+  },
+  "footer": {
+    "company_name": "Your Company",
+    "tagline": "Professional coupon management solution",
+    "all_rights_reserved": "All rights reserved.",
+    "github": "GitHub",
+    "x": "X",
+    "linkedin": "LinkedIn",
+    "about": "About",
+    "contact": "Contact",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "validations": {
+    "title_required": "Title is required",
+    "category_required": "Category is required"
+  },
+  "themes": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "languages": {
+    "turkish": "Turkish",
+    "english": "English"
   },
   "auth": {
     "login": "Login",
@@ -242,12 +305,49 @@
     "authenticating": "Authenticating...",
     "loading_user": "Loading user...",
     "failed_load_user": "Failed to load user",
-    "not_authenticated": "User not authenticated"
+    "not_authenticated": "User not authenticated",
+    "login_to_account": "Login to your account",
+    "login_with_keycloak": "Log In with Keycloak",
+    "no_account_yet": "Don't have an account yet?",
+    "sign_up": "Sign up"
+  },
+  "notfound": {
+    "oops": "Oops!",
+    "page_not_found": "The page you are looking for was not found.",
+    "go_back": "Go Back"
+  },
+  "errors": {
+    "error": "Error",
+    "oops": "Oops!",
+    "something_went_wrong": "Something went wrong. Please try again.",
+    "go_home": "Go Home"
   },
   "messages": {
     "success": "Operation completed successfully",
     "error": "An error occurred",
     "confirm_delete": "Are you sure you want to delete?",
     "no_permission": "You don't have permission for this operation"
+  },
+  "pages": {
+    "campaigns": {
+      "title": "Campaigns",
+      "subtitle": "Manage your marketing campaigns"
+    },
+    "coupons": {
+      "title": "Coupons",
+      "subtitle": "Manage all discount coupons in the system",
+      "access_denied": "Coupon management is only available to administrators and managers.",
+      "loading": "Loading..."
+    }
+  },
+  "columns": {
+    "code": "Code",
+    "discount_type": "Discount Type",
+    "discount_value": "Discount Value",
+    "assigned_user": "Assigned User",
+    "status": "Status",
+    "unassigned": "Unassigned",
+    "assigned": "Assigned",
+    "redeemed": "Redeemed"
   }
 }
