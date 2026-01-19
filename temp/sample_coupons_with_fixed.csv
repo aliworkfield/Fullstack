@@ -1,4 +1,0 @@
-code,discount_type,discount_value,expires_at
-TEST-CODE-001,percentage,1,2026-02-12 06:49:15
-TEST-CODE-002,percentage,2,2026-02-13 06:49:15
-FIXED-CODE-001,fixed,10,
