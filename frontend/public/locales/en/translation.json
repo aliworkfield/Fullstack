@@ -1,0 +1,92 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard",
+    "campaigns": "Campaigns",
+    "coupons": "Coupons",
+    "users": "Users",
+    "announcements": "Announcements",
+    "admin": "Admin"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "search": "Search",
+    "loading": "Loading...",
+    "no_results": "No results found",
+    "actions": "Actions",
+    "status": "Status",
+    "created_at": "Created At",
+    "updated_at": "Updated At"
+  },
+  "campaigns": {
+    "title": "Campaign Title",
+    "description": "Description",
+    "start_date": "Start Date",
+    "end_date": "End Date",
+    "active": "Active",
+    "inactive": "Inactive",
+    "create_campaign": "Create Campaign",
+    "edit_campaign": "Edit Campaign",
+    "campaign_details": "Campaign Details",
+    "assign_coupons": "Assign Coupons",
+    "upload_coupons": "Upload Coupons",
+    "coupons_per_person": "Coupons Per Person",
+    "assign_to_all": "Assign to All Users",
+    "assign_randomly": "Assign Randomly"
+  },
+  "coupons": {
+    "code": "Coupon Code",
+    "discount_type": "Discount Type",
+    "discount_value": "Discount Value",
+    "expires_at": "Expires At",
+    "redeemed": "Redeemed",
+    "available": "Available",
+    "assigned": "Assigned",
+    "expired": "Expired",
+    "never": "Never",
+    "percentage": "Percentage",
+    "fixed": "Fixed",
+    "all_coupons": "All Coupons",
+    "manage_coupons": "Manage Coupons",
+    "search_coupons": "Search coupons...",
+    "no_campaign": "No Campaign"
+  },
+  "users": {
+    "name": "Name",
+    "email": "Email",
+    "role": "Role",
+    "admin": "Admin",
+    "manager": "Manager",
+    "user": "User",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "announcements": {
+    "title": "Title",
+    "content": "Content",
+    "publish_date": "Publish Date",
+    "expires_at": "Expires At",
+    "published": "Published",
+    "draft": "Draft",
+    "create_announcement": "Create Announcement",
+    "edit_announcement": "Edit Announcement"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "username": "Username",
+    "password": "Password",
+    "remember_me": "Remember Me",
+    "forgot_password": "Forgot Password"
+  },
+  "messages": {
+    "success": "Operation completed successfully",
+    "error": "An error occurred",
+    "confirm_delete": "Are you sure you want to delete?",
+    "no_permission": "You don't have permission for this operation"
+  }
+}

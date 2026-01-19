@@ -1,0 +1,33 @@
+0000000000000000000000000000000000000000 74cc50338854edc2c31ff7fcb9f8342d0bd76fec ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767192112 +0300	commit (initial): Initial commit: Fullstack Coupon Management System
+74cc50338854edc2c31ff7fcb9f8342d0bd76fec 74cc50338854edc2c31ff7fcb9f8342d0bd76fec ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767192127 +0300	Branch: renamed refs/heads/master to refs/heads/main
+74cc50338854edc2c31ff7fcb9f8342d0bd76fec 621ca133e3ae89fa24a4c919a3eab538f511bb3d ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767624276 +0300	commit: Complete implementation of announcement CRUD with role-based access control and various backend/frontend fixes
+621ca133e3ae89fa24a4c919a3eab538f511bb3d ae0c8fc7520a3427cf250d42136ebcfcff99866a ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767684421 +0300	commit: Complete coupon management system implementation
+ae0c8fc7520a3427cf250d42136ebcfcff99866a 5e687da9d5a25b4984f2d04e9b044bfc072eecb9 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767684646 +0300	commit: Update OpenAPI configuration
+5e687da9d5a25b4984f2d04e9b044bfc072eecb9 a036b1faacf0e490760c36d4bcb97701c2ba138c ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767686049 +0300	commit: Fix Keycloak URL for Docker environment
+a036b1faacf0e490760c36d4bcb97701c2ba138c 221bd7786c53959045fea67f83237eac2274b797 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767705082 +0300	commit: Fix coupon endpoint and model inconsistencies
+221bd7786c53959045fea67f83237eac2274b797 1bb7c456d8c196c1a4c44f188e16833790313c94 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767709953 +0300	commit: Fix backend CurrentUser import errors and Keycloak UPDATE_EMAIL configuration
+1bb7c456d8c196c1a4c44f188e16833790313c94 f086f6aadfa79377bcb1ba3a9cea2ab3ff3333f7 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767789467 +0300	commit: Add announcement category dropdown with predefined options and remove publish date field
+f086f6aadfa79377bcb1ba3a9cea2ab3ff3333f7 7657aab68f276552e842be72a6ffaa5f8901f24b ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767796211 +0300	commit: Fix campaign model field name, resolve alembic multiple heads, update Docker Keycloak URL, fix frontend OpenAPI config
+7657aab68f276552e842be72a6ffaa5f8901f24b 57b54d370bd1e6ece5de78dd05cf00a072cac150 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767879309 +0300	commit: alembic fixed 8 ocak
+57b54d370bd1e6ece5de78dd05cf00a072cac150 aaae97a3732f788963854b8876d85e656cf88c9f ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767879544 +0300	commit: Fix migration conflict for assigned_user_id column rename in coupons table
+aaae97a3732f788963854b8876d85e656cf88c9f 78ef25474edf3e22a2676629305ee8ad00adee00 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767946633 +0300	commit: Alembic Fin 09.01
+78ef25474edf3e22a2676629305ee8ad00adee00 0ff7a5005ebc7395ae2fe6425e66f61e434ed309 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767959753 +0300	commit: campaign panel fixed
+0ff7a5005ebc7395ae2fe6425e66f61e434ed309 4e9afde425687072afb284db2662807258fd92f3 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1767970320 +0300	commit: Fix coupon upload functionality and dependency injection issues
+4e9afde425687072afb284db2662807258fd92f3 7ce74ea3efb41f32cc91751181d37b7fe47e5f9f ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768200826 +0300	commit: dep added
+7ce74ea3efb41f32cc91751181d37b7fe47e5f9f 2f9b2af5b754ba52b0e9dd15349573201788ff71 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768298967 +0300	commit: assign done
+2f9b2af5b754ba52b0e9dd15349573201788ff71 d35d9a7d68b87d2fdb16967e9087acf3303eaed2 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768309481 +0300	commit: one step to fin
+d35d9a7d68b87d2fdb16967e9087acf3303eaed2 e60553c7e750b5eecfef0a5bfdbf4f254f0bc465 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768310427 +0300	commit: 01 commit
+e60553c7e750b5eecfef0a5bfdbf4f254f0bc465 be64d716191a337fdadb53160bbcc3577b606faa ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768315209 +0300	commit: design update
+be64d716191a337fdadb53160bbcc3577b606faa 73a0f96224ee0c8fe387850eef72ebc3759cc5c3 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768372585 +0300	commit: last update
+73a0f96224ee0c8fe387850eef72ebc3759cc5c3 e2491b5cbdafe369ff4e54634717a0c965c48ef2 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768399528 +0300	commit: design updates
+e2491b5cbdafe369ff4e54634717a0c965c48ef2 15ea47a2d489a1aa4ee101f69833eaefaa0b4667 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768467851 +0300	commit: design update 2
+15ea47a2d489a1aa4ee101f69833eaefaa0b4667 89906dfc82489e7d8e2c0b86c50c1fd0be5a9127 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768475634 +0300	commit: design 03
+89906dfc82489e7d8e2c0b86c50c1fd0be5a9127 1a45a12c73f64c5fd98d3689f8e5b34642e9253f ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768478715 +0300	commit: design03
+1a45a12c73f64c5fd98d3689f8e5b34642e9253f ae3ef4cd3d129a0f9d412448e0271893f8992544 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768547406 +0300	commit: per person coupon
+ae3ef4cd3d129a0f9d412448e0271893f8992544 9ee435beff4af227cfeb32342605947f35767cbb ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768549038 +0300	commit: fix 04
+9ee435beff4af227cfeb32342605947f35767cbb f3d1e97fe59697c896c16c04ed217d3bd24ed976 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768549908 +0300	commit: fix 05
+f3d1e97fe59697c896c16c04ed217d3bd24ed976 5fb4fbbfe4bcb77f687abb566b5413c800836705 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768573313 +0300	commit: translation
+5fb4fbbfe4bcb77f687abb566b5413c800836705 ac2e8e7c1b8ac6b713b7acc34d331698057d1a98 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768809705 +0300	commit: last edits 01
+ac2e8e7c1b8ac6b713b7acc34d331698057d1a98 8560e74b0f3d83c12f7cd05eced38f52a1ae8ff5 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768811464 +0300	commit: last edits 02
+8560e74b0f3d83c12f7cd05eced38f52a1ae8ff5 134fd00c644994cdfc5068e7fba7c55313538feb ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768811940 +0300	commit: Update currency symbol to Turkish Lira (₺) and finalize project structure
+134fd00c644994cdfc5068e7fba7c55313538feb 8560e74b0f3d83c12f7cd05eced38f52a1ae8ff5 ali.ismailoglu <ali.ismailoglu@mfa.gov.tr> 1768812156 +0300	reset: moving to HEAD~1
