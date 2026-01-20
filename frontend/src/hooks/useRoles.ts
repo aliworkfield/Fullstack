@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react"
-import keycloak from "@/keycloak"
+import { useCallback } from "react"
+import useAuth from "./useAuth"
 
 interface RoleHook {
   roles: string[]
@@ -9,25 +9,18 @@ interface RoleHook {
 }
 
 const useRoles = (): RoleHook => {
-  const [roles, setRoles] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { user, isLoading } = useAuth()
 
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        if (keycloak.tokenParsed) {
-          const realmRoles = keycloak.tokenParsed.realm_access?.roles || []
-          setRoles(realmRoles)
-        }
-      } catch (error) {
-        console.error("Error fetching roles:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  // Get role from user object (database based)
+  const userRole = user?.role ? [user.role] : [] // Convert single role to array for compatibility
 
-    fetchRoles()
-  }, [])
+  // Add 'user' role implicitly if authenticated
+  const roles = user ? [...userRole, 'user'] : []
+
+  // If user is admin, they effectively have manager role too for most operations
+  if (user?.role === 'admin') {
+    roles.push('manager')
+  }
 
   const hasRole = useCallback((role: string): boolean => {
     return roles.includes(role)

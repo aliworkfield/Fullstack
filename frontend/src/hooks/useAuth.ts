@@ -6,7 +6,7 @@ import keycloak from "@/keycloak";
 export type UserPublic = {
   email: string;
   is_active: boolean;
-  is_superuser: boolean;
+  role: string;
   full_name?: string;
   keycloak_user_id: string;
   id: string;
@@ -22,7 +22,7 @@ export default function useAuth() {
           'Authorization': `Bearer ${keycloak.token}`
         };
       }
-      
+
       const response = await UsersService.readUserMe();
       return response as UserPublic;
     },

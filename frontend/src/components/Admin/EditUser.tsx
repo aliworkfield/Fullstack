@@ -42,7 +42,7 @@ const formSchema = z
       .optional()
       .or(z.literal("")),
     confirm_password: z.string().optional(),
-    is_superuser: z.boolean().optional(),
+    role: z.string().optional(),
     is_active: z.boolean().optional(),
   })
   .refine((data) => !data.password || data.password === data.confirm_password, {
@@ -64,7 +64,7 @@ export function EditUser({ user, onSuccess, open, onClose }: EditUserProps) {
   const isControlled = open !== undefined;
   const isOpen = isControlled ? open : internalOpen;
   const setIsOpen = isControlled ? (_: boolean) => onClose?.() : setInternalOpen;
-  
+
   const queryClient = useQueryClient();
   const { showSuccessToast, showErrorToast } = useCustomToast();
   const { t } = useTranslation();
@@ -76,16 +76,16 @@ export function EditUser({ user, onSuccess, open, onClose }: EditUserProps) {
     defaultValues: {
       email: user.email,
       full_name: user.full_name ?? undefined,
-      is_superuser: user.is_superuser,
+      role: user.role,
       is_active: user.is_active,
     },
   });
 
   const mutation = useMutation({
     mutationFn: (data: FormData) =>
-      UsersService.updateUser({ 
-        userId: user.id, 
-        requestBody: data 
+      UsersService.updateUser({
+        userId: user.id,
+        requestBody: data
       }),
     onSuccess: () => {
       showSuccessToast("User updated successfully");
@@ -207,16 +207,20 @@ export function EditUser({ user, onSuccess, open, onClose }: EditUserProps) {
 
               <FormField
                 control={form.control}
-                name="is_superuser"
+                name="role"
                 render={({ field }) => (
-                  <FormItem className="flex items-center gap-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal">{t('common.is_superuser', 'Is superuser?')}</FormLabel>
+                  <FormItem>
+                    <FormLabel>{t('common.role', 'Role')}</FormLabel>
+                    <select
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={field.value || "user"}
+                      onChange={field.onChange}
+                    >
+                      <option value="user">User</option>
+                      <option value="manager">Manager</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    <FormMessage />
                   </FormItem>
                 )}
               />

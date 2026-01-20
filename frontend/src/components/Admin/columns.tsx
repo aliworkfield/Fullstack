@@ -54,18 +54,17 @@ export const useUserColumns = (): ColumnDef<UserPublic>[] => {
       cell: ({ row }) => {
         const isActive = row.getValue("is_active") as boolean;
         return (
-          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-            isActive 
-              ? "bg-green-100 text-green-800" 
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${isActive
+              ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-800"
-          }`}>
+            }`}>
             {isActive ? t('common.active', 'Active') : t('common.inactive', 'Inactive')}
           </span>
         );
       },
     },
     {
-      accessorKey: "is_superuser",
+      accessorKey: "role",
       header: ({ column }) => {
         return (
           <Button
@@ -78,14 +77,14 @@ export const useUserColumns = (): ColumnDef<UserPublic>[] => {
         );
       },
       cell: ({ row }) => {
-        const isSuperuser = row.getValue("is_superuser") as boolean;
+        const role = row.getValue("role") as string;
+        let badgeColor = "bg-blue-100 text-blue-800";
+        if (role === "admin") badgeColor = "bg-purple-100 text-purple-800";
+        if (role === "manager") badgeColor = "bg-amber-100 text-amber-800";
+
         return (
-          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-            isSuperuser 
-              ? "bg-purple-100 text-purple-800" 
-              : "bg-blue-100 text-blue-800"
-          }`}>
-            {isSuperuser ? t('users.admin', 'Admin') : t('users.user', 'User')}
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${badgeColor}`}>
+            {role.charAt(0).toUpperCase() + role.slice(1)}
           </span>
         );
       },
@@ -96,13 +95,13 @@ export const useUserColumns = (): ColumnDef<UserPublic>[] => {
         const user = row.original;
 
         return (
-          <UserActionsMenu 
+          <UserActionsMenu
             user={{
               id: user.id,
               email: user.email,
               full_name: user.full_name || null,
             }}
-            onEditSuccess={() => {}} // Implement actual success callback as needed
+            onEditSuccess={() => { }} // Implement actual success callback as needed
           />
         );
       },
