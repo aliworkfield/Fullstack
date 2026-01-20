@@ -191,7 +191,7 @@ export type PrivateUserCreate = {
 export type UserCreate = {
     email: string;
     is_active?: boolean;
-    is_superuser?: boolean;
+    role?: string;
     full_name?: (string | null);
     keycloak_user_id?: (string | null);
 };
@@ -199,7 +199,7 @@ export type UserCreate = {
 export type UserPublic = {
     email: string;
     is_active?: boolean;
-    is_superuser?: boolean;
+    role?: string;
     full_name?: (string | null);
     keycloak_user_id?: (string | null);
     id: string;
@@ -219,7 +219,7 @@ export type UsersPublic = {
 export type UserUpdate = {
     email?: (string | null);
     is_active?: boolean;
-    is_superuser?: boolean;
+    role?: string;
     full_name?: (string | null);
     keycloak_user_id?: (string | null);
 };

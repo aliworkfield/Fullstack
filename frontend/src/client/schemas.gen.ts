@@ -641,10 +641,11 @@ export const UserCreateSchema = {
             title: 'Is Active',
             default: true
         },
-        is_superuser: {
-            type: 'boolean',
-            title: 'Is Superuser',
-            default: false
+        role: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Role',
+            default: 'user'
         },
         full_name: {
             anyOf: [
@@ -689,10 +690,11 @@ export const UserPublicSchema = {
             title: 'Is Active',
             default: true
         },
-        is_superuser: {
-            type: 'boolean',
-            title: 'Is Superuser',
-            default: false
+        role: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Role',
+            default: 'user'
         },
         full_name: {
             anyOf: [
@@ -779,10 +781,11 @@ export const UserUpdateSchema = {
             title: 'Is Active',
             default: true
         },
-        is_superuser: {
-            type: 'boolean',
-            title: 'Is Superuser',
-            default: false
+        role: {
+            type: 'string',
+            maxLength: 20,
+            title: 'Role',
+            default: 'user'
         },
         full_name: {
             anyOf: [

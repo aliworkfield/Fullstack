@@ -76,7 +76,7 @@ export function EditUser({ user, onSuccess, open, onClose }: EditUserProps) {
     defaultValues: {
       email: user.email,
       full_name: user.full_name ?? undefined,
-      role: user.role,
+      role: user.role ?? "user",
       is_active: user.is_active,
     },
   });
