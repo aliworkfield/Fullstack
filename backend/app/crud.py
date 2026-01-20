@@ -14,13 +14,12 @@ from app.models.campaign import Campaign, CampaignCreate
 from app.models.coupon import Coupon, CouponCreate
 
 
-# def create_user(*, session: Session, user_create: UserCreate) -> User:
-#     user_data = user_create.model_dump()
-#     db_obj = User(**user_data)
-#     session.add(db_obj)
-#     session.commit()
-#     session.refresh(db_obj)
-#     return db_obj
+def create_user(*, session: Session, user_create: UserCreate) -> User:
+    db_obj = User.model_validate(user_create)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+    return db_obj
 
 
 def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:

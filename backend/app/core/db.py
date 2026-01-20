@@ -28,6 +28,6 @@ def init_db(session: Session) -> None:
     if not user:
         user_in = UserCreate(
             email=settings.FIRST_SUPERUSER,
-            is_superuser=True,
+            role="admin",  # First user is admin
         )
         user = crud.create_user(session=session, user_create=user_in)

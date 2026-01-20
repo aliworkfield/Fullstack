@@ -108,8 +108,6 @@ def read_user_me(current_user: CurrentUser) -> Any:
     # Ensure boolean fields are not None
     if current_user.is_active is None:
         current_user.is_active = True
-    if current_user.is_superuser is None:
-        current_user.is_superuser = False
     return current_user
 
 
@@ -118,9 +116,9 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     """
     Delete own user.
     """
-    if current_user.is_superuser:
+    if current_user.role == "admin":
         raise HTTPException(
-            status_code=403, detail="Super users are not allowed to delete themselves"
+            status_code=403, detail="Admin users are not allowed to delete themselves"
         )
     session.delete(current_user)
     session.commit()
@@ -151,23 +149,8 @@ def read_user_by_id(
     Get a specific user by id.
     """
     user = session.get(User, user_id)
-    if user == current_user:
-        # Ensure boolean fields are not None
-        if user.is_active is None:
-            user.is_active = True
-        if user.is_superuser is None:
-            user.is_superuser = False
-        return user
-    if not current_user.is_superuser:
-        raise HTTPException(
-            status_code=403,
-            detail="The user doesn't have enough privileges",
-        )
-    # Ensure boolean fields are not None
-    if user.is_active is None:
-        user.is_active = True
-    if user.is_superuser is None:
-        user.is_superuser = False
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
