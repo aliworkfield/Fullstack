@@ -7,9 +7,9 @@ from sqlmodel import Session, delete
 from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
-from app.models import Item, User
+from app.models import User, Campaign, Coupon, Announcement
 from tests.utils.user import authentication_token_from_email
-from tests.utils.utils import get_superuser_token_headers
+from tests.utils.utils import get_superuser_token_headers, get_user_token_headers
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -17,10 +17,11 @@ def db() -> Generator[Session, None, None]:
     with Session(engine) as session:
         init_db(session)
         yield session
-        statement = delete(Item)
-        session.execute(statement)
-        statement = delete(User)
-        session.execute(statement)
+        # Cleanup after tests
+        session.execute(delete(Coupon))
+        session.execute(delete(Announcement))
+        session.execute(delete(Campaign))
+        session.execute(delete(User))
         session.commit()
 
 
@@ -32,11 +33,13 @@ def client() -> Generator[TestClient, None, None]:
 
 @pytest.fixture(scope="module")
 def superuser_token_headers(client: TestClient) -> dict[str, str]:
+    """Return headers with admin token."""
     return get_superuser_token_headers(client)
 
 
 @pytest.fixture(scope="module")
 def normal_user_token_headers(client: TestClient, db: Session) -> dict[str, str]:
+    """Return headers with normal user token."""
     return authentication_token_from_email(
-        client=client, email=settings.EMAIL_TEST_USER, db=db
+        client=client, email=settings.EMAIL_TEST_USER, db=db, role="user"
     )
