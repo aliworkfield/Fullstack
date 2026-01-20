@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kurumsal-indirim-backend
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kurumsal-indirim-backend
+  template:
+    metadata:
+      labels:
+        app: kurumsal-indirim-backend
+    spec:
+      containers:
+      - name: backend
+        image: kurumsal-indirim-backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: kurumsal-indirim-secrets
+              key: database-url
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kurumsal-indirim-secrets
+              key: secret-key
+        - name: ENVIRONMENT
+          value: "production"
+        - name: DOMAIN
+          value: "kurumsalindirim.mfa.gov.tr"
+        - name: FRONTEND_HOST
+          value: "https://kurumsalindirim.mfa.gov.tr"
+        - name: KEYCLOAK_URL
+          value: "https://keycloak.kurumsalindirim.mfa.gov.tr"
+        - name: POSTGRES_SERVER
+          value: "postgres-service"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: kurumsal-indirim-secrets
+              key: postgres-user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kurumsal-indirim-secrets
+              key: postgres-password
+        - name: POSTGRES_DB
+          value: "kurumsalindirim_prod"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/v1/utils/health-check/
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/v1/utils/health-check/
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kurumsal-indirim-frontend
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kurumsal-indirim-frontend
+  template:
+    metadata:
+      labels:
+        app: kurumsal-indirim-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: kurumsal-indirim-frontend:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: VITE_API_URL
+          value: "https://api.kurumsalindirim.mfa.gov.tr"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: default
+spec:
+  selector:
+    app: kurumsal-indirim-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: default
+spec:
+  selector:
+    app: kurumsal-indirim-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP

@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    image: kurumsal-indirim-backend:${BUILD_ID:-latest}
+    environment:
+      - ENVIRONMENT=development
+      - DOMAIN=dev.kurumsalindirim.mfa.gov.tr
+      - FRONTEND_HOST=https://dev.kurumsalindirim.mfa.gov.tr
+      - POSTGRES_SERVER=dev-postgres
+      - POSTGRES_DB=kurumsalindirim_dev
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.kurumsal-indirim-backend.rule=Host(`api-dev.kurumsalindirim.mfa.gov.tr`)
+      - traefik.http.routers.kurumsal-indirim-backend.entrypoints=https
+      - traefik.http.routers.kurumsal-indirim-backend.tls=true
+
+  frontend:
+    build:
+      context: ./frontend
+    image: kurumsal-indirim-frontend:${BUILD_ID:-latest}
+    environment:
+      - VITE_API_URL=https://api-dev.kurumsalindirim.mfa.gov.tr
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.kurumsal-indirim-frontend.rule=Host(`dev.kurumsalindirim.mfa.gov.tr`)
+      - traefik.http.routers.kurumsal-indirim-frontend.entrypoints=https
+      - traefik.http.routers.kurumsal-indirim-frontend.tls=true
+
+  dev-postgres:
+    image: postgres:17
+    environment:
+      - POSTGRES_DB=kurumsalindirim_dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=changethis
+    volumes:
+      - dev_postgres_data:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d kurumsalindirim_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  dev_postgres_data:

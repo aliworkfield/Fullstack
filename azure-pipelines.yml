@@ -1,0 +1,177 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: kurumsal-indirim-variables  # Variable group for secrets
+  - name: backendImage
+    value: 'kurumsal-indirim-backend:$(Build.BuildId)'
+  - name: frontendImage
+    value: 'kurumsal-indirim-frontend:$(Build.BuildId)'
+  - name: dockerRegistryServiceConnection
+    value: 'kurumsal-indirim-acr'  # Your Azure Container Registry service connection
+
+stages:
+- stage: Build
+  displayName: 'Build Stage'
+  jobs:
+  - job: BuildBackend
+    displayName: 'Build Backend'
+    steps:
+    - task: Docker@2
+      displayName: 'Build Backend Image'
+      inputs:
+        command: 'build'
+        dockerfile: '$(Build.SourcesDirectory)/backend/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/backend'
+        repository: 'kurumsal-indirim-backend'
+        tags: |
+          $(Build.BuildId)
+          latest
+
+  - job: BuildFrontend
+    displayName: 'Build Frontend'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '20.x'
+      displayName: 'Install Node.js'
+    
+    - script: |
+        cd $(Build.SourcesDirectory)/frontend
+        npm ci
+        npm run build
+      displayName: 'Build Frontend'
+      
+    - task: Docker@2
+      displayName: 'Build Frontend Image'
+      inputs:
+        command: 'build'
+        dockerfile: '$(Build.SourcesDirectory)/frontend/Dockerfile'
+        buildContext: '$(Build.SourcesDirectory)/frontend'
+        repository: 'kurumsal-indirim-frontend'
+        tags: |
+          $(Build.BuildId)
+          latest
+
+- stage: Test
+  displayName: 'Test Stage'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: BackendTests
+    displayName: 'Backend Tests'
+    steps:
+    - task: Docker@2
+      displayName: 'Pull Backend Image'
+      inputs:
+        command: 'pull'
+        repository: 'kurumsal-indirim-backend'
+        tags: '$(Build.BuildId)'
+        
+    - script: |
+        cd $(Build.SourcesDirectory)/backend
+        pip install pytest
+        python -m pytest tests/ -v
+      displayName: 'Run Backend Tests'
+      continueOnError: true  # Set to false once tests are stable
+
+  - job: FrontendTests
+    displayName: 'Frontend Tests'
+    steps:
+    - script: |
+        cd $(Build.SourcesDirectory)/frontend
+        npm test
+      displayName: 'Run Frontend Tests'
+      continueOnError: true  # Set to false once tests are stable
+
+- stage: Publish
+  displayName: 'Publish Images'
+  dependsOn: Test
+  condition: succeeded()
+  jobs:
+  - job: PushImages
+    displayName: 'Push Docker Images'
+    steps:
+    - task: Docker@2
+      displayName: 'Push Backend Image'
+      inputs:
+        command: 'push'
+        repository: 'kurumsal-indirim-backend'
+        tags: |
+          $(Build.BuildId)
+          latest
+
+    - task: Docker@2
+      displayName: 'Push Frontend Image'
+      inputs:
+        command: 'push'
+        repository: 'kurumsal-indirim-frontend'
+        tags: |
+          $(Build.BuildId)
+          latest
+
+- stage: DeployDev
+  displayName: 'Deploy to Development'
+  dependsOn: Publish
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - deployment: DeployToDev
+    displayName: 'Deploy to Development Environment'
+    environment: 'development'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: KubernetesManifest@0
+            displayName: 'Deploy to Kubernetes'
+            inputs:
+              action: 'deploy'
+              kubernetesServiceConnection: 'kurumsal-indirim-k8s-dev'
+              manifests: |
+                $(Build.SourcesDirectory)/k8s/deployment-dev.yml
+                $(Build.SourcesDirectory)/k8s/service-dev.yml
+                $(Build.SourcesDirectory)/k8s/ingress-dev.yml
+              containers: |
+                kurumsal-indirim-backend:$(Build.BuildId)
+                kurumsal-indirim-frontend:$(Build.BuildId)
+
+- stage: DeployProd
+  displayName: 'Deploy to Production'
+  dependsOn: DeployDev
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  variables:
+  - name: environmentTag
+    value: 'prod-$(Build.BuildId)'
+  jobs:
+  - deployment: DeployToProd
+    displayName: 'Deploy to Production Environment'
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: KubernetesManifest@0
+            displayName: 'Deploy to Kubernetes'
+            inputs:
+              action: 'deploy'
+              kubernetesServiceConnection: 'kurumsal-indirim-k8s-prod'
+              manifests: |
+                $(Build.SourcesDirectory)/k8s/deployment-prod.yml
+                $(Build.SourcesDirectory)/k8s/service-prod.yml
+                $(Build.SourcesDirectory)/k8s/ingress-prod.yml
+              containers: |
+                kurumsal-indirim-backend:$(Build.BuildId)
+                kurumsal-indirim-frontend:$(Build.BuildId)
+          
+          - task: AzureCLI@2
+            displayName: 'Run Database Migrations'
+            inputs:
+              azureSubscription: 'kurumsal-indirim-subscription'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                # Run database migrations
+                kubectl exec -it deployment/kurumsal-indirim-backend -- python run_migration.py

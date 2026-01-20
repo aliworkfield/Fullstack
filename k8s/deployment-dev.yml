@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kurumsal-indirim-backend
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kurumsal-indirim-backend
+  template:
+    metadata:
+      labels:
+        app: kurumsal-indirim-backend
+    spec:
+      containers:
+      - name: backend
+        image: kurumsal-indirim-backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: kurumsal-indirim-secrets
+              key: database-url
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kurumsal-indirim-secrets
+              key: secret-key
+        - name: ENVIRONMENT
+          value: "development"
+        - name: DOMAIN
+          value: "dev.kurumsalindirim.mfa.gov.tr"
+        - name: FRONTEND_HOST
+          value: "https://dev.kurumsalindirim.mfa.gov.tr"
+        - name: KEYCLOAK_URL
+          value: "https://keycloak-dev.kurumsalindirim.mfa.gov.tr"
+        - name: POSTGRES_SERVER
+          value: "postgres-service"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: kurumsal-indirim-secrets
+              key: postgres-user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kurumsal-indirim-secrets
+              key: postgres-password
+        - name: POSTGRES_DB
+          value: "kurumsalindirim_dev"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kurumsal-indirim-frontend
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kurumsal-indirim-frontend
+  template:
+    metadata:
+      labels:
+        app: kurumsal-indirim-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: kurumsal-indirim-frontend:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: VITE_API_URL
+          value: "https://api-dev.kurumsalindirim.mfa.gov.tr"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: default
+spec:
+  selector:
+    app: kurumsal-indirim-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: default
+spec:
+  selector:
+    app: kurumsal-indirim-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
