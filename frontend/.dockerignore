@@ -1,2 +1,30 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+
+# Test files
+tests/
+test-results/
+blob-report/
+playwright.config.ts
+Dockerfile.playwright
+
+# Development files
+.env
+.env.*
+.git/
+.gitignore
+README.md
+
+# IDE files
+.vscode/
+.idea/
+.tanstack/
+
+# Build artifacts (we build fresh in Docker)
+dist/
+
+# Temp files
+*.log
+*.tmp
+openapi.json.tmp
+temp_openapi.json

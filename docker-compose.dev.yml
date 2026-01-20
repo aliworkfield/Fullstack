@@ -1,47 +1,51 @@
-version: '3.8'
+# Local Development Docker Compose
+# This is a simplified version for local testing with external PostgreSQL and Keycloak
 
 services:
   backend:
-    build:
-      context: ./backend
-    image: kurumsal-indirim-backend:${BUILD_ID:-latest}
+    build: ./backend
+    ports:
+      - "8000:8000"
     environment:
-      - ENVIRONMENT=development
-      - DOMAIN=dev.kurumsalindirim.mfa.gov.tr
-      - FRONTEND_HOST=https://dev.kurumsalindirim.mfa.gov.tr
-      - POSTGRES_SERVER=dev-postgres
-      - POSTGRES_DB=kurumsalindirim_dev
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.kurumsal-indirim-backend.rule=Host(`api-dev.kurumsalindirim.mfa.gov.tr`)
-      - traefik.http.routers.kurumsal-indirim-backend.entrypoints=https
-      - traefik.http.routers.kurumsal-indirim-backend.tls=true
+      # PostgreSQL connection (external)
+      - POSTGRES_SERVER=${POSTGRES_SERVER}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      # Keycloak connection (external)
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM:-coupon-realm}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID:-coupon-backend}
+      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+      - KEYCLOAK_FRONTEND_CLIENT_ID=${KEYCLOAK_FRONTEND_CLIENT_ID:-coupon-frontend}
+      # Application settings
+      - SECRET_KEY=${SECRET_KEY}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - FRONTEND_HOST=${FRONTEND_HOST:-http://localhost:8080}
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-http://localhost:8080,http://localhost:5173}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   frontend:
     build:
       context: ./frontend
-    image: kurumsal-indirim-frontend:${BUILD_ID:-latest}
-    environment:
-      - VITE_API_URL=https://api-dev.kurumsalindirim.mfa.gov.tr
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.kurumsal-indirim-frontend.rule=Host(`dev.kurumsalindirim.mfa.gov.tr`)
-      - traefik.http.routers.kurumsal-indirim-frontend.entrypoints=https
-      - traefik.http.routers.kurumsal-indirim-frontend.tls=true
-
-  dev-postgres:
-    image: postgres:17
-    environment:
-      - POSTGRES_DB=kurumsalindirim_dev
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=changethis
-    volumes:
-      - dev_postgres_data:/var/lib/postgresql/data/pgdata
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+        - VITE_KEYCLOAK_URL=${KEYCLOAK_URL}
+        - VITE_KEYCLOAK_REALM=${KEYCLOAK_REALM:-coupon-realm}
+        - VITE_KEYCLOAK_CLIENT_ID=${KEYCLOAK_FRONTEND_CLIENT_ID:-coupon-frontend}
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d kurumsalindirim_dev"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  dev_postgres_data:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

@@ -1,8 +1,31 @@
-# Python
-__pycache__
-app.egg-info
-*.pyc
-.mypy_cache
-.coverage
-htmlcov
-.venv
+# Test files - not needed in production
+tests/
+htmlcov/
+test-results/
+*.py[cod]
+__pycache__/
+.pytest_cache/
+
+# Development files
+.env
+.env.*
+.git/
+.gitignore
+README.md
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.log
+*.tmp
+check_*.py
+test_*.py
+temp_*.py
+run_migration.py
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
