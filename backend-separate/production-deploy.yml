@@ -1,0 +1,64 @@
+version: '3.8'
+
+# Production-ready deployment for backend only
+# Connects to external PostgreSQL and Keycloak services
+
+networks:
+  app-network:
+    driver: bridge
+
+services:
+  # Backend API - connects to external PostgreSQL and Keycloak
+  backend:
+    # Use pre-built image from registry in production
+    image: ${DOCKER_IMAGE_BACKEND:-kurumsal-indirim-backend}:${TAG:-production}
+    restart: always
+    env_file:
+      - .env
+    environment:
+      # Domain and environment settings
+      - DOMAIN=${DOMAIN}
+      - FRONTEND_HOST=${FRONTEND_HOST}
+      - ENVIRONMENT=production
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS}
+      
+      # Security settings
+      - SECRET_KEY=${SECRET_KEY}
+      - FIRST_SUPERUSER=${FIRST_SUPERUSER}
+      - FIRST_SUPERUSER_PASSWORD=${FIRST_SUPERUSER_PASSWORD}
+      
+      # Email settings
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
+      
+      # External PostgreSQL database connection
+      - POSTGRES_SERVER=${EXTERNAL_POSTGRES_SERVER}  # External DB host
+      - POSTGRES_PORT=${EXTERNAL_POSTGRES_PORT:-5432}
+      - POSTGRES_DB=${EXTERNAL_POSTGRES_DB}
+      - POSTGRES_USER=${EXTERNAL_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${EXTERNAL_POSTGRES_PASSWORD}
+      
+      # Monitoring
+      - SENTRY_DSN=${SENTRY_DSN}
+      
+      # External Keycloak connection
+      - KEYCLOAK_URL=${EXTERNAL_KEYCLOAK_URL}  # External Keycloak URL
+      - KEYCLOAK_REALM=${EXTERNAL_KEYCLOAK_REALM}
+      - KEYCLOAK_CLIENT_ID=${EXTERNAL_KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_CLIENT_SECRET=${EXTERNAL_KEYCLOAK_CLIENT_SECRET}
+      - KEYCLOAK_FRONTEND_CLIENT_ID=${EXTERNAL_KEYCLOAK_FRONTEND_CLIENT_ID}
+      
+      # API URL for frontend
+      - VITE_API_URL=${VITE_API_URL:-https://api.${DOMAIN}}
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/api/v1/utils/health-check/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - app-network
+    ports:
+      - "8000:8000"

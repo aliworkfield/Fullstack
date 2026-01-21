@@ -1,0 +1,28 @@
+version: '3.8'
+
+# Production-ready deployment for frontend only
+# Connects to external backend API
+
+networks:
+  app-network:
+    driver: bridge
+
+services:
+  # Frontend Application
+  frontend:
+    # Use pre-built image from registry in production
+    image: ${DOCKER_IMAGE_FRONTEND:-kurumsal-indirim-frontend}:${TAG:-production}
+    restart: always
+    environment:
+      # Connect to external API
+      - VITE_API_URL=${VITE_API_URL:-https://api.${DOMAIN}}
+    networks:
+      - app-network
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl:ro  # For SSL certificates
+
+# This configuration serves the frontend application that connects to an external backend

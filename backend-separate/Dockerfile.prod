@@ -1,0 +1,65 @@
+# Production Dockerfile for Backend
+# Multi-stage build to reduce attack surface and image size
+
+# Build stage
+FROM python:3.10-slim AS builder
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /uvx /bin/
+
+# Place executables in the environment at the front of the path
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Install dependencies
+COPY ./pyproject.toml ./uv.lock /app/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project
+
+# Copy application code
+COPY ./app /app/app
+COPY ./scripts /app/scripts
+
+# Sync the project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync
+
+# Production stage
+FROM python:3.10-slim
+
+# Create non-root user for security
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+WORKDIR /app/
+
+# Copy Python environment from builder
+COPY --from=builder /app/.venv /app/.venv
+
+# Make sure scripts are available in PATH
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Copy application code
+COPY --from=builder --chown=appuser:appuser /app/app /app/app
+COPY --from=builder --chown=appuser:appuser /app/scripts /app/scripts
+
+# Change ownership to non-root user
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8000/api/v1/utils/health-check/ || exit 1
+
+# Run the application
+CMD ["gunicorn", "app.main:app", "--worker-class", "uvicorn.workers.UvicornWorker", "--workers", "4", "--bind", "0.0.0.0:8000", "--timeout", "120"]
